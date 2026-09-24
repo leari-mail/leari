@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#4a70e0"/>
+      <stop offset="1" stop-color="#1b2a72"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b4d0ff"/>
+      <stop offset="0.4" stop-color="#5a84ea"/>
+      <stop offset="1" stop-color="#2d49b3"/>
+    </linearGradient>
+    <linearGradient id="plume" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5d8cea"/>
+      <stop offset="1" stop-color="#2743a8"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f68d8"/>
+      <stop offset="1" stop-color="#6d98f0"/>
+    </linearGradient>
+    <clipPath id="squircle"><rect width="1024" height="1024" rx="228"/></clipPath>
+  </defs>
+  <g transform="translate(100 100) scale(0.8047)">
+    <g clip-path="url(#squircle)">
+      <rect width="1024" height="1024" fill="url(#bg)"/>
+      <g transform="translate(512 552) scale(0.86) translate(-512 -512)">
+        <path fill="url(#wing)" d="M 569 470 C 624 380 764 250 929 215 Q 933.5 310.5 874 330 Q 873.5 405.5 809 405 Q 806.0 474.5 739 468 Q 736.0 532.0 669 520 Q 666.0 580.5 599 565 Q 608.5 615.5 554 590 Z"/><path fill="url(#wing)" d="M 455 470 C 400 380 260 250 95 215 Q 90.5 310.5 150 330 Q 150.5 405.5 215 405 Q 218.0 474.5 285 468 Q 288.0 532.0 355 520 Q 358.0 580.5 425 565 Q 415.5 615.5 470 590 Z"/>
+        <path fill="#5e8fe6" opacity="0.55" d="M 564 480 C 614 420 694 370 774 330 C 724 420 644 500 556 560 Z"/><path fill="#5e8fe6" opacity="0.55" d="M 460 480 C 410 420 330 370 250 330 C 300 420 380 500 468 560 Z"/>
+        <path fill="url(#tail)" d="M 478 620 C 470 720 490 820 512 930 C 534 820 554 720 546 620 Z"/>
+        <path fill="url(#plume)" d="M 512 360 C 580 360 598 450 590 540 C 582 620 552 660 512 660 C 472 660 442 620 434 540 C 426 450 444 360 512 360 Z"/>
+        <path fill="url(#plume)" d="M 512 250 C 560 250 590 285 590 330 C 590 375 560 405 512 405 C 464 405 434 375 434 330 C 434 285 464 250 512 250 Z"/>
+        <circle cx="472" cy="318" r="17" fill="#f7cf3a"/>
+        <circle cx="552" cy="318" r="17" fill="#f7cf3a"/>
+        <circle cx="472" cy="318" r="8" fill="#111218"/>
+        <circle cx="552" cy="318" r="8" fill="#111218"/>
+        <path fill="#f7cf3a" d="M 478 372 C 490 360 534 360 546 372 C 544 400 528 416 512 418 C 496 416 480 400 478 372 Z"/>
+        <path fill="#15161c" d="M 494 372 C 502 368 522 368 530 372 C 528 392 520 402 512 404 C 504 402 496 392 494 372 Z"/>
+        <path fill="#23252e" d="M 488 340 C 492 318 532 318 536 340 C 540 370 526 398 512 410 C 498 398 484 370 488 340 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

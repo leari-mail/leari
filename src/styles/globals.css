@@ -1,0 +1,187 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/roboto/300.css";
+@import "@fontsource/roboto/400.css";
+@import "@fontsource/roboto/500.css";
+@import "@fontsource/roboto/700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Palette inspired by Lear's macaw (Anodorhynchus leari):
+ * deep cobalt/indigo plumage, a turquoise sheen on the head,
+ * and the bright yellow eye-ring and beak patch as the accent.
+ */
+:root {
+  --radius: 0.625rem;
+
+  --macaw-indigo: oklch(0.36 0.13 266);
+  --macaw-cobalt: oklch(0.5 0.17 263);
+  --macaw-sheen: oklch(0.62 0.12 240);
+  --macaw-yellow: oklch(0.88 0.16 92);
+  --macaw-beak: oklch(0.2 0.01 265);
+
+  --background: oklch(0.995 0.002 265);
+  --foreground: oklch(0.2 0.03 266);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.03 266);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.03 266);
+  --primary: var(--macaw-cobalt);
+  --primary-foreground: oklch(0.985 0.005 265);
+  --secondary: oklch(0.96 0.012 265);
+  --secondary-foreground: oklch(0.3 0.08 266);
+  --muted: oklch(0.965 0.008 265);
+  --muted-foreground: oklch(0.52 0.03 266);
+  --accent: oklch(0.95 0.02 265);
+  --accent-foreground: oklch(0.3 0.1 266);
+  --highlight: var(--macaw-yellow);
+  --highlight-foreground: oklch(0.28 0.06 80);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.915 0.012 265);
+  --input: oklch(0.9 0.014 265);
+  --ring: oklch(0.6 0.14 263);
+
+  --sidebar: oklch(0.955 0.018 265 / 0.72);
+  --sidebar-foreground: oklch(0.28 0.05 266);
+  --sidebar-primary: var(--macaw-cobalt);
+  --sidebar-primary-foreground: oklch(0.985 0.005 265);
+  --sidebar-accent: oklch(0.5 0.17 263 / 0.12);
+  --sidebar-accent-foreground: oklch(0.3 0.12 266);
+  --sidebar-border: oklch(0.88 0.02 265 / 0.7);
+  --sidebar-ring: oklch(0.6 0.14 263);
+
+  --list: oklch(0.985 0.004 265);
+  --list-selected: oklch(0.5 0.17 263);
+  --list-selected-foreground: oklch(0.985 0.005 265);
+  --unread: var(--macaw-cobalt);
+  --star: var(--macaw-yellow);
+}
+
+.dark {
+  --background: oklch(0.19 0.025 266);
+  --foreground: oklch(0.95 0.008 265);
+  --card: oklch(0.22 0.028 266);
+  --card-foreground: oklch(0.95 0.008 265);
+  --popover: oklch(0.23 0.03 266);
+  --popover-foreground: oklch(0.95 0.008 265);
+  --primary: oklch(0.68 0.14 258);
+  --primary-foreground: oklch(0.16 0.03 266);
+  --secondary: oklch(0.27 0.035 266);
+  --secondary-foreground: oklch(0.93 0.01 265);
+  --muted: oklch(0.26 0.03 266);
+  --muted-foreground: oklch(0.7 0.03 265);
+  --accent: oklch(0.29 0.045 266);
+  --accent-foreground: oklch(0.95 0.008 265);
+  --highlight: var(--macaw-yellow);
+  --highlight-foreground: oklch(0.22 0.05 80);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.6 0.13 260);
+
+  --sidebar: oklch(0.2 0.035 266 / 0.72);
+  --sidebar-foreground: oklch(0.9 0.015 265);
+  --sidebar-primary: oklch(0.68 0.14 258);
+  --sidebar-primary-foreground: oklch(0.16 0.03 266);
+  --sidebar-accent: oklch(0.68 0.14 258 / 0.18);
+  --sidebar-accent-foreground: oklch(0.96 0.01 265);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.6 0.13 260);
+
+  --list: oklch(0.21 0.027 266);
+  --list-selected: oklch(0.45 0.15 263);
+  --list-selected-foreground: oklch(0.98 0.005 265);
+  --unread: oklch(0.72 0.13 250);
+  --star: var(--macaw-yellow);
+}
+
+/* Native vibrancy is macOS only; elsewhere the sidebar is opaque. */
+:root:not([data-platform="mac"]) {
+  --sidebar: oklch(0.965 0.012 265);
+}
+:root.dark:not([data-platform="mac"]) {
+  --sidebar: oklch(0.2 0.03 266);
+}
+
+@theme inline {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-list: var(--list);
+  --color-list-selected: var(--list-selected);
+  --color-list-selected-foreground: var(--list-selected-foreground);
+  --color-unread: var(--unread);
+  --color-star: var(--star);
+
+  --color-macaw-indigo: var(--macaw-indigo);
+  --color-macaw-cobalt: var(--macaw-cobalt);
+  --color-macaw-sheen: var(--macaw-sheen);
+  --color-macaw-yellow: var(--macaw-yellow);
+  --color-macaw-beak: var(--macaw-beak);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body,
+  #root {
+    @apply h-full overflow-hidden;
+  }
+
+  /* Transparent on macOS so the native window vibrancy shows through the sidebar. */
+  [data-platform="mac"] body {
+    background: transparent;
+  }
+
+  body {
+    @apply font-sans text-foreground antialiased select-none;
+    background: var(--background);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Allow selecting text where it makes sense (message bodies, inputs). */
+  input,
+  textarea,
+  [data-selectable] {
+    @apply select-text;
+  }
+}

@@ -1,0 +1,1 @@
+export { LeariLogo } from "./LeariLogo";

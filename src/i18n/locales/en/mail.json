@@ -1,0 +1,65 @@
+{
+  "folders": {
+    "inbox": "Inbox",
+    "starred": "Starred",
+    "sent": "Sent",
+    "drafts": "Drafts",
+    "archive": "Archive",
+    "spam": "Spam",
+    "trash": "Trash",
+    "custom": "Folder"
+  },
+  "unified": {
+    "inbox": "All Inboxes",
+    "starred": "Starred",
+    "sent": "All Sent",
+    "drafts": "All Drafts",
+    "archive": "All Archive",
+    "spam": "All Spam",
+    "trash": "All Trash",
+    "custom": "All"
+  },
+  "sidebar": {
+    "favorites": "Favorites",
+    "accounts": "Accounts",
+    "compose": "New message",
+    "settings": "Settings",
+    "addAccount": "Add account"
+  },
+  "list": {
+    "search": "Search",
+    "unreadCount": "{{count}} unread",
+    "emptyTitle": "All caught up",
+    "emptyDescription": "No messages here. Enjoy the quiet.",
+    "noResultsTitle": "No results",
+    "noResultsDescription": "Nothing matches \"{{query}}\".",
+    "noSubject": "(no subject)"
+  },
+  "reader": {
+    "emptyTitle": "No message selected",
+    "emptyDescription": "Pick a message from the list to read it here.",
+    "reply": "Reply",
+    "replyAll": "Reply all",
+    "forward": "Forward",
+    "archive": "Archive",
+    "delete": "Delete",
+    "star": "Star",
+    "unstar": "Unstar",
+    "markRead": "Mark as read",
+    "markUnread": "Mark as unread",
+    "to": "To",
+    "cc": "Cc",
+    "attachments": "Has attachments"
+  },
+  "composer": {
+    "title": "New message",
+    "from": "From",
+    "to": "To",
+    "cc": "Cc",
+    "subject": "Subject",
+    "bodyPlaceholder": "Write your message…",
+    "send": "Send",
+    "discard": "Discard",
+    "notImplemented": "Sending is not implemented yet."
+  }
+}

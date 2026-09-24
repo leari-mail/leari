@@ -1,0 +1,43 @@
+{
+  "add": {
+    "title": "Add account",
+    "description": "Choose your mail provider.",
+    "configureTitle": "Configure {{provider}}",
+    "configureDescription": "Enter your account details.",
+    "oauthNotice": "You will be redirected to {{provider}} to sign in. Your password is never stored by leari."
+  },
+  "providers": {
+    "google": "Google",
+    "microsoft": "Outlook / Microsoft 365",
+    "imap": "IMAP",
+    "pop3": "POP3"
+  },
+  "providerDescriptions": {
+    "google": "Gmail and Google Workspace",
+    "microsoft": "Outlook.com, Hotmail and Microsoft 365",
+    "imap": "Any provider supporting IMAP",
+    "pop3": "Legacy providers, download only"
+  },
+  "form": {
+    "name": "Your name",
+    "email": "Email address",
+    "username": "Username",
+    "password": "Password",
+    "incoming": "Incoming server",
+    "outgoing": "Outgoing server (SMTP)",
+    "host": "Host",
+    "port": "Port",
+    "security": "Security"
+  },
+  "security": {
+    "ssl": "SSL/TLS",
+    "starttls": "STARTTLS",
+    "none": "None"
+  },
+  "empty": {
+    "title": "Welcome to leari",
+    "description": "Add your first account to start reading mail."
+  },
+  "remove": "Remove account",
+  "removeConfirm": "Remove {{email}} from leari? Local copies of its messages will be deleted."
+}

@@ -1,0 +1,65 @@
+{
+  "folders": {
+    "inbox": "Entrada",
+    "starred": "Com estrela",
+    "sent": "Enviados",
+    "drafts": "Rascunhos",
+    "archive": "Arquivo",
+    "spam": "Spam",
+    "trash": "Lixeira",
+    "custom": "Pasta"
+  },
+  "unified": {
+    "inbox": "Todas as caixas",
+    "starred": "Com estrela",
+    "sent": "Todos os enviados",
+    "drafts": "Todos os rascunhos",
+    "archive": "Todo o arquivo",
+    "spam": "Todo o spam",
+    "trash": "Toda a lixeira",
+    "custom": "Todos"
+  },
+  "sidebar": {
+    "favorites": "Favoritos",
+    "accounts": "Contas",
+    "compose": "Nova mensagem",
+    "settings": "Configurações",
+    "addAccount": "Adicionar conta"
+  },
+  "list": {
+    "search": "Buscar",
+    "unreadCount": "{{count}} não lidas",
+    "emptyTitle": "Tudo em dia",
+    "emptyDescription": "Nenhuma mensagem aqui. Aproveite o silêncio.",
+    "noResultsTitle": "Nenhum resultado",
+    "noResultsDescription": "Nada encontrado para \"{{query}}\".",
+    "noSubject": "(sem assunto)"
+  },
+  "reader": {
+    "emptyTitle": "Nenhuma mensagem selecionada",
+    "emptyDescription": "Escolha uma mensagem na lista para lê-la aqui.",
+    "reply": "Responder",
+    "replyAll": "Responder a todos",
+    "forward": "Encaminhar",
+    "archive": "Arquivar",
+    "delete": "Excluir",
+    "star": "Marcar com estrela",
+    "unstar": "Remover estrela",
+    "markRead": "Marcar como lida",
+    "markUnread": "Marcar como não lida",
+    "to": "Para",
+    "cc": "Cc",
+    "attachments": "Possui anexos"
+  },
+  "composer": {
+    "title": "Nova mensagem",
+    "from": "De",
+    "to": "Para",
+    "cc": "Cc",
+    "subject": "Assunto",
+    "bodyPlaceholder": "Escreva sua mensagem…",
+    "send": "Enviar",
+    "discard": "Descartar",
+    "notImplemented": "O envio ainda não foi implementado."
+  }
+}

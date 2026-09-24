@@ -1,0 +1,14 @@
+{
+  "title": "Configurações",
+  "appearance": "Aparência",
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "language": "Idioma",
+  "reading": "Leitura",
+  "markAsReadOnOpen": "Marcar mensagens como lidas ao abrir",
+  "about": "O leari é software livre, batizado em homenagem à arara-azul-de-lear (Anodorhynchus leari)."
+}

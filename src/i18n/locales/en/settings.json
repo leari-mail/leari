@@ -1,0 +1,14 @@
+{
+  "title": "Settings",
+  "appearance": "Appearance",
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": "Language",
+  "reading": "Reading",
+  "markAsReadOnOpen": "Mark messages as read when opened",
+  "about": "leari is open source software, named after the Lear's macaw (Anodorhynchus leari)."
+}

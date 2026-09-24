@@ -1,0 +1,25 @@
+{
+  "appName": "leari",
+  "tagline": "E-mail leve como uma pena.",
+  "actions": {
+    "add": "Adicionar",
+    "back": "Voltar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "continue": "Continuar",
+    "delete": "Excluir",
+    "remove": "Remover",
+    "save": "Salvar"
+  },
+  "dates": {
+    "yesterday": "Ontem"
+  },
+  "status": {
+    "loading": "Carregando…",
+    "starting": "Acordando a arara…"
+  },
+  "errors": {
+    "generic": "Algo deu errado.",
+    "startup": "O leari não conseguiu abrir o banco de dados."
+  }
+}
