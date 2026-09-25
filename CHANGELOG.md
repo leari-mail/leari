@@ -9,6 +9,12 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Added
+
+- Notifications for new mail in inboxes (one per message, or a summary when many arrive)
+- Unread count next to the menu bar icon (tooltip on Windows)
+- Settings to turn both off
+
 ## [0.1.0-alpha.2] - 2026-09-25
 
 ### Added

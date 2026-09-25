@@ -16,6 +16,10 @@ export function SettingsDialog() {
   const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
   const setMarkAsReadOnOpen = useSettingsStore((state) => state.setMarkAsReadOnOpen);
   const version = useAppVersion();
+  const notifyNewMail = useSettingsStore((state) => state.notifyNewMail);
+  const setNotifyNewMail = useSettingsStore((state) => state.setNotifyNewMail);
+  const showUnreadInMenuBar = useSettingsStore((state) => state.showUnreadInMenuBar);
+  const setShowUnreadInMenuBar = useSettingsStore((state) => state.setShowUnreadInMenuBar);
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeDialog()}>
@@ -43,6 +47,28 @@ export function SettingsDialog() {
               id="settings-mark-read"
               checked={markAsReadOnOpen}
               onCheckedChange={setMarkAsReadOnOpen}
+            />
+          </SettingsRow>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase">
+            {t("notifications")}
+          </h3>
+          <SettingsRow label={t("notifyNewMail")} htmlFor="settings-notify">
+            <Switch
+              id="settings-notify"
+              checked={notifyNewMail}
+              onCheckedChange={setNotifyNewMail}
+            />
+          </SettingsRow>
+          <SettingsRow label={t("showUnreadInMenuBar")} htmlFor="settings-menubar-count">
+            <Switch
+              id="settings-menubar-count"
+              checked={showUnreadInMenuBar}
+              onCheckedChange={setShowUnreadInMenuBar}
             />
           </SettingsRow>
         </section>

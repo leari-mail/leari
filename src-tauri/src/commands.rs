@@ -197,3 +197,15 @@ pub fn attachments_stat(paths: Vec<String>) -> Result<Vec<LocalFile>> {
         .map(|path| attachments::local_file(&path))
         .collect()
 }
+
+/// Unread count shown on the menu bar / tray icon (0 hides it).
+#[tauri::command]
+pub fn tray_set_unread(app: AppHandle, count: u32) {
+    crate::tray::set_unread(&app, count);
+}
+
+/// New-mail notification preferences, sent by the frontend at startup and on change.
+#[tauri::command]
+pub fn notifications_configure(enabled: bool, language: String) {
+    crate::notify::configure(enabled, language);
+}

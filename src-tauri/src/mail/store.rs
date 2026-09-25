@@ -213,20 +213,34 @@ fn json(addresses: &[MailAddress]) -> String {
     serde_json::to_string(addresses).unwrap_or_else(|_| "[]".into())
 }
 
+/// A message that was not stored before (for new-mail notifications).
+#[derive(Debug, Clone)]
+pub struct InsertedMessage {
+    pub sender: String,
+    pub subject: String,
+    pub is_read: bool,
+}
+
 /// Inserts a batch of messages (ignoring ones already stored) with their attachment metadata.
-pub async fn insert_messages(db: &SqlitePool, messages: Vec<NewMessage<'_>>) -> Result<usize> {
+pub async fn insert_messages(
+    db: &SqlitePool,
+    messages: Vec<NewMessage<'_>>,
+) -> Result<Vec<InsertedMessage>> {
     let mut tx = db.begin().await?;
-    let mut inserted = 0;
+    let mut inserted = Vec::new();
     for message in messages {
-        if insert_message(&mut tx, message).await? {
-            inserted += 1;
+        if let Some(message) = insert_message(&mut tx, message).await? {
+            inserted.push(message);
         }
     }
     tx.commit().await?;
     Ok(inserted)
 }
 
-async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_>) -> Result<bool> {
+async fn insert_message(
+    tx: &mut Transaction<'_, Sqlite>,
+    message: NewMessage<'_>,
+) -> Result<Option<InsertedMessage>> {
     let id = new_id();
     let parsed = &message.parsed;
     let from = parsed.from.clone().unwrap_or(MailAddress { name: None, address: String::new() });
@@ -266,7 +280,7 @@ async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_
     .await?;
 
     if result.rows_affected() == 0 {
-        return Ok(false);
+        return Ok(None);
     }
 
     for attachment in &parsed.attachments {
@@ -285,5 +299,9 @@ async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_
         .execute(&mut **tx)
         .await?;
     }
-    Ok(true)
+    Ok(Some(InsertedMessage {
+        sender: from.name.clone().filter(|name| !name.is_empty()).unwrap_or(from.address.clone()),
+        subject: parsed.subject.clone(),
+        is_read: message.flags.seen,
+    }))
 }

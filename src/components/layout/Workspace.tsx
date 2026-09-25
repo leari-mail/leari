@@ -1,6 +1,6 @@
 import { SplashScreen } from "@components/common";
 import { Welcome } from "@components/onboarding";
-import { useAccounts, useSyncEvents } from "@hooks";
+import { useAccounts, useNotificationSettings, useSyncEvents, useTrayBadge } from "@hooks";
 
 import { AppShell } from "./AppShell";
 
@@ -8,6 +8,8 @@ import { AppShell } from "./AppShell";
 export function Workspace() {
   const { data: accounts, error } = useAccounts();
   useSyncEvents();
+  useTrayBadge();
+  useNotificationSettings();
 
   if (!accounts) return <SplashScreen error={error} />;
   return accounts.length === 0 ? <Welcome /> : <AppShell />;
