@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+
+import { queryKeys } from "@hooks/queryKeys";
 import { accountsService } from "@services";
-import { queryKeys } from "../queryKeys";
 
 export function useAccounts() {
-  return useQuery({ queryKey: queryKeys.accounts, queryFn: accountsService.list });
+  return useQuery({ queryKey: queryKeys.accounts, queryFn: () => accountsService.list() });
 }

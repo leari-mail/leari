@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@ui";
+
 import { cn } from "@lib/utils";
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@ui";
 
 interface IconButtonProps extends Omit<ComponentProps<typeof Button>, "children"> {
   label: string;

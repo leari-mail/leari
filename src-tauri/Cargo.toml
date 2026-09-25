@@ -1,6 +1,6 @@
 [package]
 name = "leari"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 description = "A minimalistic, open source multi-account mail client"
 authors = ["Pablo Souza"]
 license = "MIT"
@@ -46,3 +46,12 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+dbg_macro = "warn"
+todo = "warn"
+unwrap_used = "warn"

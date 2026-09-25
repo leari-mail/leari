@@ -1,9 +1,11 @@
 import { RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { DragRegion, IconButton } from "@components/common";
 import { useFolderTitle, useIsSyncing, useSyncNow } from "@hooks";
 import { cn } from "@lib";
 import { useMailStore } from "@stores";
+
 import { MessageSearch } from "./MessageSearch";
 
 interface MessageListHeaderProps {

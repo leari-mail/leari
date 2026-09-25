@@ -1,9 +1,11 @@
+import type { AccountProvider } from "@models";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import { useCreateAccount, useErrorMessage } from "@hooks";
 import { providerPresets } from "@lib";
-import type { AccountProvider } from "@models";
 import { Button, DialogFooter, Input, Label } from "@ui";
+
 import { ServerFields } from "./ServerFields";
 
 interface AccountFormProps {

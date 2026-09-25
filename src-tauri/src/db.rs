@@ -11,10 +11,7 @@ use crate::error::{Error, Result};
 const DATABASE_FILE: &str = "leari.db";
 
 pub async fn open(app: &AppHandle) -> Result<SqlitePool> {
-    let dir = app
-        .path()
-        .app_config_dir()
-        .map_err(|error| Error::Other(error.to_string()))?;
+    let dir = app.path().app_config_dir().map_err(|error| Error::Other(error.to_string()))?;
     let path = dir.join(DATABASE_FILE);
 
     let options = SqliteConnectOptions::from_str(&format!("sqlite:{}", path.display()))?
@@ -22,10 +19,7 @@ pub async fn open(app: &AppHandle) -> Result<SqlitePool> {
         .busy_timeout(Duration::from_secs(10))
         .foreign_keys(true);
 
-    Ok(SqlitePoolOptions::new()
-        .max_connections(4)
-        .connect_with(options)
-        .await?)
+    Ok(SqlitePoolOptions::new().max_connections(4).connect_with(options).await?)
 }
 
 pub fn now_ms() -> i64 {

@@ -13,10 +13,8 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Open leari", true, None::<&str>)?;
     let compose = MenuItem::with_id(app, "compose", "New Message", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit leari", true, Some("CmdOrCtrl+Q"))?;
-    let menu = Menu::with_items(
-        app,
-        &[&open, &compose, &PredefinedMenuItem::separator(app)?, &quit],
-    )?;
+    let menu =
+        Menu::with_items(app, &[&open, &compose, &PredefinedMenuItem::separator(app)?, &quit])?;
 
     TrayIconBuilder::with_id("main")
         .icon(Image::from_bytes(TRAY_ICON)?)

@@ -1,7 +1,9 @@
-import { useTranslation } from "react-i18next";
-import { useUnifiedUnreadCount } from "@hooks";
 import type { MailboxRole } from "@models";
+import { useTranslation } from "react-i18next";
+
+import { useUnifiedUnreadCount } from "@hooks";
 import { useMailStore } from "@stores";
+
 import { MailboxItem } from "./MailboxItem";
 
 interface UnifiedFolderItemProps {

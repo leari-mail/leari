@@ -1,6 +1,7 @@
+import type { AccountProvider } from "@models";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { AccountProvider } from "@models";
+
 import { ProviderIcon } from "./ProviderIcon";
 
 interface ProviderOptionProps {

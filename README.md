@@ -6,6 +6,14 @@
 
 <p align="center">A minimalistic, open source, multi-account mail client that lives in your menu bar.</p>
 
+<p align="center">
+  <a href="https://github.com/leari-mail/leari/actions/workflows/ci.yml"><img src="https://github.com/leari-mail/leari/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/leari-mail/leari/releases"><img src="https://img.shields.io/github/v/release/leari-mail/leari?include_prereleases&label=release" alt="Latest release" /></a>
+</p>
+
+> [!WARNING]
+> leari is in **alpha**. Expect rough edges and breaking changes between versions.
+
 ---
 
 **leari** is named after the Lear's macaw (_Anodorhynchus leari_), an indigo-blue macaw
@@ -37,6 +45,20 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors a
 - [ ] Notifications and unread badge on the tray icon
 - [ ] Threaded conversations
 
+## Install
+
+Download the latest build from [Releases](https://github.com/leari-mail/leari/releases):
+
+- **macOS** (Apple Silicon and Intel): `leari_<version>_universal.dmg`
+- **Windows**: `leari_<version>_x64-setup.exe`
+
+Builds are not code-signed yet:
+
+- **macOS:** after moving leari to Applications, run
+  `xattr -dr com.apple.quarantine /Applications/leari.app`, or allow it in
+  System Settings → Privacy & Security.
+- **Windows:** in the SmartScreen prompt, choose **More info** → **Run anyway**.
+
 ## Platform notes
 
 | Platform | Where leari lives                 | Notes                                      |
@@ -60,7 +82,8 @@ and **Quit**.
 
 ## Development
 
-Prerequisites: [Tauri prerequisites](https://tauri.app/start/prerequisites/), Node 24+, pnpm 10+.
+Prerequisites: [Tauri prerequisites](https://tauri.app/start/prerequisites/), Node 24+, pnpm 10+,
+Rust (stable).
 
 ```sh
 pnpm install
@@ -71,16 +94,20 @@ In development, an empty database is seeded with demo accounts and messages.
 The database lives in the app data directory. On macOS that is
 `~/Library/Application Support/com.leari.mail/leari.db`. Delete it to start fresh.
 
-| Script               | What it does                                                 |
-| -------------------- | ------------------------------------------------------------ |
-| `pnpm app`           | Run the app with hot reload                                  |
-| `pnpm tauri build`   | Build installers                                             |
-| `pnpm typecheck`     | TypeScript check                                             |
-| `pnpm lint`          | ESLint                                                       |
-| `pnpm format`        | Prettier (with Tailwind class sorting)                       |
-| `pnpm db:generate`   | Generate a migration after changing `src/db/schema`          |
-| `pnpm ui:add <name>` | Add a shadcn/ui component, split into one file per component |
-| `pnpm test:rust`     | Rust unit tests                                              |
+| Script                | What it does                                                      |
+| --------------------- | ----------------------------------------------------------------- |
+| `pnpm app`            | Run the app with hot reload                                       |
+| `pnpm tauri build`    | Build installers locally                                          |
+| `pnpm check`          | Everything CI checks: types, lint, formatting, clippy, Rust tests |
+| `pnpm typecheck`      | TypeScript check                                                  |
+| `pnpm lint`           | ESLint (`pnpm lint:fix` to autofix, `pnpm lint:rust` for clippy)  |
+| `pnpm format`         | Prettier and rustfmt (`pnpm format:check` to verify only)         |
+| `pnpm test:rust`      | Rust unit tests                                                   |
+| `pnpm db:generate`    | Generate a migration after changing `src/db/schema`               |
+| `pnpm ui:add <name>`  | Add a shadcn/ui component, split into one file per component      |
+| `pnpm release <bump>` | Cut a release (see [Releasing](#releasing))                       |
+
+A pre-commit hook (husky + lint-staged) lints and formats staged files.
 
 ### Testing IMAP sync locally
 
@@ -128,6 +155,28 @@ assets/brand/   Icon sources (gen_icon.py generates the SVGs)
 scripts/        Tooling (shadcn splitter)
 ```
 
+## Releasing
+
+Versions follow [Semantic Versioning](https://semver.org/) with `alpha`, `beta` and `rc`
+pre-release channels. `package.json` holds the version (Tauri reads it from there).
+
+1. Make sure every change is listed under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
+2. On an up-to-date `main`, run one of:
+
+   ```sh
+   pnpm release alpha    # 0.1.0-alpha.1 → 0.1.0-alpha.2
+   pnpm release beta     # 0.1.0-alpha.2 → 0.1.0-beta.1
+   pnpm release stable   # 0.1.0-rc.1    → 0.1.0
+   pnpm release minor    # 0.1.0         → 0.2.0
+   ```
+
+   The script bumps `package.json`, `Cargo.toml` and `Cargo.lock`, dates the changelog,
+   commits and tags. Add `--dry-run` to preview.
+
+3. `git push --follow-tags`. The [release workflow](.github/workflows/release.yml) builds
+   macOS (universal) and Windows installers and publishes a GitHub release with the changelog
+   notes. Versions with a pre-release suffix are marked as pre-releases.
+
 ## Contributing
 
 Conventions (see also [CLAUDE.md](CLAUDE.md)):
@@ -142,7 +191,10 @@ Conventions (see also [CLAUDE.md](CLAUDE.md)):
   which call `@services`.
 - **Every user-facing string goes through i18next**, with keys added to every locale.
 - **Use theme tokens** from `src/styles/globals.css` instead of raw colors.
-- Run `pnpm typecheck && pnpm lint` before opening a pull request.
+- Imports are sorted automatically (`pnpm lint:fix`): packages, then aliases, then relative.
+- Add a line to **Unreleased** in [CHANGELOG.md](CHANGELOG.md) for user-facing changes.
+- Run `pnpm check` before opening a pull request. CI runs the same checks, plus the IMAP
+  end-to-end test.
 
 ### Adding a language
 

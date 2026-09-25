@@ -66,11 +66,7 @@ fn display_name(path: &str, delimiter: Option<&str>) -> String {
 }
 
 pub async fn list(session: &mut ImapSession) -> Result<Vec<FolderInfo>> {
-    let names: Vec<_> = session
-        .list(Some(""), Some("*"))
-        .await?
-        .try_collect()
-        .await?;
+    let names: Vec<_> = session.list(Some(""), Some("*")).await?.try_collect().await?;
 
     let mut folders: Vec<FolderInfo> = Vec::new();
     let mut unknown: Vec<FolderInfo> = Vec::new();
@@ -119,14 +115,9 @@ pub async fn list(session: &mut ImapSession) -> Result<Vec<FolderInfo>> {
 
     folders.sort_by(|a, b| {
         let rank = |folder: &FolderInfo| {
-            ROLE_ORDER
-                .iter()
-                .position(|role| *role == folder.role)
-                .unwrap_or(ROLE_ORDER.len())
+            ROLE_ORDER.iter().position(|role| *role == folder.role).unwrap_or(ROLE_ORDER.len())
         };
-        rank(a)
-            .cmp(&rank(b))
-            .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+        rank(a).cmp(&rank(b)).then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
     });
     for (index, folder) in folders.iter_mut().enumerate() {
         folder.sort_order = index as i64;
@@ -141,10 +132,7 @@ mod tests {
 
     #[test]
     fn decodes_nested_utf7_names() {
-        assert_eq!(
-            display_name("INBOX/Relat&APM-rios", Some("/")),
-            "Relatórios"
-        );
+        assert_eq!(display_name("INBOX/Relat&APM-rios", Some("/")), "Relatórios");
         assert_eq!(display_name("[Gmail]/Sent Mail", Some("/")), "Sent Mail");
         assert_eq!(display_name("Archive", None), "Archive");
     }

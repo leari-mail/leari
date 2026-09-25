@@ -1,6 +1,8 @@
-import { eq } from "drizzle-orm";
 import type { MailboxRole, NewMailbox, NewMessage } from "@models";
+import { eq } from "drizzle-orm";
+
 import { newId } from "@lib/ids";
+
 import { db } from "./client";
 import { accounts, mailboxes, messages } from "./schema";
 
@@ -144,7 +146,7 @@ async function seedAccount(options: {
   const rows: NewMessage[] = options.inbox.map((demo, index) => ({
     id: newId(),
     accountId,
-    mailboxId: inbox.id!,
+    mailboxId: inbox.id,
     uid: index + 1,
     subject: demo.subject,
     fromName: demo.from[0],
@@ -163,7 +165,7 @@ async function seedAccount(options: {
   await db
     .update(mailboxes)
     .set({ unreadCount: unread, totalCount: rows.length })
-    .where(eq(mailboxes.id, inbox.id!));
+    .where(eq(mailboxes.id, inbox.id));
 }
 
 /** Development only: fills an empty database with demo accounts and messages. */

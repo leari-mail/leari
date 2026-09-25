@@ -1,9 +1,10 @@
-import { asc, eq } from "drizzle-orm";
-import { accounts, db, mailboxes } from "@db";
-import { newId } from "@lib/ids";
-import { pickAccountColor } from "@lib/account-colors";
 import type { Account, MailboxRole, NewAccount } from "@models";
-import { credentialsService } from "../credentials";
+import { asc, eq } from "drizzle-orm";
+
+import { accounts, db, mailboxes } from "@db";
+import { pickAccountColor } from "@lib/account-colors";
+import { newId } from "@lib/ids";
+import { credentialsService } from "@services/credentials";
 
 export type CreateAccountInput = Omit<NewAccount, "id" | "color" | "sortOrder" | "createdAt">;
 

@@ -179,10 +179,7 @@ pub async fn pending_message_ids(db: &SqlitePool, account_id: &str) -> Result<Ha
 pub async fn delete_messages(db: &SqlitePool, ids: &[String]) -> Result<()> {
     let mut tx = db.begin().await?;
     for id in ids {
-        sqlx::query("DELETE FROM messages WHERE id = ?")
-            .bind(id)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query("DELETE FROM messages WHERE id = ?").bind(id).execute(&mut *tx).await?;
     }
     tx.commit().await?;
     Ok(())
@@ -232,14 +229,8 @@ pub async fn insert_messages(db: &SqlitePool, messages: Vec<NewMessage<'_>>) -> 
 async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_>) -> Result<bool> {
     let id = new_id();
     let parsed = &message.parsed;
-    let from = parsed.from.clone().unwrap_or(MailAddress {
-        name: None,
-        address: String::new(),
-    });
-    let date = parsed
-        .date_ms
-        .or(message.internal_date_ms)
-        .unwrap_or_else(crate::db::now_ms);
+    let from = parsed.from.clone().unwrap_or(MailAddress { name: None, address: String::new() });
+    let date = parsed.date_ms.or(message.internal_date_ms).unwrap_or_else(crate::db::now_ms);
 
     let result = sqlx::query(
         "INSERT INTO messages (id, account_id, mailbox_id, uid, message_id_header, thread_id, in_reply_to, \

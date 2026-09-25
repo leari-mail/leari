@@ -1,4 +1,5 @@
 import type { MailboxRole } from "@models";
+
 import { UnifiedFolderItem } from "./UnifiedFolderItem";
 
 const unifiedRoles: MailboxRole[] = ["inbox", "starred", "sent", "drafts", "archive", "trash"];

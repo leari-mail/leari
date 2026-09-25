@@ -1,9 +1,10 @@
+import type { Account, Message } from "@models";
 import { Paperclip } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { AccountDot } from "@components/accounts";
 import { SenderAvatar } from "@components/common";
 import { formatAddress, formatFullDate } from "@lib";
-import type { Account, Message } from "@models";
 
 interface ReaderHeaderProps {
   message: Message;

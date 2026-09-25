@@ -1,4 +1,5 @@
 import type { MailboxRole } from "@models";
+
 import { useMailboxes } from "./useMailboxes";
 import { useUnreadCounts } from "./useUnreadCounts";
 

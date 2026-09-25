@@ -1,5 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
+
 import { messagesService, syncService } from "@services";
+
 import { useInvalidateMail } from "./useInvalidateMail";
 
 export function useSetMessageRead() {

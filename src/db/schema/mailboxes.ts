@@ -1,4 +1,5 @@
 import { index, integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+
 import { accounts } from "./accounts";
 
 export const mailboxRoles = [

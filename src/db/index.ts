@@ -1,4 +1,4 @@
-export { db, type DB } from "./client";
+export { type DB, db } from "./client";
 export { runMigrations } from "./migrate";
-export { seedDemoData } from "./seed";
 export * from "./schema";
+export { seedDemoData } from "./seed";

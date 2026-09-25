@@ -1,7 +1,9 @@
 import { useDefaultLayout } from "react-resizable-panels";
+
 import { MessageList } from "@components/messages";
 import { MessageReader } from "@components/reader";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@ui";
+
 import { Sidebar } from "./Sidebar";
 
 /** Classic three-pane mail layout: sidebar · message list · reader. */

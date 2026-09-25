@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+
+import { queryKeys } from "@hooks/queryKeys";
 import { syncService } from "@services";
 import { useSyncStore } from "@stores";
-import { queryKeys } from "../queryKeys";
 
 /**
  * Starts background sync and keeps the UI in step with it: statuses go to the sync store,
@@ -20,7 +21,10 @@ export function useSyncEvents() {
         queryClient.invalidateQueries({ queryKey: queryKeys.mailboxes }),
       ]);
 
-    const subscriptions = [syncService.onStatus(setStatus), syncService.onChanged(onChanged)];
+    const subscriptions = [
+      syncService.onStatus(setStatus),
+      syncService.onChanged(() => void onChanged()),
+    ];
     void syncService.statuses().then(setStatuses);
     void syncService.start();
 

@@ -1,8 +1,10 @@
 import { Send } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import { useComposerStore } from "@stores";
 import { Button, Dialog, DialogContent, DialogTitle, Input, Textarea } from "@ui";
+
 import { ComposerField } from "./ComposerField";
 import { FromSelect } from "./FromSelect";
 

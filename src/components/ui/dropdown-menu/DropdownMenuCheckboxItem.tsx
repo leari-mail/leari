@@ -1,7 +1,8 @@
-import * as React from "react";
-import { cn } from "@lib/utils";
 import { CheckIcon } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
+import * as React from "react";
+
+import { cn } from "@lib/utils";
 
 export function DropdownMenuCheckboxItem({
   className,

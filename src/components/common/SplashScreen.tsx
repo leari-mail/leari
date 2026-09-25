@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
+
 import { LeariLogo } from "@components/brand";
+import { errorText } from "@lib";
 
 interface SplashScreenProps {
   error?: unknown;
@@ -18,7 +20,9 @@ export function SplashScreen({ error }: SplashScreenProps) {
         {error ? t("errors.startup") : t("status.starting")}
       </p>
       {error != null && (
-        <pre className="max-w-md text-xs whitespace-pre-wrap text-destructive">{String(error)}</pre>
+        <pre className="max-w-md text-xs whitespace-pre-wrap text-destructive">
+          {errorText(error)}
+        </pre>
       )}
     </div>
   );

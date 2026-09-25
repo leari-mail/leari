@@ -1,1 +1,1 @@
-export { syncService, type ServerConfig } from "./syncService";
+export { type ServerConfig, syncService } from "./syncService";

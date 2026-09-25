@@ -1,6 +1,6 @@
-import { Avatar, AvatarFallback } from "@ui";
 import { colorFromString, initials } from "@lib";
 import { cn } from "@lib/utils";
+import { Avatar, AvatarFallback } from "@ui";
 
 interface SenderAvatarProps {
   name?: string | null;

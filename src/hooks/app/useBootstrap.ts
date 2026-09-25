@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { runMigrations, seedDemoData } from "@db";
-import { queryKeys } from "../queryKeys";
+import { queryKeys } from "@hooks/queryKeys";
 
 async function bootstrap() {
   await runMigrations();

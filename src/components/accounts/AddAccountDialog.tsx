@@ -1,8 +1,10 @@
+import type { AccountProvider } from "@models";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AccountProvider } from "@models";
+
 import { useDialogStore } from "@stores";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@ui";
+
 import { AccountForm } from "./AccountForm";
 import { ProviderPicker } from "./ProviderPicker";
 

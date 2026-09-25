@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+
 import { messagesService, syncService } from "@services";
 import { useMailStore } from "@stores";
+
 import { useInvalidateMail } from "./useInvalidateMail";
 
 export function useMoveMessage() {

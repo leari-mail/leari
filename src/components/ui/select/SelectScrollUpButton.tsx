@@ -1,7 +1,8 @@
-import * as React from "react";
-import { cn } from "@lib/utils";
 import { ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
+import * as React from "react";
+
+import { cn } from "@lib/utils";
 
 export function SelectScrollUpButton({
   className,

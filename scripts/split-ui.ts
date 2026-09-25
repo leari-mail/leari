@@ -10,9 +10,10 @@
  * Runs automatically after `pnpm ui:add <component>`.
  * Existing folders are kept (so local customizations survive) unless --force is passed.
  */
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+
 import ts from "typescript";
 
 const UI_DIR = path.resolve(import.meta.dirname, "../src/components/ui");
@@ -221,6 +222,8 @@ const flatFiles = fs
 flatFiles.forEach(splitFile);
 writeBarrel();
 
+// Sort imports / apply lint fixes, then format.
+execFileSync("pnpm", ["exec", "eslint", "--fix", UI_DIR], { stdio: "inherit" });
 execFileSync("pnpm", ["exec", "prettier", "--write", "--log-level", "warn", UI_DIR], {
   stdio: "inherit",
 });

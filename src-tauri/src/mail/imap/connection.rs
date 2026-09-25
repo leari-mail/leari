@@ -32,11 +32,8 @@ async fn read_greeting<T: Stream>(client: &mut Client<T>) -> Result<()> {
 
 /// Opens a connection (implicit TLS, STARTTLS or plain) and logs in.
 pub async fn connect(server: &ServerConfig, username: &str, password: &str) -> Result<ImapSession> {
-    let tcp = timeout(
-        CONNECT_TIMEOUT,
-        TcpStream::connect((server.host.as_str(), server.port)),
-    )
-    .await??;
+    let tcp =
+        timeout(CONNECT_TIMEOUT, TcpStream::connect((server.host.as_str(), server.port))).await??;
 
     let client: Client<Box<dyn Stream>> = match server.security {
         Security::Ssl => {
@@ -57,14 +54,13 @@ pub async fn connect(server: &ServerConfig, username: &str, password: &str) -> R
         }
     };
 
-    let (session, _) = client
-        .login_with_capabilities(username, password)
-        .await
-        .map_err(|(error, _)| match error {
+    let (session, _) = client.login_with_capabilities(username, password).await.map_err(
+        |(error, _)| match error {
             async_imap::error::Error::No(message) | async_imap::error::Error::Bad(message) => {
                 Error::Auth(message)
             }
             other => other.into(),
-        })?;
+        },
+    )?;
     Ok(session)
 }
