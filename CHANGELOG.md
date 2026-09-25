@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.1] - 2026-09-25
+
 ### Added
 
 - Tray / menu bar app with no dock icon; closing the window hides it
