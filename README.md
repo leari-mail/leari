@@ -52,7 +52,7 @@ Download the latest build from [Releases](https://github.com/leari-mail/leari/re
 - **macOS** (Apple Silicon and Intel): `leari_<version>_universal.dmg`
 - **Windows**: `leari_<version>_x64-setup.exe`
 
-Builds are not code-signed yet:
+Builds are not notarized by Apple / signed by Microsoft yet:
 
 - **macOS:** after moving leari to Applications, run
   `xattr -dr com.apple.quarantine /Applications/leari.app`, or allow it in

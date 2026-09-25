@@ -9,24 +9,13 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
-### Fixed
-
-- Development builds asked for the Keychain password after every rebuild; they are now signed
-  with a local identity created automatically on first run
-
 ### Added
 
 - Attachments: listed in the reader (open with the default app or save a copy), downloaded on
   demand; attach files in the composer (button or drag and drop); forwarding keeps attachments
 - Images embedded in HTML emails (logos, signatures) are displayed
-
-### Added
-
 - Sending mail over SMTP (password or OAuth), with Cc/Bcc, reply threading headers and ⌘↵ to
   send; a copy is saved to Sent (Gmail and Microsoft 365 do this themselves)
-
-### Added
-
 - Sign in with Google (Gmail / Workspace) and Microsoft (Outlook / 365) using OAuth; tokens stay
   in the OS keychain and refresh automatically
 - "Sign in again" in an account's context menu when its access expires
@@ -35,6 +24,11 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Fixed
 
+- macOS asked for the Keychain password again after every update; releases are now signed with
+  a fixed certificate, so updates keep Keychain access
+- Release builds failed with Xcode 27 ("mis-aligned LINKEDIT string pool")
+- Development builds asked for the Keychain password after every rebuild; they are now signed
+  with a local identity created automatically on first run
 - Language selector had no effect (Português (Brasil) fell back to English)
 - Long sender names, subjects and account emails overflowed horizontally instead of truncating with "…"
 - Wide HTML emails were cut off on the right; they are now scaled to fit the reader
