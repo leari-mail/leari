@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use lettre::message::header::ContentType;
-use lettre::message::{Mailbox, Mailboxes};
+use lettre::message::{Attachment, Mailbox, Mailboxes, MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::{Credentials, Mechanism};
 use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 
@@ -24,6 +24,13 @@ pub struct Outgoing {
     pub in_reply_to: Option<String>,
     /// Thread ancestry, oldest first (without angle brackets).
     pub references: Vec<String>,
+    pub attachments: Vec<OutgoingAttachment>,
+}
+
+pub struct OutgoingAttachment {
+    pub name: String,
+    pub content_type: String,
+    pub bytes: Vec<u8>,
 }
 
 /// Parses a recipient field: `a@x.com, "Doe, John" <j@y.com>; b@z.com`.
@@ -66,10 +73,19 @@ pub fn build(outgoing: Outgoing) -> Result<Message> {
         builder = builder.references(references.join(" "));
     }
 
-    builder
-        .header(ContentType::TEXT_PLAIN)
-        .body(outgoing.body)
-        .map_err(|error| Error::Invalid(error.to_string()))
+    let result = if outgoing.attachments.is_empty() {
+        builder.header(ContentType::TEXT_PLAIN).body(outgoing.body)
+    } else {
+        let mut parts = MultiPart::mixed().singlepart(SinglePart::plain(outgoing.body));
+        for attachment in outgoing.attachments {
+            let content_type = ContentType::parse(&attachment.content_type)
+                .unwrap_or_else(|_| ContentType::parse("application/octet-stream").expect("valid"));
+            parts = parts
+                .singlepart(Attachment::new(attachment.name).body(attachment.bytes, content_type));
+        }
+        builder.multipart(parts)
+    };
+    result.map_err(|error| Error::Invalid(error.to_string()))
 }
 
 fn smtp_error(error: lettre::transport::smtp::Error) -> Error {
@@ -141,6 +157,7 @@ mod tests {
             body: "Hi Bob".into(),
             in_reply_to: Some("parent@example.com".into()),
             references: vec!["root@example.com".into(), "parent@example.com".into()],
+            attachments: Vec::new(),
         })
         .unwrap();
         let raw = String::from_utf8(message.formatted()).unwrap();
@@ -150,5 +167,35 @@ mod tests {
         assert!(raw.contains("@example.com>\r\n") && raw.contains("Message-ID: <"));
         assert!(!raw.contains("secret@example.com"), "Bcc must not appear in headers");
         assert!(message.envelope().to().iter().any(|a| a.to_string() == "secret@example.com"));
+    }
+
+    #[test]
+    fn builds_multipart_with_attachments() {
+        let message = build(Outgoing {
+            from: "ana@example.com".parse().unwrap(),
+            to: parse_recipients("bob@example.com").unwrap(),
+            cc: Mailboxes::new(),
+            bcc: Mailboxes::new(),
+            subject: "Files".into(),
+            body: "See attached".into(),
+            in_reply_to: None,
+            references: Vec::new(),
+            attachments: vec![OutgoingAttachment {
+                name: "notes.txt".into(),
+                content_type: "text/plain".into(),
+                bytes: b"hello world".to_vec(),
+            }],
+        })
+        .unwrap();
+        let raw = message.formatted();
+
+        let parsed = crate::mail::parse::parse(&raw).unwrap();
+        assert_eq!(parsed.body_text.as_deref().map(str::trim), Some("See attached"));
+        assert_eq!(parsed.attachments.len(), 1);
+        assert_eq!(parsed.attachments[0].filename, "notes.txt");
+        assert_eq!(
+            crate::mail::parse::attachment_content(&raw, Some(0), "notes.txt").unwrap(),
+            b"hello world"
+        );
     }
 }

@@ -49,3 +49,17 @@ export function initials(nameOrEmail: string): string {
 export function formatRelative(date: number, now: number, language: string): string {
   return formatDistanceStrict(date, now, { addSuffix: true, locale: dateLocale(language) });
 }
+
+/** Human-readable file size: "840 B", "12 KB", "3.4 MB". */
+export function formatBytes(bytes: number, language: string): string {
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  const digits = unit === 0 || value >= 10 ? 0 : 1;
+  const number = new Intl.NumberFormat(language, { maximumFractionDigits: digits }).format(value);
+  return `${number} ${units[unit]}`;
+}

@@ -28,7 +28,8 @@
       "protocol": "O servidor recusou a solicitação.",
       "other": "Algo deu errado.",
       "cancelled": "O login foi cancelado.",
-      "invalid": "Verifique este endereço: {{detail}}"
+      "invalid": "Verifique este endereço: {{detail}}",
+      "tooLarge": "Os anexos são grandes demais para enviar (limite {{limit}})."
     },
     "noRecipients": "Adicione pelo menos um destinatário."
   }

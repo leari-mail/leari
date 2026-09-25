@@ -62,7 +62,9 @@
     "discard": "Descartar",
     "bcc": "Cco",
     "sending": "Enviando…",
-    "sendShortcut": "⌘↵ para enviar"
+    "sendShortcut": "⌘↵ para enviar",
+    "attach": "Anexar arquivos",
+    "dropFiles": "Solte os arquivos para anexar"
   },
   "sync": {
     "refresh": "Verificar novos e-mails",
@@ -73,5 +75,12 @@
     "failedCount_one": "Falha ao sincronizar {{count}} conta",
     "failedCount_other": "Falha ao sincronizar {{count}} contas",
     "never": "Ainda não sincronizado"
+  },
+  "attachments": {
+    "count_one": "{{count}} anexo",
+    "count_other": "{{count}} anexos",
+    "open": "Abrir",
+    "save": "Salvar…",
+    "remove": "Remover {{name}}"
   }
 }

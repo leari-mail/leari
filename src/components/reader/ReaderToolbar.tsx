@@ -2,7 +2,12 @@ import { Archive, Forward, MailOpen, Reply, ReplyAll, Star, Trash2 } from "lucid
 import { useTranslation } from "react-i18next";
 
 import { DragRegion, IconButton } from "@components/common";
-import { useMoveMessage, useSetMessageRead, useSetMessageStarred } from "@hooks";
+import {
+  useMessageAttachments,
+  useMoveMessage,
+  useSetMessageRead,
+  useSetMessageStarred,
+} from "@hooks";
 import { cn } from "@lib";
 import type { Message } from "@models";
 import { useComposerStore } from "@stores";
@@ -26,6 +31,7 @@ export function ReaderToolbar({ message }: ReaderToolbarProps) {
   const setRead = useSetMessageRead();
   const setStarred = useSetMessageStarred();
   const move = useMoveMessage();
+  const { data: attachments = [] } = useMessageAttachments(message.id);
 
   const replySubject = message.subject.match(/^re:/i) ? message.subject : `Re: ${message.subject}`;
 
@@ -66,6 +72,14 @@ export function ReaderToolbar({ message }: ReaderToolbarProps) {
             accountId: message.accountId,
             subject: `Fwd: ${message.subject}`,
             body: quote(message),
+            attachments: attachments
+              .filter((attachment) => !(attachment.isInline && attachment.contentId))
+              .map((attachment) => ({
+                kind: "forwarded" as const,
+                attachmentId: attachment.id,
+                name: attachment.filename,
+                size: attachment.size,
+              })),
           })
         }
       />

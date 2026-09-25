@@ -25,6 +25,7 @@ pub fn run() {
     builder
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
             // No dock icon: leari lives in the menu bar (macOS) / system tray.
@@ -49,6 +50,11 @@ pub fn run() {
             commands::oauth_cancel,
             commands::oauth_attach,
             commands::mail_send,
+            commands::attachment_open,
+            commands::attachment_save,
+            commands::message_inline_images,
+            commands::attachments_pick,
+            commands::attachments_stat,
         ])
         .on_window_event(window::handle_event)
         .run(tauri::generate_context!())

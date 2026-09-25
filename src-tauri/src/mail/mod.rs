@@ -1,6 +1,7 @@
 //! Mail engine: protocol clients (IMAP for now) and persistence of synced data.
 
 pub mod account;
+pub mod attachments;
 pub mod auth;
 pub mod imap;
 pub mod parse;

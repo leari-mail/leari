@@ -10,6 +10,8 @@ pub struct MailAddress {
 
 #[derive(Debug, Clone)]
 pub struct AttachmentInfo {
+    /// Position in mail-parser's attachment order, to find the part again later.
+    pub index: usize,
     pub filename: String,
     pub mime_type: String,
     pub size: i64,
@@ -61,6 +63,42 @@ fn header_ids(value: &HeaderValue) -> Vec<String> {
     }
 }
 
+/// An attachment's decoded bytes: by position, or (for rows synced before positions were
+/// stored) by file name.
+pub fn attachment_content(raw: &[u8], index: Option<usize>, filename: &str) -> Option<Vec<u8>> {
+    let message = MessageParser::default().parse(raw)?;
+    let part = match index {
+        Some(index) => message.attachments().nth(index),
+        None => message.attachments().find(|part| part.attachment_name() == Some(filename)),
+    }?;
+    Some(part.contents().to_vec())
+}
+
+pub struct InlineImage {
+    pub content_id: String,
+    pub mime_type: String,
+    pub bytes: Vec<u8>,
+}
+
+/// Images referenced from the HTML body as `cid:…` (logos, signatures).
+pub fn inline_images(raw: &[u8]) -> Vec<InlineImage> {
+    let Some(message) = MessageParser::default().parse(raw) else { return Vec::new() };
+    message
+        .attachments()
+        .filter_map(|part| {
+            let content_type = part.content_type()?;
+            if !content_type.ctype().eq_ignore_ascii_case("image") {
+                return None;
+            }
+            Some(InlineImage {
+                content_id: part.content_id()?.trim_matches(|c| c == '<' || c == '>').to_owned(),
+                mime_type: format!("image/{}", content_type.subtype().unwrap_or("png")),
+                bytes: part.contents().to_vec(),
+            })
+        })
+        .collect()
+}
+
 pub fn snippet(text: &str) -> String {
     let collapsed = text.split_whitespace().collect::<Vec<_>>().join(" ");
     collapsed.chars().take(SNIPPET_LENGTH).collect()
@@ -86,7 +124,9 @@ pub fn parse(raw: &[u8]) -> Option<ParsedMessage> {
 
     let attachments = message
         .attachments()
-        .map(|part| AttachmentInfo {
+        .enumerate()
+        .map(|(index, part)| AttachmentInfo {
+            index,
             filename: part.attachment_name().unwrap_or("attachment").to_owned(),
             mime_type: part
                 .content_type()
@@ -141,6 +181,37 @@ Content-Type: multipart/alternative; boundary=\"b\"\r\n\r\n\
         assert_eq!(parsed.snippet, "Hi there Bob");
         assert!(parsed.body_html.unwrap().contains("<p>"));
         assert_eq!(parsed.date_ms, Some(1_788_256_800_000));
+    }
+
+    const WITH_ATTACHMENTS: &[u8] = b"From: a@example.com\r\nSubject: Files\r\nMIME-Version: 1.0\r\n\
+Content-Type: multipart/mixed; boundary=\"m\"\r\n\r\n\
+--m\r\nContent-Type: multipart/related; boundary=\"r\"\r\n\r\n\
+--r\r\nContent-Type: text/html\r\n\r\n<p><img src=\"cid:logo@x\"></p>\r\n\
+--r\r\nContent-Type: image/png\r\nContent-ID: <logo@x>\r\nContent-Disposition: inline\r\n\
+Content-Transfer-Encoding: base64\r\n\r\niVBORw0K\r\n--r--\r\n\
+--m\r\nContent-Type: text/plain; name=\"notes.txt\"\r\nContent-Disposition: attachment; filename=\"notes.txt\"\r\n\
+Content-Transfer-Encoding: base64\r\n\r\naGVsbG8gd29ybGQ=\r\n--m--\r\n";
+
+    #[test]
+    fn extracts_attachments_and_inline_images() {
+        let parsed = parse(WITH_ATTACHMENTS).unwrap();
+        let notes = parsed.attachments.iter().find(|a| a.filename == "notes.txt").unwrap();
+        assert_eq!(notes.mime_type, "text/plain");
+
+        assert_eq!(
+            attachment_content(WITH_ATTACHMENTS, Some(notes.index), "notes.txt").unwrap(),
+            b"hello world"
+        );
+        assert_eq!(
+            attachment_content(WITH_ATTACHMENTS, None, "notes.txt").unwrap(),
+            b"hello world"
+        );
+
+        let images = inline_images(WITH_ATTACHMENTS);
+        assert_eq!(images.len(), 1);
+        assert_eq!(images[0].content_id, "logo@x");
+        assert_eq!(images[0].mime_type, "image/png");
+        assert_eq!(images[0].bytes, [0x89, b'P', b'N', b'G', 0x0d, 0x0a]);
     }
 
     #[test]

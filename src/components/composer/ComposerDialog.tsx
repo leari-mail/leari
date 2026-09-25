@@ -1,8 +1,12 @@
-import { LoaderCircle, Send } from "lucide-react";
+import { LoaderCircle, Paperclip, Send } from "lucide-react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useAccounts, useErrorMessage, useSendMessage } from "@hooks";
+import { ComposerAttachments, DropOverlay } from "@components/attachments";
+import { IconButton } from "@components/common";
+import { useAccounts, useErrorMessage, useFileDrop, useSendMessage } from "@hooks";
+import type { LocalFile } from "@models";
+import { attachmentsService } from "@services";
 import { useComposerStore } from "@stores";
 import { Button, Dialog, DialogContent, DialogTitle, Input, Textarea } from "@ui";
 
@@ -14,13 +18,20 @@ const bareInput =
 
 export function ComposerDialog() {
   const { t } = useTranslation("mail");
-  const { isOpen, draft, update, close } = useComposerStore();
+  const { isOpen, draft, update, attach, detach, close } = useComposerStore();
   const { data: accounts = [] } = useAccounts();
   const sendMessage = useSendMessage();
   const errorMessage = useErrorMessage();
 
   const accountId = draft.accountId ?? accounts[0]?.id;
   const sending = sendMessage.isPending;
+
+  const attachFiles = (files: LocalFile[]) =>
+    attach(files.map((file) => ({ kind: "file" as const, ...file })));
+  const pickFiles = () => void attachmentsService.pick().then(attachFiles);
+  const dropping = useFileDrop(isOpen && !sending, (paths) => {
+    void attachmentsService.stat(paths).then(attachFiles);
+  });
 
   const onOpenChange = (open: boolean) => {
     if (open || sending) return;
@@ -40,6 +51,11 @@ export function ComposerDialog() {
         subject: draft.subject,
         body: draft.body,
         replyToMessageId: draft.replyToMessageId,
+        attachments: draft.attachments.map((attachment) =>
+          attachment.kind === "file"
+            ? { kind: "file" as const, path: attachment.path }
+            : { kind: "forwarded" as const, attachmentId: attachment.attachmentId },
+        ),
       },
       {
         onSuccess: () => {
@@ -62,11 +78,18 @@ export function ComposerDialog() {
         onKeyDown={onKeyDown}
         className="flex h-[min(640px,85vh)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
       >
+        {dropping && <DropOverlay />}
         <form onSubmit={send} className="flex min-h-0 flex-1 flex-col">
           <div className="flex h-12 items-center gap-2 border-b border-border/70 px-4">
             <DialogTitle className="flex-1 truncate text-sm">
               {draft.subject || t("composer.title")}
             </DialogTitle>
+            <IconButton
+              label={t("composer.attach")}
+              icon={<Paperclip />}
+              disabled={sending}
+              onClick={pickFiles}
+            />
             <Button
               type="button"
               variant="ghost"
@@ -137,6 +160,8 @@ export function ComposerDialog() {
               className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 text-[14px] shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
           </fieldset>
+
+          <ComposerAttachments attachments={draft.attachments} onRemove={detach} />
 
           {sendMessage.isError && (
             <p

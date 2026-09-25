@@ -62,7 +62,9 @@
     "discard": "Discard",
     "bcc": "Bcc",
     "sending": "Sending…",
-    "sendShortcut": "⌘↵ to send"
+    "sendShortcut": "⌘↵ to send",
+    "attach": "Attach files",
+    "dropFiles": "Drop files to attach"
   },
   "sync": {
     "refresh": "Check for new mail",
@@ -73,5 +75,12 @@
     "failedCount_one": "{{count}} account failed to sync",
     "failedCount_other": "{{count}} accounts failed to sync",
     "never": "Not synced yet"
+  },
+  "attachments": {
+    "count_one": "{{count}} attachment",
+    "count_other": "{{count}} attachments",
+    "open": "Open",
+    "save": "Save…",
+    "remove": "Remove {{name}}"
   }
 }

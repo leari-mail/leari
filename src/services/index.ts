@@ -1,4 +1,5 @@
 export * from "./accounts";
+export * from "./attachments";
 export * from "./credentials";
 export * from "./mailboxes";
 export * from "./messages";

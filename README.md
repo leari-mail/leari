@@ -40,8 +40,8 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors a
 - [ ] POP3 download
 - [x] OAuth 2 sign-in for Google and Microsoft
 - [x] SMTP sending (password and OAuth), saved to Sent
+- [x] Attachments (open, save, attach, forward) and embedded images
 - [x] Credentials in the OS keychain
-- [ ] Attachments
 - [ ] Notifications and unread badge on the tray icon
 - [ ] Threaded conversations
 

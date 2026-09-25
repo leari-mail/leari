@@ -28,7 +28,8 @@
       "protocol": "The server rejected the request.",
       "other": "Something went wrong.",
       "cancelled": "Sign-in was cancelled.",
-      "invalid": "Check this address: {{detail}}"
+      "invalid": "Check this address: {{detail}}",
+      "tooLarge": "Attachments are too large to send (limit {{limit}})."
     },
     "noRecipients": "Add at least one recipient."
   }

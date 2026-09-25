@@ -20,6 +20,9 @@ pub enum Error {
     /// Bad user input (e.g. an unparsable recipient); the message is the offending value.
     #[error("{0}")]
     Invalid(String),
+    /// Attachments larger than providers accept; the value is the limit in bytes.
+    #[error("attachments exceed {0} bytes")]
+    TooLarge(u64),
     #[error("cancelled")]
     Cancelled,
     #[error("{0}")]
@@ -36,6 +39,7 @@ impl Error {
             Error::Protocol(_) => "protocol",
             Error::Cancelled => "cancelled",
             Error::Invalid(_) => "invalid",
+            Error::TooLarge(_) => "tooLarge",
             Error::Database(_) | Error::Keychain(_) | Error::Other(_) => "other",
         }
     }
@@ -51,6 +55,7 @@ impl Clone for Error {
             Error::Protocol(message) => Error::Protocol(message.clone()),
             Error::Cancelled => Error::Cancelled,
             Error::Invalid(message) => Error::Invalid(message.clone()),
+            Error::TooLarge(limit) => Error::TooLarge(*limit),
             other => Error::Other(other.to_string()),
         }
     }

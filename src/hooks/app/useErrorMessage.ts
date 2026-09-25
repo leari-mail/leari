@@ -11,6 +11,9 @@ export function useErrorMessage() {
         ? t("errors.kinds.invalid", { detail: error.message })
         : t("errors.noRecipients");
     }
+    if (isAppError(error) && error.kind === "tooLarge") {
+      return t("errors.kinds.tooLarge", { limit: "18 MB" });
+    }
     if (isAppError(error)) return t(`errors.kinds.${error.kind}`);
     if (error instanceof Error && error.message) return error.message;
     return t("errors.generic");

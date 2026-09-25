@@ -11,6 +11,12 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- Attachments: listed in the reader (open with the default app or save a copy), downloaded on
+  demand; attach files in the composer (button or drag and drop); forwarding keeps attachments
+- Images embedded in HTML emails (logos, signatures) are displayed
+
+### Added
+
 - Sending mail over SMTP (password or OAuth), with Cc/Bcc, reply threading headers and ⌘↵ to
   send; a copy is saved to Sent (Gmail and Microsoft 365 do this themselves)
 

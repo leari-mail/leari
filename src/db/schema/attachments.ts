@@ -12,5 +12,8 @@ export const attachments = sqliteTable("attachments", {
   size: integer("size").notNull().default(0),
   contentId: text("content_id"),
   isInline: integer("is_inline", { mode: "boolean" }).notNull().default(false),
+  /** Position among the message's attachments (mail-parser order), used to extract it later. */
+  partIndex: integer("part_index"),
+  /** Downloaded copy in the app cache, once opened or saved. */
   localPath: text("local_path"),
 });

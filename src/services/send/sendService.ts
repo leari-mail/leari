@@ -9,6 +9,7 @@ export interface SendRequest {
   subject: string;
   body: string;
   replyToMessageId?: string;
+  attachments: Array<{ kind: "file"; path: string } | { kind: "forwarded"; attachmentId: string }>;
 }
 
 /** Sends through the account's SMTP server (Rust, src-tauri/src/mail/send.rs). */

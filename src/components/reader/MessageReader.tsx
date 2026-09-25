@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
-import { useAccounts, useMessage, useSetMessageRead } from "@hooks";
+import { AttachmentList } from "@components/attachments";
+import { useAccounts, useMessage, useMessageAttachments, useSetMessageRead } from "@hooks";
 import { useMailStore, useSettingsStore } from "@stores";
 import { ScrollArea } from "@ui";
 
@@ -15,6 +16,7 @@ export function MessageReader() {
   const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
   const { data: message } = useMessage(selectedId);
   const { data: accounts = [] } = useAccounts();
+  const { data: attachments = [] } = useMessageAttachments(message?.id);
   const { mutate: setRead } = useSetMessageRead();
 
   const messageId = message?.id;
@@ -34,6 +36,10 @@ export function MessageReader() {
   }
 
   const account = accounts.find((item) => item.id === message.accountId);
+  // Embedded images (referenced from the HTML body) are not listed as attachments.
+  const visibleAttachments = attachments.filter(
+    (attachment) => !(attachment.isInline && attachment.contentId),
+  );
 
   return (
     <section className="flex h-full flex-col bg-background">
@@ -42,6 +48,7 @@ export function MessageReader() {
         <article className="mx-auto max-w-3xl space-y-6 px-8 py-6">
           <ReaderHeader message={message} account={account} />
           <MessageBody message={message} />
+          {visibleAttachments.length > 0 && <AttachmentList attachments={visibleAttachments} />}
         </article>
       </ScrollArea>
     </section>

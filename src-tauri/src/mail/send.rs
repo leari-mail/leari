@@ -1,13 +1,16 @@
 //! Sending a message from the composer: SMTP submission, then a copy in the Sent folder.
 
+use std::path::{Path, PathBuf};
+
 use lettre::message::Mailbox;
 use serde::Deserialize;
 use sqlx::SqlitePool;
 
 use super::account::{self, Account};
+use super::attachments;
 use super::auth::{self, Auth};
 use super::imap::connection;
-use super::smtp::{self, Outgoing};
+use super::smtp::{self, Outgoing, OutgoingAttachment};
 use crate::error::{Error, Result};
 
 #[derive(Debug, Deserialize)]
@@ -22,6 +25,50 @@ pub struct SendRequest {
     pub body: String,
     /// Local id of the message being replied to, for threading headers.
     pub reply_to_message_id: Option<String>,
+    #[serde(default)]
+    pub attachments: Vec<DraftAttachment>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum DraftAttachment {
+    /// A file on disk, picked or dropped in the composer.
+    File { path: String },
+    /// An attachment of a received message (when forwarding).
+    #[serde(rename_all = "camelCase")]
+    Forwarded { attachment_id: String },
+}
+
+/// Most providers reject messages above ~25 MB (Gmail, Outlook.com); base64 adds ~33%.
+pub const MAX_ATTACHMENTS_BYTES: u64 = 18 * 1024 * 1024;
+
+async fn load_attachments(
+    db: &SqlitePool,
+    cache_dir: &Path,
+    drafts: &[DraftAttachment],
+) -> Result<Vec<OutgoingAttachment>> {
+    let mut attachments = Vec::with_capacity(drafts.len());
+    let mut total = 0u64;
+    for draft in drafts {
+        let path = match draft {
+            DraftAttachment::File { path } => PathBuf::from(path),
+            DraftAttachment::Forwarded { attachment_id } => {
+                attachments::ensure_downloaded(db, cache_dir, attachment_id).await?
+            }
+        };
+        let bytes = tokio::fs::read(&path)
+            .await
+            .map_err(|_| Error::Invalid(path.to_string_lossy().into_owned()))?;
+        total += bytes.len() as u64;
+        if total > MAX_ATTACHMENTS_BYTES {
+            return Err(Error::TooLarge(MAX_ATTACHMENTS_BYTES));
+        }
+        let name = path.file_name().map(|name| name.to_string_lossy().into_owned());
+        let name = name.unwrap_or_else(|| "attachment".into());
+        let content_type = mime_guess::from_path(&path).first_or_octet_stream().to_string();
+        attachments.push(OutgoingAttachment { name, content_type, bytes });
+    }
+    Ok(attachments)
 }
 
 /// Gmail and Exchange Online store messages sent through their SMTP servers in Sent
@@ -71,15 +118,16 @@ async fn append_to_sent(
     Ok(())
 }
 
-pub async fn send(db: &SqlitePool, request: SendRequest) -> Result<()> {
+pub async fn send(db: &SqlitePool, cache_dir: &Path, request: SendRequest) -> Result<()> {
     let account = account::load(db, &request.account_id).await?;
     let secret = auth::secret_for(&account).await?;
-    send_as(db, &account, secret.auth(), request).await
+    send_as(db, cache_dir, &account, secret.auth(), request).await
 }
 
 /// [`send`] with explicit credentials.
 pub(crate) async fn send_as(
     db: &SqlitePool,
+    cache_dir: &Path,
     account: &Account,
     auth: Auth<'_>,
     request: SendRequest,
@@ -96,6 +144,7 @@ pub(crate) async fn send_as(
         None => (None, Vec::new()),
     };
 
+    let attachments = load_attachments(db, cache_dir, &request.attachments).await?;
     let message = smtp::build(Outgoing {
         from: sender(account)?,
         to,
@@ -105,6 +154,7 @@ pub(crate) async fn send_as(
         body: request.body,
         in_reply_to,
         references,
+        attachments,
     })?;
 
     smtp::send(&account.smtp, &account.username, auth, &message).await?;
