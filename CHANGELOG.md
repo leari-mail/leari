@@ -19,6 +19,7 @@ the new version, and the release workflow publishes it as the GitHub release not
 - Language selector had no effect (Português (Brasil) fell back to English)
 - Long sender names, subjects and account emails overflowed horizontally instead of truncating with "…"
 - Wide HTML emails were cut off on the right; they are now scaled to fit the reader
+- macOS asked for the Keychain password on every sync; passwords are now read once per launch
 
 ## [0.1.0-alpha.1] - 2026-09-25
 
