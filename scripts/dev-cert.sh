@@ -3,10 +3,10 @@
 # login keychain. Dev builds signed with it (see scripts/dev-run.sh) keep the same identity
 # across rebuilds, so the Keychain's "Always Allow" for leari's saved passwords sticks.
 #
-#   pnpm dev:cert
-#
-# macOS asks for your password once, to trust the certificate for code signing.
-# Remove it any time in Keychain Access (search "leari Development").
+# Runs automatically on the first `pnpm app`; `pnpm dev:cert` runs it by hand.
+# The certificate does not need to be trusted (the Keychain matches the signature by
+# certificate fingerprint), so no password is asked. Remove it any time in Keychain Access
+# (search "leari Development").
 set -euo pipefail
 
 NAME="leari Development"
@@ -14,10 +14,10 @@ KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
 OPENSSL=/usr/bin/openssl # LibreSSL: produces a PKCS#12 that `security import` accepts
 
 if [[ "$(uname)" != "Darwin" ]]; then
-  echo "Only needed on macOS." && exit 0
+  exit 0
 fi
-if security find-identity -p codesigning "$KEYCHAIN" | grep -q "\"$NAME\""; then
-  echo "\"$NAME\" already exists." && exit 0
+if security find-identity -p codesigning "$KEYCHAIN" 2>/dev/null | grep -q "\"$NAME\""; then
+  exit 0
 fi
 
 tmp="$(mktemp -d)"
@@ -42,6 +42,6 @@ CNF
   -out "$tmp/identity.p12" -passout pass:leari
 
 security import "$tmp/identity.p12" -k "$KEYCHAIN" -P leari -T /usr/bin/codesign >/dev/null
-security add-trusted-cert -r trustRoot -p codeSign -k "$KEYCHAIN" "$tmp/cert.pem"
 
-echo "Created \"$NAME\". Restart \`pnpm app\`; the next Keychain prompt is the last one if you choose \"Always Allow\"."
+echo "leari: created the \"$NAME\" signing identity for dev builds." >&2
+echo "leari: next Keychain prompt, choose \"Always Allow\" (it will be the last one)." >&2

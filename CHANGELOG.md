@@ -9,6 +9,11 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Fixed
+
+- Development builds asked for the Keychain password after every rebuild; they are now signed
+  with a local identity created automatically on first run
+
 ### Added
 
 - Sending mail over SMTP (password or OAuth), with Cc/Bcc, reply threading headers and ⌘↵ to
