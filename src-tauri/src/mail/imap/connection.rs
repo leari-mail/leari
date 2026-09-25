@@ -11,6 +11,7 @@ use tokio_native_tls::{native_tls, TlsConnector};
 
 use crate::error::{Error, Result};
 use crate::mail::account::{Security, ServerConfig};
+pub use crate::mail::auth::Auth;
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -18,13 +19,6 @@ pub trait Stream: AsyncRead + AsyncWrite + Unpin + Send + Debug {}
 impl<T: AsyncRead + AsyncWrite + Unpin + Send + Debug> Stream for T {}
 
 pub type ImapSession = Session<Box<dyn Stream>>;
-
-/// How to log in: a password, or an OAuth access token (SASL XOAUTH2, used by Gmail and Outlook).
-#[derive(Clone, Copy)]
-pub enum Auth<'a> {
-    Password(&'a str),
-    OAuth2(&'a str),
-}
 
 /// The XOAUTH2 credentials go in the command itself (SASL-IR, RFC 4959, supported by Gmail
 /// and Outlook). A continuation from the server is an error report: answering it with an

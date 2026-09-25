@@ -4,7 +4,10 @@
 //! ```sh
 //! java -Dgreenmail.setup.test.all -Dgreenmail.users=leari:secret@localhost -jar greenmail-standalone.jar
 //! LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
-//!   cargo test imap_sync -- --ignored
+//!   cargo test imap_ -- --ignored
+//! ```
+//! The send test also needs SMTP (`LEARI_TEST_SMTP=127.0.0.1:3025`).
+//! ```sh
 //! ```
 //! The test wipes the account's mailboxes, so never point it at a real account.
 
@@ -17,6 +20,9 @@ use sqlx::SqlitePool;
 use super::connection::{self, Auth, ImapSession};
 use super::sync;
 use crate::mail::account::{Account, Security, ServerConfig};
+
+/// The tests share one server mailbox, so they run one at a time.
+static SERVER_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
 const MIGRATIONS: [&str; 2] = [
     include_str!("../../../../src/db/migrations/0000_init.sql"),
@@ -160,6 +166,7 @@ const ARCHIVE: &str = "SELECT m.subject, m.is_read, m.is_starred FROM messages m
 #[tokio::test]
 #[ignore = "needs a disposable IMAP server, see module docs"]
 async fn imap_sync_round_trip() {
+    let _server = SERVER_LOCK.lock().await;
     let env = env();
     let db = database().await;
     let account = create_account(&db, &env).await;
@@ -304,6 +311,7 @@ async fn imap_sync_round_trip() {
 #[tokio::test]
 #[ignore = "needs a disposable IMAP server, see module docs"]
 async fn imap_xoauth2_login() {
+    let _server = SERVER_LOCK.lock().await;
     let env = env();
     let mut session = connection::connect(&env.server, &env.username, Auth::OAuth2(&env.password))
         .await
@@ -314,4 +322,72 @@ async fn imap_xoauth2_login() {
     let rejected =
         connection::connect(&env.server, &env.username, Auth::OAuth2("wrong-token")).await;
     assert!(matches!(rejected, Err(crate::error::Error::Auth(_))), "bad token is an auth error");
+}
+
+/// Sends through SMTP, checks delivery, the copy filed in Sent, and reply threading headers.
+#[tokio::test]
+#[ignore = "needs a disposable IMAP + SMTP server, see module docs"]
+async fn imap_smtp_send_round_trip() {
+    let _server = SERVER_LOCK.lock().await;
+    let env = env();
+    let smtp_address = std::env::var("LEARI_TEST_SMTP").expect("LEARI_TEST_SMTP=host:port");
+    let (smtp_host, smtp_port) = smtp_address.rsplit_once(':').expect("host:port");
+
+    let db = database().await;
+    let mut account = create_account(&db, &env).await;
+    account.smtp = ServerConfig {
+        host: smtp_host.into(),
+        port: smtp_port.parse().unwrap(),
+        security: Security::None,
+    };
+    let mut server = server_session(&env).await;
+    reset_server(&mut server).await;
+    server.append("INBOX", None, None, message("original")).await.unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+
+    let parent: String = sqlx::query_scalar("SELECT id FROM messages WHERE subject = 'original'")
+        .fetch_one(&db)
+        .await
+        .unwrap();
+    let request = crate::mail::send::SendRequest {
+        account_id: "acc".into(),
+        to: "leari@localhost".into(),
+        cc: String::new(),
+        bcc: String::new(),
+        subject: "Re: original".into(),
+        body: "Reply body".into(),
+        reply_to_message_id: Some(parent),
+    };
+    crate::mail::send::send_as(&db, &account, Auth::Password(&env.password), request)
+        .await
+        .unwrap();
+
+    // Delivered to the recipient (this test account)…
+    let mut delivered = None;
+    for _ in 0..20 {
+        server.select("INBOX").await.unwrap();
+        let fetches: Vec<_> =
+            server.fetch("1:*", "(BODY.PEEK[])").await.unwrap().try_collect().await.unwrap();
+        delivered = fetches
+            .iter()
+            .filter_map(|fetch| fetch.body().map(|body| String::from_utf8_lossy(body).to_string()))
+            .find(|raw| raw.contains("Subject: Re: original"));
+        if delivered.is_some() {
+            break;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+    }
+    let delivered = delivered.expect("reply delivered to INBOX");
+    assert!(delivered.contains("In-Reply-To: <original@example.com>"));
+    assert!(delivered.contains("From: Test <leari@localhost>"));
+
+    // …and filed in Sent (generic IMAP servers don't do it themselves).
+    let sent = server_flags(&mut server, "Sent Items").await;
+    assert_eq!(
+        sent.iter().map(|(subject, _)| subject.as_str()).collect::<Vec<_>>(),
+        ["Re: original"]
+    );
+    assert!(sent[0].1.contains(&"Seen".to_string()));
+
+    server.logout().await.ok();
 }

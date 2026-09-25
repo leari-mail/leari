@@ -4,11 +4,14 @@ export interface Draft {
   accountId?: string;
   to: string;
   cc: string;
+  bcc: string;
   subject: string;
   body: string;
+  /** Local id of the message being replied to (threading headers). */
+  replyToMessageId?: string;
 }
 
-const emptyDraft: Draft = { to: "", cc: "", subject: "", body: "" };
+const emptyDraft: Draft = { to: "", cc: "", bcc: "", subject: "", body: "" };
 
 interface ComposerState {
   isOpen: boolean;

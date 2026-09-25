@@ -36,10 +36,11 @@ jobs:
       # Disposable IMAP server for the end-to-end sync test.
       greenmail:
         image: greenmail/standalone:2.1.14
-        ports: ["3143:3143"]
+        ports: ["3143:3143", "3025:3025"]
         env:
           GREENMAIL_OPTS: >-
             -Dgreenmail.setup.test.imap
+            -Dgreenmail.setup.test.smtp
             -Dgreenmail.hostname=0.0.0.0
             -Dgreenmail.users=leari:secret@localhost
     defaults:
@@ -66,6 +67,7 @@ jobs:
       - name: IMAP end-to-end test
         env:
           LEARI_TEST_IMAP: 127.0.0.1:3143
+          LEARI_TEST_SMTP: 127.0.0.1:3025
           LEARI_TEST_USER: leari
           LEARI_TEST_PASS: secret
         run: |

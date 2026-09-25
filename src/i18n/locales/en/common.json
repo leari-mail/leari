@@ -27,7 +27,9 @@
       "unsupported": "This isn't supported yet.",
       "protocol": "The server rejected the request.",
       "other": "Something went wrong.",
-      "cancelled": "Sign-in was cancelled."
-    }
+      "cancelled": "Sign-in was cancelled.",
+      "invalid": "Check this address: {{detail}}"
+    },
+    "noRecipients": "Add at least one recipient."
   }
 }

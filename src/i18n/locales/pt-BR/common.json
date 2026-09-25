@@ -27,7 +27,9 @@
       "unsupported": "Isso ainda não é suportado.",
       "protocol": "O servidor recusou a solicitação.",
       "other": "Algo deu errado.",
-      "cancelled": "O login foi cancelado."
-    }
+      "cancelled": "O login foi cancelado.",
+      "invalid": "Verifique este endereço: {{detail}}"
+    },
+    "noRecipients": "Adicione pelo menos um destinatário."
   }
 }

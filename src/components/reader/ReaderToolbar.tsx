@@ -40,6 +40,7 @@ export function ReaderToolbar({ message }: ReaderToolbarProps) {
             to: message.fromAddress,
             subject: replySubject,
             body: quote(message),
+            replyToMessageId: message.id,
           })
         }
       />
@@ -53,6 +54,7 @@ export function ReaderToolbar({ message }: ReaderToolbarProps) {
             cc: message.cc.map((cc) => cc.address).join(", "),
             subject: replySubject,
             body: quote(message),
+            replyToMessageId: message.id,
           })
         }
       />

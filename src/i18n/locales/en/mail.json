@@ -60,7 +60,9 @@
     "bodyPlaceholder": "Write your message…",
     "send": "Send",
     "discard": "Discard",
-    "notImplemented": "Sending is not implemented yet."
+    "bcc": "Bcc",
+    "sending": "Sending…",
+    "sendShortcut": "⌘↵ to send"
   },
   "sync": {
     "refresh": "Check for new mail",
