@@ -39,7 +39,7 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors a
 - [x] IMAP sync (Rust): folders, messages, flags, expunges; local changes pushed back
 - [ ] POP3 download
 - [ ] SMTP sending
-- [ ] OAuth 2 sign-in for Google and Microsoft
+- [x] OAuth 2 sign-in for Google and Microsoft
 - [x] Credentials in the OS keychain
 - [ ] Attachments
 - [ ] Notifications and unread badge on the tray icon
@@ -114,6 +114,38 @@ The database lives in the app data directory. On macOS that is
 
 A pre-commit hook (husky + lint-staged) lints and formats staged files.
 
+### OAuth setup (Google and Microsoft sign-in)
+
+Google and Microsoft accounts sign in with OAuth. leari opens the provider's page in the browser
+and receives the result on a local loopback address (PKCE, RFC 8252). Builds need the OAuth
+client ids of the project: copy `.env.example` to `.env.local` (git-ignored) and fill it in.
+Release builds read the same names from the repository's Actions secrets. Without them, those
+two options explain that sign-in isn't available and point to IMAP with an app password.
+
+**Google** ([Google Cloud Console](https://console.cloud.google.com/)):
+
+1. Create a project, enable the **Gmail API**.
+2. **OAuth consent screen**: External; add the scope `https://mail.google.com/`.
+3. **Credentials → Create credentials → OAuth client ID → Desktop app**. Put the client id and
+   secret in `LEARI_GOOGLE_CLIENT_ID` / `LEARI_GOOGLE_CLIENT_SECRET` (for desktop apps the
+   secret is not confidential).
+
+> [!NOTE]
+> `https://mail.google.com/` is a **restricted** scope. While the consent screen is in
+> _Testing_, only listed test users (up to 100) can sign in and their sign-ins expire after
+> 7 days. Opening it to everyone requires Google's verification and a yearly security assessment.
+
+**Microsoft** ([Microsoft Entra admin center](https://entra.microsoft.com/) → App registrations):
+
+1. **New registration**: accounts in any organizational directory **and** personal Microsoft
+   accounts.
+2. **Authentication → Add a platform → Mobile and desktop applications**, redirect URI
+   `http://localhost`; set **Allow public client flows** to _Yes_.
+3. **API permissions → Add → APIs my organization uses → Office 365 Exchange Online →
+   Delegated**: `IMAP.AccessAsUser.All`, `SMTP.Send` (plus `offline_access`, `openid`,
+   `email`, `profile` from Microsoft Graph).
+4. Put the **Application (client) ID** in `LEARI_MICROSOFT_CLIENT_ID`. No secret is needed.
+
 ### Testing IMAP sync locally
 
 The sync engine has an end-to-end test that runs against a disposable IMAP server.
@@ -124,7 +156,7 @@ java -Dgreenmail.setup.test.all -Dgreenmail.users=leari:secret@localhost \
   -jar greenmail-standalone.jar
 
 LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
-  cargo test --manifest-path src-tauri/Cargo.toml imap_sync -- --ignored
+  cargo test --manifest-path src-tauri/Cargo.toml imap_ -- --ignored
 ```
 
 To try it in the app, add an **IMAP** account with server `127.0.0.1`, port `3143`,

@@ -7,7 +7,7 @@ use async_imap::types::{Fetch, Flag};
 use futures::TryStreamExt;
 use sqlx::SqlitePool;
 
-use super::connection::{self, ImapSession};
+use super::connection::{self, Auth, ImapSession};
 use super::{folders, ops};
 use crate::error::{Error, Result};
 use crate::mail::account::Account;
@@ -42,8 +42,8 @@ async fn server_support(session: &mut ImapSession) -> Result<ops::ServerSupport>
 }
 
 /// Only sends queued local changes to the server.
-pub async fn push_account(db: &SqlitePool, account: &Account, password: &str) -> Result<()> {
-    let mut session = connection::connect(&account.incoming, &account.username, password).await?;
+pub async fn push_account(db: &SqlitePool, account: &Account, auth: Auth<'_>) -> Result<()> {
+    let mut session = connection::connect(&account.incoming, &account.username, auth).await?;
     let support = server_support(&mut session).await?;
     ops::push(db, &mut session, &account.id, support).await?;
     session.logout().await.ok();
@@ -53,10 +53,10 @@ pub async fn push_account(db: &SqlitePool, account: &Account, password: &str) ->
 pub async fn sync_account(
     db: &SqlitePool,
     account: &Account,
-    password: &str,
+    auth: Auth<'_>,
     on_progress: &(dyn Fn() + Send + Sync),
 ) -> Result<()> {
-    let mut session = connection::connect(&account.incoming, &account.username, password).await?;
+    let mut session = connection::connect(&account.incoming, &account.username, auth).await?;
 
     let support = server_support(&mut session).await?;
     ops::push(db, &mut session, &account.id, support).await?;

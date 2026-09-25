@@ -1,7 +1,7 @@
-import type { MailboxRole, NewMailbox, NewMessage } from "@models";
 import { eq } from "drizzle-orm";
 
 import { newId } from "@lib/ids";
+import type { MailboxRole, NewMailbox, NewMessage } from "@models";
 
 import { db } from "./client";
 import { accounts, mailboxes, messages } from "./schema";

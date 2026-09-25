@@ -4,7 +4,6 @@
     "description": "Choose your mail provider.",
     "configureTitle": "Configure {{provider}}",
     "configureDescription": "Enter your account details.",
-    "oauthNotice": "You will be redirected to {{provider}} to sign in. Your password is never stored by leari.",
     "testing": "Checking connection…"
   },
   "providers": {
@@ -40,5 +39,13 @@
     "description": "Add your first account to start reading mail."
   },
   "remove": "Remove account",
-  "removeConfirm": "Remove {{email}} from leari? Local copies of its messages will be deleted."
+  "removeConfirm": "Remove {{email}} from leari? Local copies of its messages will be deleted.",
+  "oauth": {
+    "signIn": "Continue with {{provider}}",
+    "description": "leari opens {{provider}} in your browser. Your password is never shared with leari.",
+    "waiting": "Finish signing in in your browser…",
+    "notConfigured": "This build of leari can't sign in with {{provider}} yet. Use the IMAP option with an app password instead.",
+    "reauthorize": "Sign in again",
+    "wrongAccount": "You signed in as {{email}}, but this account is {{expected}}."
+  }
 }

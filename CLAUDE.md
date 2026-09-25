@@ -26,6 +26,8 @@ closing the window hides it.
 - **Sync engine (Rust)**: `src-tauri/src/mail` (IMAP client, parsing, persistence) and `src-tauri/src/sync` (scheduler, events).
   Rust writes rows into the Drizzle-owned schema with raw SQL (`mail/store.rs`), so schema changes must be mirrored there.
   UI mutations never talk to the server: they update SQLite and queue a `pending_operations` row, then call `syncService.push`.
+- OAuth (`src-tauri/src/oauth`): PKCE + loopback redirect; tokens never go to the webview (the UI gets an opaque
+  handle and calls `oauth_attach`). Client ids are build-time env (`.env.local`, CI secrets); see `.env.example`.
 - Git: work on feature branches off `main` (`feat/...`, `fix/...`, `chore/...`), merged through pull requests.
   Add user-facing changes to `CHANGELOG.md` under **Unreleased**.
 - Relative imports may not leave their folder (`../` is a lint error); use aliases. Rust: no `unwrap()` outside tests.

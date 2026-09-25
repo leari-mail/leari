@@ -1,7 +1,7 @@
-import type { ConnectionSecurity } from "@models";
 import { useTranslation } from "react-i18next";
 
 import { connectionSecurities } from "@db/schema";
+import type { ConnectionSecurity } from "@models";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@ui";
 
 interface SecuritySelectProps {

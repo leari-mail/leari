@@ -1,7 +1,7 @@
-import type { AccountProvider } from "@models";
 import { Inbox, Mail } from "lucide-react";
 
 import { cn } from "@lib";
+import type { AccountProvider } from "@models";
 
 interface ProviderIconProps {
   provider: AccountProvider;

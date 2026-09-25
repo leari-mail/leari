@@ -1,12 +1,19 @@
-import type { Account, Mailbox } from "@models";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MailboxItem } from "@components/mailboxes";
+import { useErrorMessage, useReauthorizeAccount } from "@hooks";
 import { cn } from "@lib";
+import { type Account, isAppError, type Mailbox } from "@models";
 import { useMailStore } from "@stores";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@ui";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@ui";
 
 import { AccountDot } from "./AccountDot";
 import { AccountSyncIndicator } from "./AccountSyncIndicator";
@@ -23,6 +30,9 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
   const { t } = useTranslation(["mail", "accounts"]);
   const [expanded, setExpanded] = useState(true);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const reauthorize = useReauthorizeAccount();
+  const errorMessage = useErrorMessage();
+  const cancelled = isAppError(reauthorize.error) && reauthorize.error.kind === "cancelled";
   const folder = useMailStore((state) => state.folder);
   const selectFolder = useMailStore((state) => state.selectFolder);
 
@@ -53,11 +63,23 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
           </button>
         </ContextMenuTrigger>
         <ContextMenuContent>
+          {account.authType === "oauth2" && (
+            <>
+              <ContextMenuItem onSelect={() => reauthorize.mutate(account)}>
+                {t("accounts:oauth.reauthorize")}
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
           <ContextMenuItem variant="destructive" onSelect={() => setConfirmRemove(true)}>
             {t("accounts:remove")}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
+      {reauthorize.error && !cancelled && (
+        <p className="px-2 pb-1 text-[11px] text-destructive">{errorMessage(reauthorize.error)}</p>
+      )}
 
       {expanded && (
         <div className="space-y-px pl-4">

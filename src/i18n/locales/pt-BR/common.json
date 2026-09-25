@@ -26,7 +26,8 @@
       "network": "Não foi possível conectar ao servidor. Verifique servidor, porta e sua conexão.",
       "unsupported": "Isso ainda não é suportado.",
       "protocol": "O servidor recusou a solicitação.",
-      "other": "Algo deu errado."
+      "other": "Algo deu errado.",
+      "cancelled": "O login foi cancelado."
     }
   }
 }

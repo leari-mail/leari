@@ -17,7 +17,9 @@ use tokio::time::timeout;
 use crate::credentials;
 use crate::db;
 use crate::error::{Error, Result};
+use crate::mail::imap::connection::Auth;
 use crate::mail::{account, imap};
+use crate::oauth;
 
 const SYNC_INTERVAL: Duration = Duration::from_secs(5 * 60);
 const ACCOUNT_SYNC_TIMEOUT: Duration = Duration::from_secs(15 * 60);
@@ -159,10 +161,15 @@ impl SyncEngine {
         if account.incoming_protocol != "imap" {
             return Err(Error::Unsupported("POP3 accounts are not supported yet".into()));
         }
-        if account.auth_type == "oauth2" {
-            return Err(Error::Auth("sign-in with OAuth is not supported yet".into()));
-        }
-        let password = credentials::get_password(account_id)?;
+        let oauth = account.auth_type == "oauth2";
+        let secret = if oauth {
+            let provider = oauth::Provider::from_account(&account.provider)
+                .ok_or_else(|| Error::Unsupported(format!("OAuth for {}", account.provider)))?;
+            oauth::access_token(account_id, provider).await?
+        } else {
+            credentials::get_password(account_id)?
+        };
+        let auth = if oauth { Auth::OAuth2(&secret) } else { Auth::Password(&secret) };
 
         let app = self.app.clone();
         let id = account_id.to_owned();
@@ -172,11 +179,11 @@ impl SyncEngine {
 
         match mode {
             Mode::Full => {
-                imap::sync::sync_account(db, &account, &password, &notify).await?;
+                imap::sync::sync_account(db, &account, auth, &notify).await?;
                 account::mark_synced(db, account_id, db::now_ms()).await?;
             }
             Mode::PushOnly => {
-                imap::sync::push_account(db, &account, &password).await?;
+                imap::sync::push_account(db, &account, auth).await?;
                 notify();
             }
         }

@@ -1,4 +1,3 @@
-import type { MailAddress } from "@models";
 import {
   format,
   formatDistanceStrict,
@@ -9,6 +8,8 @@ import {
   type Locale,
 } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
+
+import type { MailAddress } from "@models";
 
 const dateLocales: Record<string, Locale> = { en: enUS, "pt-BR": ptBR };
 

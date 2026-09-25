@@ -26,7 +26,8 @@
       "network": "Can't reach the server. Check the host, port and your connection.",
       "unsupported": "This isn't supported yet.",
       "protocol": "The server rejected the request.",
-      "other": "Something went wrong."
+      "other": "Something went wrong.",
+      "cancelled": "Sign-in was cancelled."
     }
   }
 }

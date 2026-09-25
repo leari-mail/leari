@@ -1,7 +1,7 @@
-import type { ServerPreset } from "@lib";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
+import type { ServerPreset } from "@lib";
 import { Input, Label } from "@ui";
 
 import { SecuritySelect } from "./SecuritySelect";

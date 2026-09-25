@@ -1,9 +1,9 @@
-import type { Account, MailboxRole, NewAccount } from "@models";
 import { asc, eq } from "drizzle-orm";
 
 import { accounts, db, mailboxes } from "@db";
 import { pickAccountColor } from "@lib/account-colors";
 import { newId } from "@lib/ids";
+import type { Account, MailboxRole, NewAccount } from "@models";
 import { credentialsService } from "@services/credentials";
 
 export type CreateAccountInput = Omit<NewAccount, "id" | "color" | "sortOrder" | "createdAt">;

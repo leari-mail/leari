@@ -17,6 +17,8 @@ pub enum Error {
     Database(#[from] sqlx::Error),
     #[error("keychain: {0}")]
     Keychain(#[from] keyring::Error),
+    #[error("cancelled")]
+    Cancelled,
     #[error("{0}")]
     Other(String),
 }
@@ -29,6 +31,7 @@ impl Error {
             Error::Network(_) => "network",
             Error::Unsupported(_) => "unsupported",
             Error::Protocol(_) => "protocol",
+            Error::Cancelled => "cancelled",
             Error::Database(_) | Error::Keychain(_) | Error::Other(_) => "other",
         }
     }
@@ -42,6 +45,7 @@ impl Clone for Error {
             Error::Network(message) => Error::Network(message.clone()),
             Error::Unsupported(message) => Error::Unsupported(message.clone()),
             Error::Protocol(message) => Error::Protocol(message.clone()),
+            Error::Cancelled => Error::Cancelled,
             other => Error::Other(other.to_string()),
         }
     }

@@ -1,8 +1,8 @@
-import type { FolderSelection, Message, MessageSummary } from "@models";
 import { and, desc, eq, getTableColumns, inArray, like, or, type SQL } from "drizzle-orm";
 
 import { db, mailboxes, messages, pendingOperations } from "@db";
 import { newId } from "@lib/ids";
+import type { FolderSelection, Message, MessageSummary } from "@models";
 
 const { bodyText: _bodyText, bodyHtml: _bodyHtml, ...summaryColumns } = getTableColumns(messages);
 

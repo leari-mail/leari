@@ -7,6 +7,7 @@ export function useErrorMessage() {
   const { t } = useTranslation();
   return (error: unknown): string => {
     if (isAppError(error)) return t(`errors.kinds.${error.kind}`);
+    if (error instanceof Error && error.message) return error.message;
     return t("errors.generic");
   };
 }

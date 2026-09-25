@@ -3,6 +3,7 @@ mod credentials;
 mod db;
 mod error;
 mod mail;
+mod oauth;
 mod sync;
 mod tray;
 mod window;
@@ -31,6 +32,7 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             app.manage(sync::SyncEngine::new(app.handle().clone()));
+            app.manage(oauth::OAuthState::default());
             tray::setup(app.handle())?;
             Ok(())
         })
@@ -42,6 +44,10 @@ pub fn run() {
             commands::credentials_set_password,
             commands::credentials_delete,
             commands::imap_test_connection,
+            commands::oauth_providers,
+            commands::oauth_sign_in,
+            commands::oauth_cancel,
+            commands::oauth_attach,
         ])
         .on_window_event(window::handle_event)
         .run(tauri::generate_context!())

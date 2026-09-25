@@ -4,6 +4,7 @@ export { AccountList } from "./AccountList";
 export { AccountSection } from "./AccountSection";
 export { AccountSyncIndicator } from "./AccountSyncIndicator";
 export { AddAccountDialog } from "./AddAccountDialog";
+export { OAuthSignIn } from "./OAuthSignIn";
 export { ProviderIcon } from "./ProviderIcon";
 export { ProviderOption } from "./ProviderOption";
 export { ProviderPicker } from "./ProviderPicker";

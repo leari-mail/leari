@@ -1,10 +1,10 @@
-import type { Account, MessageSummary } from "@models";
 import { Paperclip, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { AccountDot } from "@components/accounts";
 import { SenderAvatar } from "@components/common";
 import { cn, formatListDate } from "@lib";
+import type { Account, MessageSummary } from "@models";
 
 interface MessageListItemProps {
   message: MessageSummary;
