@@ -33,6 +33,7 @@ pub struct ServerConfig {
 #[derive(Debug, Clone)]
 pub struct Account {
     pub id: String,
+    pub provider: String,
     pub username: String,
     pub auth_type: String,
     pub incoming_protocol: String,
@@ -42,6 +43,7 @@ pub struct Account {
 #[derive(sqlx::FromRow)]
 struct AccountRow {
     id: String,
+    provider: String,
     username: String,
     auth_type: String,
     incoming_protocol: String,
@@ -50,13 +52,14 @@ struct AccountRow {
     incoming_security: String,
 }
 
-const SELECT: &str = "SELECT id, username, auth_type, incoming_protocol, incoming_host, \
+const SELECT: &str = "SELECT id, provider, username, auth_type, incoming_protocol, incoming_host, \
      incoming_port, incoming_security FROM accounts";
 
 impl From<AccountRow> for Account {
     fn from(row: AccountRow) -> Self {
         Account {
             id: row.id,
+            provider: row.provider,
             username: row.username,
             auth_type: row.auth_type,
             incoming_protocol: row.incoming_protocol,

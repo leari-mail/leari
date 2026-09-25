@@ -11,6 +11,9 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- Sign in with Google (Gmail / Workspace) and Microsoft (Outlook / 365) using OAuth; tokens stay
+  in the OS keychain and refresh automatically
+- "Sign in again" in an account's context menu when its access expires
 - Sync status in the sidebar footer: "Syncing…", "Updated 2 minutes ago" or sync failures
 - Menu bar / tray icon shows a badge (and tooltip) while mail is syncing
 

@@ -1,5 +1,6 @@
-import type { FolderSelection } from "@models";
 import { create } from "zustand";
+
+import type { FolderSelection } from "@models";
 
 interface MailState {
   folder: FolderSelection;

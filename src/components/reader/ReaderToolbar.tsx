@@ -1,10 +1,10 @@
-import type { Message } from "@models";
 import { Archive, Forward, MailOpen, Reply, ReplyAll, Star, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { DragRegion, IconButton } from "@components/common";
 import { useMoveMessage, useSetMessageRead, useSetMessageStarred } from "@hooks";
 import { cn } from "@lib";
+import type { Message } from "@models";
 import { useComposerStore } from "@stores";
 import { Separator } from "@ui";
 

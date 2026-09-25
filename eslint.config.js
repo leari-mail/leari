@@ -7,8 +7,11 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-/** Path aliases from tsconfig.json, sorted as their own import group. */
-const aliases = "^@(/|app|assets|components|ui|db|hooks|i18n|lib|models|services|stores)(/.*|$)";
+/**
+ * Path aliases from tsconfig.json, sorted as their own import group. `\b` (rather than `$`)
+ * also matches type imports, which simple-import-sort suffixes with \u0000.
+ */
+const aliases = "^@(/|(app|assets|components|ui|db|hooks|i18n|lib|models|services|stores)\\b)";
 
 export default tseslint.config(
   { ignores: ["dist", "src-tauri", "src/db/migrations"] },

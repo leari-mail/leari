@@ -1,6 +1,6 @@
 /** Error returned by Rust commands and sync statuses (see src-tauri/src/error.rs). */
 export interface AppError {
-  kind: "auth" | "network" | "unsupported" | "protocol" | "other";
+  kind: "auth" | "network" | "unsupported" | "protocol" | "cancelled" | "other";
   message: string;
 }
 

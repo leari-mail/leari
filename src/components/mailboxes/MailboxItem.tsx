@@ -1,6 +1,5 @@
-import type { MailboxRole } from "@models";
-
 import { cn } from "@lib/utils";
+import type { MailboxRole } from "@models";
 
 import { MailboxIcon } from "./MailboxIcon";
 

@@ -1,4 +1,3 @@
-import type { MailboxRole } from "@models";
 import {
   Archive,
   File,
@@ -10,6 +9,8 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
+
+import type { MailboxRole } from "@models";
 
 const icons: Record<MailboxRole, React.ComponentType<LucideProps>> = {
   inbox: Inbox,

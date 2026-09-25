@@ -1,9 +1,9 @@
-import type { AccountProvider } from "@models";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateAccount, useErrorMessage } from "@hooks";
 import { providerPresets } from "@lib";
+import type { AccountProvider } from "@models";
 import { Button, DialogFooter, Input, Label } from "@ui";
 
 import { ServerFields } from "./ServerFields";
@@ -14,12 +14,12 @@ interface AccountFormProps {
   onDone: () => void;
 }
 
+/** Password-based accounts (IMAP / POP3) with manual server settings. */
 export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
   const { t } = useTranslation(["accounts", "common"]);
   const createAccount = useCreateAccount();
   const errorMessage = useErrorMessage();
   const preset = providerPresets[provider];
-  const isOAuth = preset.authType === "oauth2";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,10 +29,9 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    // TODO: OAuth sign-in for Google / Microsoft (feat/oauth).
     createAccount.mutate(
       {
-        password: isOAuth ? undefined : password,
+        password,
         input: {
           provider,
           name,
@@ -75,30 +74,22 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
             onChange={(event) => setEmail(event.target.value)}
           />
         </div>
-        {!isOAuth && (
-          <div className="space-y-1">
-            <Label htmlFor="account-password">{t("form.password")}</Label>
-            <Input
-              id="account-password"
-              type="password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-        )}
+        <div className="space-y-1">
+          <Label htmlFor="account-password">{t("form.password")}</Label>
+          <Input
+            id="account-password"
+            type="password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </div>
       </div>
 
-      {isOAuth ? (
-        <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-          {t("add.oauthNotice", { provider: t(`providers.${provider}`) })}
-        </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ServerFields title={t("form.incoming")} value={incoming} onChange={setIncoming} />
-          <ServerFields title={t("form.outgoing")} value={smtp} onChange={setSmtp} />
-        </div>
-      )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ServerFields title={t("form.incoming")} value={incoming} onChange={setIncoming} />
+        <ServerFields title={t("form.outgoing")} value={smtp} onChange={setSmtp} />
+      </div>
 
       {createAccount.isError && (
         <p className="text-xs text-destructive">{errorMessage(createAccount.error)}</p>
@@ -109,7 +100,7 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
           {t("common:actions.back")}
         </Button>
         <Button type="submit" disabled={createAccount.isPending}>
-          {createAccount.isPending && !isOAuth ? t("add.testing") : t("common:actions.continue")}
+          {createAccount.isPending ? t("add.testing") : t("common:actions.continue")}
         </Button>
       </DialogFooter>
     </form>

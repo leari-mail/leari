@@ -84,6 +84,10 @@ jobs:
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          # OAuth client ids baked into the build (see .env.example). Empty = sign-in disabled.
+          LEARI_GOOGLE_CLIENT_ID: ${{ secrets.LEARI_GOOGLE_CLIENT_ID }}
+          LEARI_GOOGLE_CLIENT_SECRET: ${{ secrets.LEARI_GOOGLE_CLIENT_SECRET }}
+          LEARI_MICROSOFT_CLIENT_ID: ${{ secrets.LEARI_MICROSOFT_CLIENT_ID }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }}

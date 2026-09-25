@@ -2,12 +2,13 @@
 
 use std::sync::Arc;
 
-use tauri::State;
+use tauri::{AppHandle, State};
 
 use crate::credentials;
 use crate::error::Result;
 use crate::mail::account::ServerConfig;
 use crate::mail::imap;
+use crate::oauth::{self, OAuthState, Provider, SignInResult};
 use crate::sync::{SyncEngine, SyncStatus};
 
 #[tauri::command]
@@ -56,7 +57,40 @@ pub async fn imap_test_connection(
     username: String,
     password: String,
 ) -> Result<()> {
-    let mut session = imap::connection::connect(&server, &username, &password).await?;
+    let auth = imap::connection::Auth::Password(&password);
+    let mut session = imap::connection::connect(&server, &username, auth).await?;
     session.logout().await.ok();
     Ok(())
+}
+
+/// Providers this build can sign in with (depends on the client ids it was built with).
+#[tauri::command]
+pub fn oauth_providers() -> Vec<Provider> {
+    oauth::configured_providers()
+}
+
+/// Opens the provider's sign-in page and resolves once the user completes it.
+#[tauri::command]
+pub async fn oauth_sign_in(
+    app: AppHandle,
+    state: State<'_, OAuthState>,
+    provider: Provider,
+    language: String,
+) -> Result<SignInResult> {
+    oauth::sign_in(&app, &state, provider, &language).await
+}
+
+#[tauri::command]
+pub fn oauth_cancel(state: State<'_, OAuthState>) {
+    oauth::cancel(&state);
+}
+
+/// Stores the tokens of a completed sign-in for an account.
+#[tauri::command]
+pub fn oauth_attach(
+    state: State<'_, OAuthState>,
+    account_id: String,
+    handle: String,
+) -> Result<()> {
+    oauth::attach(&state, &account_id, &handle)
 }

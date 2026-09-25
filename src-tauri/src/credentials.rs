@@ -10,6 +10,7 @@ use std::sync::{Mutex, MutexGuard, OnceLock};
 use keyring::Entry;
 
 use crate::error::{Error, Result};
+use crate::oauth::tokens::TokenSet;
 
 const SERVICE: &str = "com.leari.mail";
 
@@ -22,10 +23,21 @@ fn entry(account_id: &str) -> Result<Entry> {
     Ok(Entry::new(SERVICE, account_id)?)
 }
 
+/// Password accounts store the password; OAuth accounts store their [`TokenSet`] as JSON.
 pub fn set_password(account_id: &str, password: &str) -> Result<()> {
     entry(account_id)?.set_password(password)?;
     cache().insert(account_id.to_owned(), password.to_owned());
     Ok(())
+}
+
+pub fn set_tokens(account_id: &str, tokens: &TokenSet) -> Result<()> {
+    let json = serde_json::to_string(tokens).map_err(|error| Error::Other(error.to_string()))?;
+    set_password(account_id, &json)
+}
+
+pub fn get_tokens(account_id: &str) -> Result<TokenSet> {
+    serde_json::from_str(&get_password(account_id)?)
+        .map_err(|_| Error::Auth("sign-in required for this account".into()))
 }
 
 pub fn get_password(account_id: &str) -> Result<String> {

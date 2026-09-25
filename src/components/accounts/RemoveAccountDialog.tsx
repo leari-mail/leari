@@ -1,7 +1,7 @@
-import type { Account } from "@models";
 import { useTranslation } from "react-i18next";
 
 import { useRemoveAccount } from "@hooks";
+import type { Account } from "@models";
 import {
   Button,
   Dialog,

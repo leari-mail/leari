@@ -14,7 +14,7 @@ use futures::TryStreamExt;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::SqlitePool;
 
-use super::connection::{self, ImapSession};
+use super::connection::{self, Auth, ImapSession};
 use super::sync;
 use crate::mail::account::{Account, Security, ServerConfig};
 
@@ -98,7 +98,7 @@ async fn create_account(db: &SqlitePool, env: &Env) -> Account {
 }
 
 async fn server_session(env: &Env) -> ImapSession {
-    connection::connect(&env.server, &env.username, &env.password).await.unwrap()
+    connection::connect(&env.server, &env.username, Auth::Password(&env.password)).await.unwrap()
 }
 
 fn message(subject: &str) -> String {
@@ -171,7 +171,7 @@ async fn imap_sync_round_trip() {
     server.append("INBOX", None, None, message("gamma")).await.unwrap();
 
     // 1. Initial sync: folders reconciled, messages and flags pulled.
-    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
 
     let mailboxes: Vec<(String, String, String)> =
         sqlx::query_as("SELECT id, path, role FROM mailboxes ORDER BY sort_order")
@@ -245,7 +245,7 @@ async fn imap_sync_round_trip() {
     .await
     .unwrap();
 
-    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
 
     let pending: i64 =
         sqlx::query_scalar("SELECT count(*) FROM pending_operations").fetch_one(&db).await.unwrap();
@@ -289,7 +289,7 @@ async fn imap_sync_round_trip() {
         .unwrap();
     server.append("INBOX", None, None, message("delta")).await.unwrap();
 
-    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
 
     assert_eq!(
         local(&db, INBOX).await,
@@ -297,4 +297,21 @@ async fn imap_sync_round_trip() {
     );
 
     server.logout().await.ok();
+}
+
+/// XOAUTH2 login path. GreenMail accepts the account password as the bearer token; against a
+/// real provider this needs a real access token.
+#[tokio::test]
+#[ignore = "needs a disposable IMAP server, see module docs"]
+async fn imap_xoauth2_login() {
+    let env = env();
+    let mut session = connection::connect(&env.server, &env.username, Auth::OAuth2(&env.password))
+        .await
+        .expect("XOAUTH2 login");
+    session.select("INBOX").await.unwrap();
+    session.logout().await.ok();
+
+    let rejected =
+        connection::connect(&env.server, &env.username, Auth::OAuth2("wrong-token")).await;
+    assert!(matches!(rejected, Err(crate::error::Error::Auth(_))), "bad token is an auth error");
 }

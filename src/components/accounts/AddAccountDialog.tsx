@@ -1,11 +1,12 @@
-import type { AccountProvider } from "@models";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import type { AccountProvider } from "@models";
 import { useDialogStore } from "@stores";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@ui";
 
 import { AccountForm } from "./AccountForm";
+import { OAuthSignIn } from "./OAuthSignIn";
 import { ProviderPicker } from "./ProviderPicker";
 
 /** Two steps: pick a provider, then fill in the account details. */
@@ -39,7 +40,9 @@ export function AddAccountDialog() {
             {provider ? t("add.configureDescription") : t("add.description")}
           </DialogDescription>
         </DialogHeader>
-        {provider ? (
+        {provider === "google" || provider === "microsoft" ? (
+          <OAuthSignIn provider={provider} onBack={() => setProvider(null)} onDone={close} />
+        ) : provider ? (
           <AccountForm provider={provider} onBack={() => setProvider(null)} onDone={close} />
         ) : (
           <ProviderPicker onSelect={setProvider} />
