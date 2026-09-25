@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/brand/app-icon.png" width="128" alt="leari" />
+  <img src="assets/brand/app-icon.png" width="128" alt="Leari" />
 </p>
 
-<h1 align="center">leari</h1>
+<h1 align="center">Leari</h1>
 
 <p align="center">A minimalistic, open source, multi-account mail client that lives in your menu bar.</p>
 
@@ -12,15 +12,15 @@
 </p>
 
 > [!WARNING]
-> leari is in **alpha**. Expect rough edges and breaking changes between versions.
+> Leari is in **alpha**. Expect rough edges and breaking changes between versions.
 
 ---
 
-**leari** is named after the Lear's macaw (_Anodorhynchus leari_), an indigo-blue macaw
-found only in Bahia, Brazil. Another bird is also behind it: leari is a homage to
+**Leari** is named after the Lear's macaw (_Anodorhynchus leari_), an indigo-blue macaw
+found only in Bahia, Brazil. Another bird is also behind it: Leari is a homage to
 [Sparrow](<https://en.wikipedia.org/wiki/Sparrow_(email_client)>), the minimalist Mac mail
 client that inspired its look and feel.
-The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors and icon.
+The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors and icon.
 
 ## Features
 
@@ -56,14 +56,14 @@ Download the latest build from [Releases](https://github.com/leari-mail/leari/re
 
 Builds are not notarized by Apple / signed by Microsoft yet:
 
-- **macOS:** after moving leari to Applications, run
+- **macOS:** after moving Leari to Applications, run
   `xattr -dr com.apple.quarantine /Applications/leari.app`, or allow it in
   System Settings → Privacy & Security.
 - **Windows:** in the SmartScreen prompt, choose **More info** → **Run anyway**.
 
 ## Platform notes
 
-| Platform | Where leari lives                 | Notes                                      |
+| Platform | Where Leari lives                 | Notes                                      |
 | -------- | --------------------------------- | ------------------------------------------ |
 | macOS    | Menu bar (no dock icon)           | Translucent sidebar, hidden title bar      |
 | Windows  | System tray (hidden from taskbar) |                                            |
@@ -116,7 +116,7 @@ A pre-commit hook (husky + lint-staged) lints and formats staged files.
 
 ### OAuth setup (Google and Microsoft sign-in)
 
-Google and Microsoft accounts sign in with OAuth. leari opens the provider's page in the browser
+Google and Microsoft accounts sign in with OAuth. Leari opens the provider's page in the browser
 and receives the result on a local loopback address (PKCE, RFC 8252). Builds need the OAuth
 client ids of the project: copy `.env.example` to `.env.local` (git-ignored) and fill it in.
 Release builds read the same names from the repository's Actions secrets. Without them, those

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to leari are documented here. The format follows
+All notable changes to Leari are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
 [Semantic Versioning](https://semver.org/) with `alpha`, `beta` and `rc` pre-release channels.
 
@@ -8,6 +8,11 @@ Add entries under **Unreleased** as changes land; `pnpm release <bump>` turns th
 the new version, and the release workflow publishes it as the GitHub release notes.
 
 ## [Unreleased]
+
+### Changed
+
+- The product is written "Leari" (capital L) in the app's texts, menu bar and docs; file names
+  (`leari.app`, installers) stay lowercase
 
 ### Added
 

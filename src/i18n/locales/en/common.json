@@ -1,5 +1,5 @@
 {
-  "appName": "leari",
+  "appName": "Leari",
   "tagline": "Mail, light as a feather.",
   "actions": {
     "add": "Add",
@@ -20,7 +20,7 @@
   },
   "errors": {
     "generic": "Something went wrong.",
-    "startup": "leari could not open its database.",
+    "startup": "Leari could not open its database.",
     "kinds": {
       "auth": "Sign-in failed. Check your username and password.",
       "network": "Can't reach the server. Check the host, port and your connection.",

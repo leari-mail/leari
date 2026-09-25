@@ -7,5 +7,5 @@ interface LeariLogoProps {
 
 /** The leari mark: a Lear's macaw with open wings. */
 export function LeariLogo({ className }: LeariLogoProps) {
-  return <img src={logoMark} alt="leari" draggable={false} className={cn("size-16", className)} />;
+  return <img src={logoMark} alt="Leari" draggable={false} className={cn("size-16", className)} />;
 }

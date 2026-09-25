@@ -78,7 +78,7 @@ export function SettingsDialog() {
         <div className="flex items-center gap-3">
           <LeariLogo className="size-10" />
           <div className="space-y-0.5">
-            {version && <p className="text-xs font-medium">leari {version}</p>}
+            {version && <p className="text-xs font-medium">Leari {version}</p>}
             <p className="text-xs text-muted-foreground">{t("about")}</p>
           </div>
         </div>

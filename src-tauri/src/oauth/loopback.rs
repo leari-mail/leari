@@ -43,7 +43,7 @@ impl Page {
         } else {
             Page {
                 success_title: "You're signed in",
-                success_text: "leari is connected. You can close this tab.",
+                success_text: "Leari is connected. You can close this tab.",
                 failure_title: "Sign-in failed",
             }
         }
@@ -52,7 +52,7 @@ impl Page {
 
 fn html(title: &str, text: &str) -> String {
     format!(
-        "<!doctype html><html><head><meta charset=\"utf-8\"><title>leari</title><style>\
+        "<!doctype html><html><head><meta charset=\"utf-8\"><title>Leari</title><style>\
          body{{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;\
          font:15px/1.5 -apple-system,system-ui,sans-serif;background:#1b2a72;color:#fff}}\
          main{{text-align:center;max-width:26rem;padding:2rem}}h1{{font-size:1.4rem;margin:0 0 .5rem}}\
