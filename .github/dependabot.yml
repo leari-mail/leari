@@ -13,6 +13,10 @@ updates:
     directory: /src-tauri
     schedule:
       interval: weekly
+    ignore:
+      # Must match the sqlx major used by tauri-plugin-sql (they share one SQLite build).
+      - dependency-name: sqlx
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       cargo:
         patterns: ["*"]
