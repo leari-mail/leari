@@ -21,7 +21,8 @@
     "ui:add": "shadcn add -y -o $0 && node scripts/split-ui.ts",
     "ui:split": "node scripts/split-ui.ts",
     "prepare": "husky",
-    "release": "node scripts/release.ts"
+    "release": "node scripts/release.ts",
+    "dev:cert": "bash scripts/dev-cert.sh"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.3.0",

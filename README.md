@@ -91,6 +91,11 @@ pnpm app            # run the desktop app (tauri dev)
 ```
 
 In development, an empty database is seeded with demo accounts and messages.
+
+**macOS: stop the Keychain password prompts in development.** Every rebuild is a new binary to
+macOS, so it asks again for access to the saved account passwords. Run `pnpm dev:cert` once: it
+creates a local "leari Development" signing certificate, and dev builds are then signed with it
+(see `scripts/dev-run.sh`), so choosing **Always Allow** sticks across rebuilds.
 The database lives in the app data directory. On macOS that is
 `~/Library/Application Support/com.leari.mail/leari.db`. Delete it to start fresh.
 

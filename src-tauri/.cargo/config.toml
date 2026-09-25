@@ -1,0 +1,4 @@
+# macOS dev builds run through scripts/dev-run.sh, which signs them with a stable local
+# identity (if created with `pnpm dev:cert`) so Keychain "Always Allow" survives rebuilds.
+[target.'cfg(target_os = "macos")']
+runner = "../scripts/dev-run.sh"
