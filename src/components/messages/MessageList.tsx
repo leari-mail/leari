@@ -25,6 +25,8 @@ export function MessageList() {
     () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
   );
+  // Account markers only help when a unified folder mixes several accounts.
+  const showAccounts = isUnified && accounts.length > 1;
   const unread = messages.filter((message) => !message.isRead).length;
 
   // ↑/↓ (or k/j) moves the selection through the list.
@@ -68,7 +70,7 @@ export function MessageList() {
             <MessageListItem
               key={message.id}
               message={message}
-              account={isUnified ? accountsById.get(message.accountId) : undefined}
+              account={showAccounts ? accountsById.get(message.accountId) : undefined}
               selected={message.id === selectedId}
               onSelect={selectMessage}
             />

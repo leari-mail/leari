@@ -1,5 +1,7 @@
 export { AccountDot } from "./AccountDot";
+export { AccountEdge } from "./AccountEdge";
 export { AccountForm } from "./AccountForm";
+export { AccountLabel } from "./AccountLabel";
 export { AccountList } from "./AccountList";
 export { AccountSection } from "./AccountSection";
 export { AccountSyncIndicator } from "./AccountSyncIndicator";

@@ -20,3 +20,8 @@ export function colorFromString(value: string): string {
   for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) | 0;
   return pickAccountColor(Math.abs(hash));
 }
+
+/** Background wash in the account's color, strongest at the left edge and fading to the right. */
+export function accountTint(color: string, strength = 10) {
+  return `linear-gradient(to right, color-mix(in srgb, ${color} ${strength}%, transparent), transparent 40%)`;
+}

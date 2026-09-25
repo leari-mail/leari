@@ -1,13 +1,14 @@
 import { Paperclip, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { AccountDot } from "@components/accounts";
+import { AccountEdge } from "@components/accounts";
 import { SenderAvatar } from "@components/common";
 import { cn, formatListDate } from "@lib";
 import type { Account, MessageSummary } from "@models";
 
 interface MessageListItemProps {
   message: MessageSummary;
+  /** Set when the list mixes accounts: shown as a colored left edge. */
   account?: Account;
   selected: boolean;
   onSelect: (id: string) => void;
@@ -23,12 +24,14 @@ export function MessageListItem({ message, account, selected, onSelect }: Messag
       data-message-id={message.id}
       onClick={() => onSelect(message.id)}
       className={cn(
-        "relative flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
+        "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
         selected
           ? "bg-list-selected text-list-selected-foreground"
           : "hover:bg-accent/70 focus-visible:bg-accent/70",
       )}
     >
+      {account && <AccountEdge color={account.color} label={account.email} />}
+
       {unread && (
         <span
           aria-hidden
@@ -68,17 +71,14 @@ export function MessageListItem({ message, account, selected, onSelect }: Messag
           {message.subject || t("mail:list.noSubject")}
         </p>
 
-        <div className="flex items-end gap-2">
-          <p
-            className={cn(
-              "line-clamp-2 flex-1 text-xs leading-snug",
-              selected ? "text-list-selected-foreground/75" : "text-muted-foreground",
-            )}
-          >
-            {message.snippet}
-          </p>
-          {account && <AccountDot color={account.color} className="mb-0.5 size-1.5" />}
-        </div>
+        <p
+          className={cn(
+            "line-clamp-2 text-xs leading-snug",
+            selected ? "text-list-selected-foreground/75" : "text-muted-foreground",
+          )}
+        >
+          {message.snippet}
+        </p>
       </div>
     </button>
   );

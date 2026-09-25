@@ -15,6 +15,12 @@ the new version, and the release workflow publishes it as the GitHub release not
 - Unread count next to the menu bar icon (tooltip on Windows)
 - Settings to turn both off
 
+### Changed
+
+- The account marker in lists is now a background tint in the account's color, fading from left
+  to right (the old dot looked like an unread marker); the reader names the account the same
+  way. Both are hidden with a single account
+
 ## [0.1.0-alpha.2] - 2026-09-25
 
 ### Added
