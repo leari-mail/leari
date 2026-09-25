@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2026-09-25
+
 ### Added
 
 - Attachments: listed in the reader (open with the default app or save a copy), downloaded on
