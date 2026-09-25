@@ -271,8 +271,8 @@ async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_
 
     for attachment in &parsed.attachments {
         sqlx::query(
-            "INSERT INTO attachments (id, message_id, filename, mime_type, size, content_id, is_inline) \
-             VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO attachments (id, message_id, filename, mime_type, size, content_id, is_inline, \
+             part_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(new_id())
         .bind(&id)
@@ -281,6 +281,7 @@ async fn insert_message(tx: &mut Transaction<'_, Sqlite>, message: NewMessage<'_
         .bind(attachment.size)
         .bind(&attachment.content_id)
         .bind(attachment.is_inline)
+        .bind(attachment.index as i64)
         .execute(&mut **tx)
         .await?;
     }

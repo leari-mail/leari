@@ -15,6 +15,13 @@
       "when": 1790293951202,
       "tag": "0001_pending_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790333316075,
+      "tag": "0002_attachment_part_index",
+      "breakpoints": true
     }
   ]
 }

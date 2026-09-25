@@ -1,12 +1,17 @@
 //! Tauri commands exposed to the frontend (see src/services/sync, src/services/credentials).
 
+use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
 
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
+use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_opener::OpenerExt;
 
 use crate::credentials;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::mail::account::ServerConfig;
+use crate::mail::attachments::{self, LocalFile};
 use crate::mail::imap;
 use crate::mail::send::{self, SendRequest};
 use crate::oauth::{self, OAuthState, Provider, SignInResult};
@@ -96,13 +101,99 @@ pub fn oauth_attach(
     oauth::attach(&state, &account_id, &handle)
 }
 
+fn cache_dir(app: &AppHandle) -> Result<PathBuf> {
+    app.path().app_cache_dir().map_err(|error| Error::Other(error.to_string()))
+}
+
 /// Sends a message, then syncs the account so the copy in Sent shows up.
 #[tauri::command]
-pub async fn mail_send(engine: State<'_, Arc<SyncEngine>>, request: SendRequest) -> Result<()> {
+pub async fn mail_send(
+    app: AppHandle,
+    engine: State<'_, Arc<SyncEngine>>,
+    request: SendRequest,
+) -> Result<()> {
     let account_id = request.account_id.clone();
-    send::send(engine.db().await?, request).await?;
+    send::send(engine.db().await?, &cache_dir(&app)?, request).await?;
 
     let engine = Arc::clone(&engine);
     tauri::async_runtime::spawn(async move { engine.sync_account(account_id).await });
     Ok(())
+}
+
+/// Opens an attachment with its default app (executables are revealed in the file manager).
+#[tauri::command]
+pub async fn attachment_open(
+    app: AppHandle,
+    engine: State<'_, Arc<SyncEngine>>,
+    attachment_id: String,
+) -> Result<()> {
+    let path =
+        attachments::ensure_downloaded(engine.db().await?, &cache_dir(&app)?, &attachment_id)
+            .await?;
+    let name = path.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default();
+    let opened = if attachments::is_executable(&name) {
+        app.opener().reveal_item_in_dir(&path)
+    } else {
+        app.opener().open_path(path.to_string_lossy(), None::<&str>)
+    };
+    opened.map_err(|error| Error::Other(error.to_string()))
+}
+
+/// Asks where to save an attachment and copies it there. `None` when the user cancels.
+#[tauri::command]
+pub async fn attachment_save(
+    app: AppHandle,
+    engine: State<'_, Arc<SyncEngine>>,
+    attachment_id: String,
+) -> Result<Option<String>> {
+    let source =
+        attachments::ensure_downloaded(engine.db().await?, &cache_dir(&app)?, &attachment_id)
+            .await?;
+    let name =
+        source.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default();
+
+    let dialog = app.dialog().file().set_file_name(name);
+    let chosen = tauri::async_runtime::spawn_blocking(move || dialog.blocking_save_file())
+        .await
+        .map_err(|error| Error::Other(error.to_string()))?;
+    let Some(target) = chosen else { return Ok(None) };
+    let target = target.into_path().map_err(|error| Error::Other(error.to_string()))?;
+
+    tokio::fs::copy(&source, &target).await?;
+    Ok(Some(target.to_string_lossy().into_owned()))
+}
+
+/// `cid` → `data:` URLs for the images embedded in a message's HTML body.
+#[tauri::command]
+pub async fn message_inline_images(
+    engine: State<'_, Arc<SyncEngine>>,
+    message_id: String,
+) -> Result<HashMap<String, String>> {
+    attachments::inline_images(engine.db().await?, &message_id).await
+}
+
+/// Native file picker for the composer's "Attach" button.
+#[tauri::command]
+pub async fn attachments_pick(app: AppHandle) -> Result<Vec<LocalFile>> {
+    let dialog = app.dialog().file();
+    let picked = tauri::async_runtime::spawn_blocking(move || dialog.blocking_pick_files())
+        .await
+        .map_err(|error| Error::Other(error.to_string()))?
+        .unwrap_or_default();
+    picked
+        .into_iter()
+        .filter_map(|file| file.into_path().ok())
+        .map(|path| attachments::local_file(&path))
+        .collect()
+}
+
+/// Name and size of files dropped on the composer.
+#[tauri::command]
+pub fn attachments_stat(paths: Vec<String>) -> Result<Vec<LocalFile>> {
+    paths
+        .iter()
+        .map(PathBuf::from)
+        .filter(|path| path.is_file())
+        .map(|path| attachments::local_file(&path))
+        .collect()
 }

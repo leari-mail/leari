@@ -1,6 +1,7 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useEffect, useRef } from "react";
 
+import { useInlineImages } from "@hooks";
 import type { Message } from "@models";
 
 interface MessageBodyProps {
@@ -45,12 +46,22 @@ function fitContent(frame: HTMLIFrameElement, content: HTMLElement) {
  * HTML bodies render in a sandboxed iframe without scripts; links open in the default
  * browser. Plain-text bodies render as preformatted text.
  */
+/** Points `cid:` references at the embedded images' data URLs. */
+function resolveInlineImages(html: string, images: Record<string, string> | undefined) {
+  if (!images) return html;
+  return html.replace(/cid:([^"'\s)>]+)/gi, (reference, id: string) => {
+    return images[decodeURIComponent(id)] ?? reference;
+  });
+}
+
 export function MessageBody({ message }: MessageBodyProps) {
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const { data: inlineImages } = useInlineImages(message);
+  const html = message.bodyHtml ? resolveInlineImages(message.bodyHtml, inlineImages) : null;
 
   useEffect(() => {
     const frame = frameRef.current;
-    if (!frame || !message.bodyHtml) return;
+    if (!frame || !html) return;
 
     let frameObserver: ResizeObserver | undefined;
     let pending = 0;
@@ -88,16 +99,16 @@ export function MessageBody({ message }: MessageBodyProps) {
       frameObserver?.disconnect();
       cancelAnimationFrame(pending);
     };
-  }, [message.bodyHtml]);
+  }, [html]);
 
-  if (message.bodyHtml) {
+  if (html) {
     return (
       <div className="overflow-hidden rounded-lg bg-white p-4">
         <iframe
           ref={frameRef}
           title={message.subject}
           sandbox="allow-same-origin allow-popups"
-          srcDoc={buildDocument(message.bodyHtml)}
+          srcDoc={buildDocument(html)}
           className="block w-full border-0"
         />
       </div>

@@ -24,10 +24,19 @@ use crate::mail::account::{Account, Security, ServerConfig};
 /// The tests share one server mailbox, so they run one at a time.
 static SERVER_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
-const MIGRATIONS: [&str; 2] = [
+const MIGRATIONS: [&str; 3] = [
     include_str!("../../../../src/db/migrations/0000_init.sql"),
     include_str!("../../../../src/db/migrations/0001_pending_operations.sql"),
+    include_str!("../../../../src/db/migrations/0002_attachment_part_index.sql"),
 ];
+
+/// Fails when a new drizzle migration is not added to [`MIGRATIONS`] above.
+#[test]
+fn migrations_list_is_complete() {
+    let journal = include_str!("../../../../src/db/migrations/meta/_journal.json");
+    let entries = journal.matches("\"tag\"").count();
+    assert_eq!(entries, MIGRATIONS.len(), "add the new migration to MIGRATIONS in tests.rs");
+}
 
 struct Env {
     server: ServerConfig,
@@ -345,6 +354,10 @@ async fn imap_smtp_send_round_trip() {
     server.append("INBOX", None, None, message("original")).await.unwrap();
     sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
 
+    let attachment_path =
+        std::env::temp_dir().join(format!("leari-{}-notes.txt", uuid::Uuid::new_v4()));
+    std::fs::write(&attachment_path, "attached text").unwrap();
+
     let parent: String = sqlx::query_scalar("SELECT id FROM messages WHERE subject = 'original'")
         .fetch_one(&db)
         .await
@@ -357,10 +370,19 @@ async fn imap_smtp_send_round_trip() {
         subject: "Re: original".into(),
         body: "Reply body".into(),
         reply_to_message_id: Some(parent),
+        attachments: vec![crate::mail::send::DraftAttachment::File {
+            path: attachment_path.to_string_lossy().into_owned(),
+        }],
     };
-    crate::mail::send::send_as(&db, &account, Auth::Password(&env.password), request)
-        .await
-        .unwrap();
+    crate::mail::send::send_as(
+        &db,
+        &std::env::temp_dir(),
+        &account,
+        Auth::Password(&env.password),
+        request,
+    )
+    .await
+    .unwrap();
 
     // Delivered to the recipient (this test account)…
     let mut delivered = None;
@@ -388,6 +410,28 @@ async fn imap_smtp_send_round_trip() {
         ["Re: original"]
     );
     assert!(sent[0].1.contains(&"Seen".to_string()));
+    assert!(delivered.contains("notes.txt"), "attachment delivered");
+
+    // The received copy's attachment downloads on demand from the server.
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+    let attachment_id: String = sqlx::query_scalar(
+        "SELECT a.id FROM attachments a JOIN messages m ON m.id = a.message_id \
+         JOIN mailboxes b ON b.id = m.mailbox_id WHERE b.role = 'inbox' AND m.subject = 'Re: original'",
+    )
+    .fetch_one(&db)
+    .await
+    .unwrap();
+    let cache = std::env::temp_dir().join(format!("leari-cache-{}", uuid::Uuid::new_v4()));
+    let downloaded = crate::mail::attachments::ensure_downloaded_as(
+        &db,
+        &cache,
+        &attachment_id,
+        Some(Auth::Password(&env.password)),
+    )
+    .await
+    .unwrap();
+    assert!(downloaded.to_string_lossy().ends_with("notes.txt"));
+    assert_eq!(std::fs::read_to_string(&downloaded).unwrap(), "attached text");
 
     server.logout().await.ok();
 }
