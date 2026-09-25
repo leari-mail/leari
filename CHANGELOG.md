@@ -17,8 +17,9 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Changed
 
-- The account marker in lists is now a fading color bar on the left edge (it looked like an
-  unread dot) and the reader names the account; both are hidden with a single account
+- The account marker in lists is now a background tint in the account's color, fading from left
+  to right (the old dot looked like an unread marker); the reader names the account the same
+  way. Both are hidden with a single account
 
 ## [0.1.0-alpha.2] - 2026-09-25
 

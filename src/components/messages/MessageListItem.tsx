@@ -24,7 +24,7 @@ export function MessageListItem({ message, account, selected, onSelect }: Messag
       data-message-id={message.id}
       onClick={() => onSelect(message.id)}
       className={cn(
-        "relative flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
+        "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
         selected
           ? "bg-list-selected text-list-selected-foreground"
           : "hover:bg-accent/70 focus-visible:bg-accent/70",

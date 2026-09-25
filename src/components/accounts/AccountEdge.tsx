@@ -1,4 +1,4 @@
-import { cn } from "@lib";
+import { accountTint, cn } from "@lib";
 
 interface AccountEdgeProps {
   color: string;
@@ -8,8 +8,8 @@ interface AccountEdgeProps {
 }
 
 /**
- * Thin bar on an item's left edge in the account's color, fading out at both ends:
- * tells which account a message belongs to without looking like a status indicator.
+ * Tells which account a message belongs to without looking like a status indicator.
+ * Placed as the first child of a `relative isolate` item, it sits behind the item's content.
  */
 export function AccountEdge({ color, label, className }: AccountEdgeProps) {
   return (
@@ -17,10 +17,8 @@ export function AccountEdge({ color, label, className }: AccountEdgeProps) {
       role="img"
       aria-label={label}
       title={label}
-      className={cn("absolute inset-y-1.5 left-0 w-[3px] rounded-full", className)}
-      style={{
-        background: `linear-gradient(to bottom, transparent, ${color} 30%, ${color} 70%, transparent)`,
-      }}
+      className={cn("pointer-events-none absolute inset-0 -z-10 rounded-[inherit]", className)}
+      style={{ background: accountTint(color) }}
     />
   );
 }
