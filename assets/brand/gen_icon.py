@@ -78,8 +78,10 @@ def full_icon():
 </svg>
 '''
 
-def tray_icon():
+def tray_icon(badge=False):
+    """Menu bar / tray template image. `badge` adds a dot shown while mail is syncing."""
     wings = "".join(f'<path d="{wing(s)}"/>' for s in (-1, 1))
+    dot = '<circle cx="840" cy="960" r="104" fill="#000"/>' if badge else ""
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 210 864 864">
   <g fill="#000" transform="translate(0 40)">
     {wings}
@@ -87,6 +89,7 @@ def tray_icon():
     <path d="{BODY}"/>
     <path d="{HEAD}"/>
   </g>
+  {dot}
 </svg>
 '''
 
@@ -102,3 +105,4 @@ def logo_mark():
 open(os.path.join(HERE, "app-icon.svg"), "w").write(full_icon())
 open(os.path.join(HERE, "..", "..", "src", "assets", "logo-mark.svg"), "w").write(logo_mark())
 open(os.path.join(HERE, "tray-icon.svg"), "w").write(tray_icon())
+open(os.path.join(HERE, "tray-icon-sync.svg"), "w").write(tray_icon(badge=True))

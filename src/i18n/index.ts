@@ -2,7 +2,7 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
-import { fallbackLanguage, languages } from "./languages";
+import { fallbackLanguage, languages, matchLanguage } from "./languages";
 import { defaultNS, resources } from "./resources";
 
 void i18n
@@ -13,13 +13,14 @@ void i18n
     defaultNS,
     ns: Object.keys(resources.en),
     fallbackLng: fallbackLanguage,
+    // Explicit codes only: i18next 26 fails to resolve "pt-BR" with `nonExplicitSupportedLngs`.
     supportedLngs: languages.map((language) => language.code),
-    nonExplicitSupportedLngs: true,
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
       lookupLocalStorage: "leari.language",
       caches: ["localStorage"],
+      convertDetectedLanguage: matchLanguage,
     },
   });
 
