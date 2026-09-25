@@ -1,6 +1,9 @@
+import { RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { DragRegion } from "@components/common";
-import { useFolderTitle } from "@hooks";
+import { DragRegion, IconButton } from "@components/common";
+import { useFolderTitle, useIsSyncing, useSyncNow } from "@hooks";
+import { cn } from "@lib";
+import { useMailStore } from "@stores";
 import { MessageSearch } from "./MessageSearch";
 
 interface MessageListHeaderProps {
@@ -10,6 +13,9 @@ interface MessageListHeaderProps {
 export function MessageListHeader({ unread }: MessageListHeaderProps) {
   const { t } = useTranslation("mail");
   const { title, subtitle } = useFolderTitle();
+  const isSyncing = useIsSyncing();
+  const syncNow = useSyncNow();
+  const folder = useMailStore((state) => state.folder);
 
   return (
     <div className="shrink-0 space-y-2 border-b border-border/70 px-3 pb-2.5">
@@ -23,6 +29,13 @@ export function MessageListHeader({ unread }: MessageListHeaderProps) {
             {unread > 0 && subtitle ? ` · ${subtitle}` : null}
           </p>
         </div>
+        <IconButton
+          label={isSyncing ? t("sync.syncing") : t("sync.refresh")}
+          icon={<RotateCw className={cn(isSyncing && "animate-spin")} />}
+          disabled={isSyncing}
+          onClick={() => syncNow.mutate(folder.kind === "mailbox" ? folder.accountId : undefined)}
+          className="mb-0.5"
+        />
       </DragRegion>
       <MessageSearch />
     </div>

@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCreateAccount } from "@hooks";
+import { useCreateAccount, useErrorMessage } from "@hooks";
 import { providerPresets } from "@lib";
 import type { AccountProvider } from "@models";
 import { Button, DialogFooter, Input, Label } from "@ui";
@@ -15,6 +15,7 @@ interface AccountFormProps {
 export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
   const { t } = useTranslation(["accounts", "common"]);
   const createAccount = useCreateAccount();
+  const errorMessage = useErrorMessage();
   const preset = providerPresets[provider];
   const isOAuth = preset.authType === "oauth2";
 
@@ -26,22 +27,24 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    // TODO: run the OAuth flow / store `password` in the OS keychain once the Rust mail engine lands.
-    void password;
+    // TODO: OAuth sign-in for Google / Microsoft (feat/oauth).
     createAccount.mutate(
       {
-        provider,
-        name,
-        email,
-        username: email,
-        authType: preset.authType,
-        incomingProtocol: preset.incomingProtocol,
-        incomingHost: incoming.host,
-        incomingPort: incoming.port,
-        incomingSecurity: incoming.security,
-        smtpHost: smtp.host,
-        smtpPort: smtp.port,
-        smtpSecurity: smtp.security,
+        password: isOAuth ? undefined : password,
+        input: {
+          provider,
+          name,
+          email,
+          username: email,
+          authType: preset.authType,
+          incomingProtocol: preset.incomingProtocol,
+          incomingHost: incoming.host,
+          incomingPort: incoming.port,
+          incomingSecurity: incoming.security,
+          smtpHost: smtp.host,
+          smtpPort: smtp.port,
+          smtpSecurity: smtp.security,
+        },
       },
       { onSuccess: onDone },
     );
@@ -96,7 +99,7 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
       )}
 
       {createAccount.isError && (
-        <p className="text-xs text-destructive">{String(createAccount.error)}</p>
+        <p className="text-xs text-destructive">{errorMessage(createAccount.error)}</p>
       )}
 
       <DialogFooter>
@@ -104,7 +107,7 @@ export function AccountForm({ provider, onBack, onDone }: AccountFormProps) {
           {t("common:actions.back")}
         </Button>
         <Button type="submit" disabled={createAccount.isPending}>
-          {t("common:actions.continue")}
+          {createAccount.isPending && !isOAuth ? t("add.testing") : t("common:actions.continue")}
         </Button>
       </DialogFooter>
     </form>

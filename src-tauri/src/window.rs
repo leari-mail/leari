@@ -15,7 +15,9 @@ pub fn show(app: &AppHandle) {
 }
 
 pub fn toggle(app: &AppHandle) {
-    let Some(window) = main_window(app) else { return };
+    let Some(window) = main_window(app) else {
+        return;
+    };
     let visible = window.is_visible().unwrap_or(false);
     let focused = window.is_focused().unwrap_or(false);
 

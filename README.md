@@ -28,11 +28,11 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors a
 - [x] Local database with migrations
 - [x] Mail UI: sidebar, message list, reader, composer, settings
 - [x] Add account flow (provider presets for Google and Microsoft)
-- [ ] IMAP sync (Rust)
+- [x] IMAP sync (Rust): folders, messages, flags, expunges; local changes pushed back
 - [ ] POP3 download
 - [ ] SMTP sending
 - [ ] OAuth 2 sign-in for Google and Microsoft
-- [ ] Credentials in the OS keychain
+- [x] Credentials in the OS keychain
 - [ ] Attachments
 - [ ] Notifications and unread badge on the tray icon
 - [ ] Threaded conversations
@@ -80,6 +80,33 @@ The database lives in the app data directory. On macOS that is
 | `pnpm format`        | Prettier (with Tailwind class sorting)                       |
 | `pnpm db:generate`   | Generate a migration after changing `src/db/schema`          |
 | `pnpm ui:add <name>` | Add a shadcn/ui component, split into one file per component |
+| `pnpm test:rust`     | Rust unit tests                                              |
+
+### Testing IMAP sync locally
+
+The sync engine has an end-to-end test that runs against a disposable IMAP server.
+[GreenMail](https://greenmail-mail-test.github.io/greenmail/) works well (needs Java):
+
+```sh
+java -Dgreenmail.setup.test.all -Dgreenmail.users=leari:secret@localhost \
+  -jar greenmail-standalone.jar
+
+LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
+  cargo test --manifest-path src-tauri/Cargo.toml imap_sync -- --ignored
+```
+
+To try it in the app, add an **IMAP** account with server `127.0.0.1`, port `3143`,
+security **None**, username `leari` and password `secret`.
+
+## How sync works
+
+- The Rust engine (`src-tauri/src/mail`, `src-tauri/src/sync`) syncs every account on start
+  and every 5 minutes. It opens the same SQLite file as the UI, in WAL mode.
+- Each sync pushes queued local changes first, then reconciles folders, updates flags,
+  removes expunged messages and downloads new ones (the latest 200 per folder on first sync).
+- Changes made in the UI (read, star, archive, delete) are applied locally right away and
+  queued in `pending_operations`, so they are never overwritten by a sync and survive being offline.
+- The engine emits `sync://status` and `sync://changed` events, and the UI refreshes as data arrives.
 
 ## Project structure
 
@@ -96,7 +123,7 @@ src/
   services/     Data access (Drizzle queries)
   stores/       Zustand stores
   styles/       Tailwind entry and theme tokens
-src-tauri/      Rust: tray, window behavior, plugins
+src-tauri/      Rust: tray, window behavior, sync engine (mail/, sync/), keychain
 assets/brand/   Icon sources (gen_icon.py generates the SVGs)
 scripts/        Tooling (shadcn splitter)
 ```

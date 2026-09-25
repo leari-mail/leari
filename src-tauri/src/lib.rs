@@ -1,5 +1,13 @@
+mod commands;
+mod credentials;
+mod db;
+mod error;
+mod mail;
+mod sync;
 mod tray;
 mod window;
+
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,6 +22,11 @@ pub fn run() {
     }
 
     builder
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
@@ -21,9 +34,19 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
+            app.manage(sync::SyncEngine::new(app.handle().clone()));
             tray::setup(app.handle())?;
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![
+            commands::sync_start,
+            commands::sync_now,
+            commands::sync_push,
+            commands::sync_statuses,
+            commands::credentials_set_password,
+            commands::credentials_delete,
+            commands::imap_test_connection,
+        ])
         .on_window_event(window::handle_event)
         .run(tauri::generate_context!())
         .expect("error while running leari");

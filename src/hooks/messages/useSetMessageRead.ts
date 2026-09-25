@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { messagesService } from "@services";
+import { messagesService, syncService } from "@services";
 import { useInvalidateMail } from "./useInvalidateMail";
 
 export function useSetMessageRead() {
@@ -7,6 +7,9 @@ export function useSetMessageRead() {
   return useMutation({
     mutationFn: ({ id, isRead }: { id: string; isRead: boolean }) =>
       messagesService.setRead(id, isRead),
-    onSuccess: invalidate,
+    onSuccess: (accountId) => {
+      if (accountId) void syncService.push(accountId);
+      return invalidate();
+    },
   });
 }

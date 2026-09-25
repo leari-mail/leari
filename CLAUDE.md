@@ -22,13 +22,18 @@ closing the window hides it.
 - **State**: server/DB data → TanStack Query; UI state → Zustand stores in `@stores`.
 - **Styling**: Tailwind 4 + theme tokens in `src/styles/globals.css`. The palette comes from the Lear's macaw
   (cobalt/indigo primary, yellow `highlight`/`star` accent). Use tokens, not raw colors. Font: Roboto.
-- Secrets (passwords, OAuth tokens) must never be stored in SQLite. Use the OS keychain.
+- Secrets (passwords, OAuth tokens) must never be stored in SQLite. Use the OS keychain (`src-tauri/src/credentials.rs`).
+- **Sync engine (Rust)**: `src-tauri/src/mail` (IMAP client, parsing, persistence) and `src-tauri/src/sync` (scheduler, events).
+  Rust writes rows into the Drizzle-owned schema with raw SQL (`mail/store.rs`), so schema changes must be mirrored there.
+  UI mutations never talk to the server: they update SQLite and queue a `pending_operations` row, then call `syncService.push`.
+- Git: work on feature branches off `main` (`feat/...`, `fix/...`), merged through pull requests.
 
 ## Commands
 
 - `pnpm app`: run the app (tauri dev)
 - `pnpm typecheck && pnpm lint`: run before finishing a change
 - `pnpm format`: Prettier (with tailwind class sorting)
+- `pnpm test:rust`: Rust unit tests. The IMAP end-to-end test is ignored by default (see README, "Testing IMAP sync locally")
 
 ## Brand
 

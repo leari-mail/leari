@@ -3,6 +3,7 @@ import { accounts, db, mailboxes } from "@db";
 import { newId } from "@lib/ids";
 import { pickAccountColor } from "@lib/account-colors";
 import type { Account, MailboxRole, NewAccount } from "@models";
+import { credentialsService } from "../credentials";
 
 export type CreateAccountInput = Omit<NewAccount, "id" | "color" | "sortOrder" | "createdAt">;
 
@@ -49,5 +50,6 @@ export const accountsService = {
 
   async remove(id: string): Promise<void> {
     await db.delete(accounts).where(eq(accounts.id, id));
+    await credentialsService.remove(id);
   },
 };

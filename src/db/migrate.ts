@@ -16,6 +16,9 @@ const BREAKPOINT = "--> statement-breakpoint";
 export async function runMigrations(): Promise<void> {
   const connection = await getConnection();
 
+  // WAL lets the Rust sync engine write while the UI reads. The mode persists in the file.
+  await connection.execute("PRAGMA journal_mode = WAL");
+
   await connection.execute(
     "CREATE TABLE IF NOT EXISTS __leari_migrations (tag TEXT PRIMARY KEY, applied_at INTEGER NOT NULL)",
   );

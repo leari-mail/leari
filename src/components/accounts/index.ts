@@ -2,6 +2,7 @@ export { AccountDot } from "./AccountDot";
 export { AccountForm } from "./AccountForm";
 export { AccountList } from "./AccountList";
 export { AccountSection } from "./AccountSection";
+export { AccountSyncIndicator } from "./AccountSyncIndicator";
 export { AddAccountDialog } from "./AddAccountDialog";
 export { ProviderIcon } from "./ProviderIcon";
 export { ProviderOption } from "./ProviderOption";

@@ -61,5 +61,10 @@
     "send": "Enviar",
     "discard": "Descartar",
     "notImplemented": "O envio ainda não foi implementado."
+  },
+  "sync": {
+    "refresh": "Verificar novos e-mails",
+    "syncing": "Sincronizando…",
+    "failed": "Falha na sincronização"
   }
 }

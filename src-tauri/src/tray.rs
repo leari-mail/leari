@@ -15,12 +15,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let quit = MenuItem::with_id(app, "quit", "Quit leari", true, Some("CmdOrCtrl+Q"))?;
     let menu = Menu::with_items(
         app,
-        &[
-            &open,
-            &compose,
-            &PredefinedMenuItem::separator(app)?,
-            &quit,
-        ],
+        &[&open, &compose, &PredefinedMenuItem::separator(app)?, &quit],
     )?;
 
     TrayIconBuilder::with_id("main")
