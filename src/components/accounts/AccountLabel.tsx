@@ -11,7 +11,7 @@ export function AccountLabel({ account, className }: AccountLabelProps) {
   return (
     <span
       className={cn("truncate rounded-md px-2 py-0.5", className)}
-      style={{ background: accountTint(account.color, 35) }}
+      style={{ background: accountTint(account.color, 18) }}
     >
       {account.email}
     </span>

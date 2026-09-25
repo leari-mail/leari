@@ -22,6 +22,6 @@ export function colorFromString(value: string): string {
 }
 
 /** Background wash in the account's color, strongest at the left edge and fading to the right. */
-export function accountTint(color: string, strength = 22) {
-  return `linear-gradient(to right, color-mix(in srgb, ${color} ${strength}%, transparent), transparent 55%)`;
+export function accountTint(color: string, strength = 10) {
+  return `linear-gradient(to right, color-mix(in srgb, ${color} ${strength}%, transparent), transparent 40%)`;
 }
