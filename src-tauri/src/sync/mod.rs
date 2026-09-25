@@ -194,8 +194,11 @@ impl SyncEngine {
                 last_synced_at: if state == "idle" { Some(db::now_ms()) } else { previous },
             };
             guard.statuses.insert(account_id.to_owned(), status.clone());
-            status
+            let syncing = guard.statuses.values().any(|status| status.state == "syncing");
+            (status, syncing)
         };
+        let (status, syncing) = status;
+        crate::tray::set_syncing(&self.app, syncing);
         let _ = self.app.emit("sync://status", status);
     }
 }

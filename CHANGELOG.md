@@ -9,6 +9,17 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Added
+
+- Sync status in the sidebar footer: "Syncing…", "Updated 2 minutes ago" or sync failures
+- Menu bar / tray icon shows a badge (and tooltip) while mail is syncing
+
+### Fixed
+
+- Language selector had no effect (Português (Brasil) fell back to English)
+- Long sender names, subjects and account emails overflowed horizontally instead of truncating with "…"
+- Wide HTML emails were cut off on the right; they are now scaled to fit the reader
+
 ## [0.1.0-alpha.1] - 2026-09-25
 
 ### Added

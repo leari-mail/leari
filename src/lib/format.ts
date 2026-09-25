@@ -1,5 +1,13 @@
 import type { MailAddress } from "@models";
-import { format, isThisWeek, isThisYear, isToday, isYesterday, type Locale } from "date-fns";
+import {
+  format,
+  formatDistanceStrict,
+  isThisWeek,
+  isThisYear,
+  isToday,
+  isYesterday,
+  type Locale,
+} from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
 
 const dateLocales: Record<string, Locale> = { en: enUS, "pt-BR": ptBR };
@@ -34,4 +42,9 @@ export function initials(nameOrEmail: string): string {
   const letters =
     parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : parts[0]?.slice(0, 2);
   return (letters ?? "?").toUpperCase();
+}
+
+/** "2 minutes ago" / "há 2 minutos", relative to `now`. */
+export function formatRelative(date: number, now: number, language: string): string {
+  return formatDistanceStrict(date, now, { addSuffix: true, locale: dateLocale(language) });
 }

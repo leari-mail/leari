@@ -65,6 +65,11 @@
   "sync": {
     "refresh": "Verificar novos e-mails",
     "syncing": "Sincronizando…",
-    "failed": "Falha na sincronização"
+    "failed": "Falha na sincronização",
+    "updated": "Atualizado {{time}}",
+    "updatedJustNow": "Atualizado agora",
+    "failedCount_one": "Falha ao sincronizar {{count}} conta",
+    "failedCount_other": "Falha ao sincronizar {{count}} contas",
+    "never": "Ainda não sincronizado"
   }
 }

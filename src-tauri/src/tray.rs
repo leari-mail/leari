@@ -7,7 +7,10 @@ use tauri::{
 
 use crate::window;
 
+const TRAY_ID: &str = "main";
 const TRAY_ICON: &[u8] = include_bytes!("../icons/tray-icon.png");
+/// Same bird with a dot, shown while any account is syncing.
+const TRAY_ICON_SYNCING: &[u8] = include_bytes!("../icons/tray-icon-sync.png");
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Open leari", true, None::<&str>)?;
@@ -16,7 +19,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let menu =
         Menu::with_items(app, &[&open, &compose, &PredefinedMenuItem::separator(app)?, &quit])?;
 
-    TrayIconBuilder::with_id("main")
+    TrayIconBuilder::with_id(TRAY_ID)
         .icon(Image::from_bytes(TRAY_ICON)?)
         .icon_as_template(true)
         .tooltip("leari")
@@ -44,4 +47,16 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
         .build(app)?;
 
     Ok(())
+}
+
+/// Reflects sync activity in the menu bar / tray icon and its tooltip.
+pub fn set_syncing(app: &AppHandle, syncing: bool) {
+    let Some(tray) = app.tray_by_id(TRAY_ID) else { return };
+    let bytes = if syncing { TRAY_ICON_SYNCING } else { TRAY_ICON };
+    if let Ok(icon) = Image::from_bytes(bytes) {
+        let _ = tray.set_icon(Some(icon));
+        // Replacing the image resets the template flag on macOS.
+        let _ = tray.set_icon_as_template(true);
+    }
+    let _ = tray.set_tooltip(Some(if syncing { "leari — syncing…" } else { "leari" }));
 }

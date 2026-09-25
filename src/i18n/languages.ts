@@ -9,3 +9,15 @@ export const languages: Array<{ code: Language; label: string }> = [
 ];
 
 export const fallbackLanguage: Language = "en";
+
+/** Maps a detected locale (e.g. "pt", "pt-PT", "en-GB") to the closest supported language. */
+export function matchLanguage(detected: string): Language {
+  const exact = languages.find(
+    (language) => language.code.toLowerCase() === detected.toLowerCase(),
+  );
+  if (exact) return exact.code;
+  const base = detected.split("-")[0].toLowerCase();
+  return (
+    languages.find((language) => language.code.split("-")[0] === base)?.code ?? fallbackLanguage
+  );
+}

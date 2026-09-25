@@ -65,6 +65,11 @@
   "sync": {
     "refresh": "Check for new mail",
     "syncing": "Syncing…",
-    "failed": "Sync failed"
+    "failed": "Sync failed",
+    "updated": "Updated {{time}}",
+    "updatedJustNow": "Updated just now",
+    "failedCount_one": "{{count}} account failed to sync",
+    "failedCount_other": "{{count}} accounts failed to sync",
+    "never": "Not synced yet"
   }
 }
