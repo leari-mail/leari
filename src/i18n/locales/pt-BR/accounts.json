@@ -35,16 +35,16 @@
     "none": "Nenhuma"
   },
   "empty": {
-    "title": "Bem-vindo ao leari",
+    "title": "Bem-vindo ao Leari",
     "description": "Adicione sua primeira conta para começar a ler seus e-mails."
   },
   "remove": "Remover conta",
-  "removeConfirm": "Remover {{email}} do leari? As cópias locais das mensagens serão apagadas.",
+  "removeConfirm": "Remover {{email}} do Leari? As cópias locais das mensagens serão apagadas.",
   "oauth": {
     "signIn": "Continuar com {{provider}}",
-    "description": "O leari abre o {{provider}} no seu navegador. Sua senha nunca é compartilhada com o leari.",
+    "description": "O Leari abre o {{provider}} no seu navegador. Sua senha nunca é compartilhada com o leari.",
     "waiting": "Termine de entrar no seu navegador…",
-    "notConfigured": "Esta versão do leari ainda não pode entrar com {{provider}}. Use a opção IMAP com uma senha de app.",
+    "notConfigured": "Esta versão do Leari ainda não pode entrar com {{provider}}. Use a opção IMAP com uma senha de app.",
     "reauthorize": "Entrar novamente",
     "wrongAccount": "Você entrou como {{email}}, mas esta conta é {{expected}}."
   }

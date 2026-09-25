@@ -29,7 +29,7 @@ jobs:
 
           **Installing:** download the `.dmg` (macOS, Apple Silicon and Intel) or the `-setup.exe` (Windows).
           Builds are not code-signed yet:
-          - macOS: after moving leari to Applications, run `xattr -dr com.apple.quarantine /Applications/leari.app`
+          - macOS: after moving Leari to Applications, run `xattr -dr com.apple.quarantine /Applications/leari.app`
             (or allow it in System Settings → Privacy & Security).
           - Windows: in the SmartScreen prompt, choose "More info" → "Run anyway".
           NOTES
@@ -43,7 +43,7 @@ jobs:
           # The create call returns the id directly (a draft has no tag yet, so it can't be looked up by tag).
           id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
             -f tag_name="$GITHUB_REF_NAME" \
-            -f name="leari $GITHUB_REF_NAME" \
+            -f name="Leari $GITHUB_REF_NAME" \
             -F body=@notes.md \
             -F draft=true \
             -F prerelease="$prerelease" \

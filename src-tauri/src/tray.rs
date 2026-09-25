@@ -15,16 +15,16 @@ const TRAY_ICON: &[u8] = include_bytes!("../icons/tray-icon.png");
 const TRAY_ICON_SYNCING: &[u8] = include_bytes!("../icons/tray-icon-sync.png");
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
-    let open = MenuItem::with_id(app, "open", "Open leari", true, None::<&str>)?;
+    let open = MenuItem::with_id(app, "open", "Open Leari", true, None::<&str>)?;
     let compose = MenuItem::with_id(app, "compose", "New Message", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit leari", true, Some("CmdOrCtrl+Q"))?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Leari", true, Some("CmdOrCtrl+Q"))?;
     let menu =
         Menu::with_items(app, &[&open, &compose, &PredefinedMenuItem::separator(app)?, &quit])?;
 
     TrayIconBuilder::with_id(TRAY_ID)
         .icon(Image::from_bytes(TRAY_ICON)?)
         .icon_as_template(true)
-        .tooltip("leari")
+        .tooltip("Leari")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -63,7 +63,7 @@ fn state() -> MutexGuard<'static, TrayState> {
 }
 
 fn tooltip(state: TrayState) -> String {
-    let mut parts = vec!["leari".to_owned()];
+    let mut parts = vec!["Leari".to_owned()];
     if state.unread > 0 {
         parts.push(format!("{} unread", state.unread));
     }

@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "leari",
+        "title": "Leari",
         "width": 1200,
         "height": 760,
         "minWidth": 820,
@@ -54,7 +54,7 @@
       "minimumSystemVersion": "11.0",
       "signingIdentity": "-"
     },
-    "publisher": "leari",
+    "publisher": "Leari",
     "copyright": "© 2026 Pablo Souza",
     "windows": {
       "nsis": {
