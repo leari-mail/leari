@@ -49,10 +49,7 @@ async fn database() -> SqlitePool {
         .unwrap()
         .create_if_missing(true)
         .foreign_keys(true);
-    let db = SqlitePoolOptions::new()
-        .connect_with(options)
-        .await
-        .unwrap();
+    let db = SqlitePoolOptions::new().connect_with(options).await.unwrap();
     for migration in MIGRATIONS {
         for statement in migration.split("--> statement-breakpoint") {
             sqlx::query(statement).execute(&db).await.unwrap();
@@ -101,9 +98,7 @@ async fn create_account(db: &SqlitePool, env: &Env) -> Account {
 }
 
 async fn server_session(env: &Env) -> ImapSession {
-    connection::connect(&env.server, &env.username, &env.password)
-        .await
-        .unwrap()
+    connection::connect(&env.server, &env.username, &env.password).await.unwrap()
 }
 
 fn message(subject: &str) -> String {
@@ -125,13 +120,7 @@ async fn reset_server(session: &mut ImapSession) {
         .try_collect()
         .await
         .unwrap();
-    let _: Vec<_> = session
-        .expunge()
-        .await
-        .unwrap()
-        .try_collect()
-        .await
-        .unwrap();
+    let _: Vec<_> = session.expunge().await.unwrap().try_collect().await.unwrap();
     for folder in ["Archive", "Trash", "Sent Items", "Projects"] {
         session.create(folder).await.unwrap();
     }
@@ -177,33 +166,20 @@ async fn imap_sync_round_trip() {
     let mut server = server_session(&env).await;
     reset_server(&mut server).await;
 
-    server
-        .append("INBOX", None, None, message("alpha"))
-        .await
-        .unwrap();
-    server
-        .append("INBOX", Some("(\\Seen)"), None, message("beta"))
-        .await
-        .unwrap();
-    server
-        .append("INBOX", None, None, message("gamma"))
-        .await
-        .unwrap();
+    server.append("INBOX", None, None, message("alpha")).await.unwrap();
+    server.append("INBOX", Some("(\\Seen)"), None, message("beta")).await.unwrap();
+    server.append("INBOX", None, None, message("gamma")).await.unwrap();
 
     // 1. Initial sync: folders reconciled, messages and flags pulled.
-    sync::sync_account(&db, &account, &env.password, &|| {})
-        .await
-        .unwrap();
+    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
 
     let mailboxes: Vec<(String, String, String)> =
         sqlx::query_as("SELECT id, path, role FROM mailboxes ORDER BY sort_order")
             .fetch_all(&db)
             .await
             .unwrap();
-    let roles: Vec<(&str, &str)> = mailboxes
-        .iter()
-        .map(|(_, path, role)| (path.as_str(), role.as_str()))
-        .collect();
+    let roles: Vec<(&str, &str)> =
+        mailboxes.iter().map(|(_, path, role)| (path.as_str(), role.as_str())).collect();
     assert_eq!(
         roles,
         [
@@ -215,9 +191,7 @@ async fn imap_sync_round_trip() {
         ]
     );
     // Placeholders keep their ids when re-pointed; ones missing on the server are removed.
-    assert!(mailboxes
-        .iter()
-        .any(|(id, path, _)| id == "local-sent" && path == "Sent Items"));
+    assert!(mailboxes.iter().any(|(id, path, _)| id == "local-sent" && path == "Sent Items"));
     assert!(!mailboxes.iter().any(|(id, ..)| id == "local-drafts"));
 
     assert_eq!(
@@ -271,27 +245,17 @@ async fn imap_sync_round_trip() {
     .await
     .unwrap();
 
-    sync::sync_account(&db, &account, &env.password, &|| {})
-        .await
-        .unwrap();
+    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
 
-    let pending: i64 = sqlx::query_scalar("SELECT count(*) FROM pending_operations")
-        .fetch_one(&db)
-        .await
-        .unwrap();
+    let pending: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM pending_operations").fetch_one(&db).await.unwrap();
     assert_eq!(pending, 0);
 
     let inbox = server_flags(&mut server, "INBOX").await;
     assert_eq!(inbox.len(), 2);
     assert!(inbox[0].0 == "alpha" && inbox[0].1.contains(&"Seen".to_string()));
     let archive = server_flags(&mut server, "Archive").await;
-    assert_eq!(
-        archive
-            .iter()
-            .map(|(subject, _)| subject.as_str())
-            .collect::<Vec<_>>(),
-        ["gamma"]
-    );
+    assert_eq!(archive.iter().map(|(subject, _)| subject.as_str()).collect::<Vec<_>>(), ["gamma"]);
 
     assert_eq!(
         local(&db, INBOX).await,
@@ -303,10 +267,7 @@ async fn imap_sync_round_trip() {
             .fetch_one(&db)
             .await
             .unwrap();
-    assert!(
-        gamma_uid_after.is_some(),
-        "moved message is pulled again with its new UID"
-    );
+    assert!(gamma_uid_after.is_some(), "moved message is pulled again with its new UID");
 
     // 3. Changes made elsewhere: flag beta, expunge alpha, deliver delta.
     server.select("INBOX").await.unwrap();
@@ -326,14 +287,9 @@ async fn imap_sync_round_trip() {
         .try_collect()
         .await
         .unwrap();
-    server
-        .append("INBOX", None, None, message("delta"))
-        .await
-        .unwrap();
+    server.append("INBOX", None, None, message("delta")).await.unwrap();
 
-    sync::sync_account(&db, &account, &env.password, &|| {})
-        .await
-        .unwrap();
+    sync::sync_account(&db, &account, &env.password, &|| {}).await.unwrap();
 
     assert_eq!(
         local(&db, INBOX).await,

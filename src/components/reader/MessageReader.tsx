@@ -1,7 +1,9 @@
 import { useEffect } from "react";
+
 import { useAccounts, useMessage, useSetMessageRead } from "@hooks";
 import { useMailStore, useSettingsStore } from "@stores";
 import { ScrollArea } from "@ui";
+
 import { MessageBody } from "./MessageBody";
 import { ReaderEmpty } from "./ReaderEmpty";
 import { ReaderHeader } from "./ReaderHeader";

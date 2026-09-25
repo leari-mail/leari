@@ -26,12 +26,17 @@ closing the window hides it.
 - **Sync engine (Rust)**: `src-tauri/src/mail` (IMAP client, parsing, persistence) and `src-tauri/src/sync` (scheduler, events).
   Rust writes rows into the Drizzle-owned schema with raw SQL (`mail/store.rs`), so schema changes must be mirrored there.
   UI mutations never talk to the server: they update SQLite and queue a `pending_operations` row, then call `syncService.push`.
-- Git: work on feature branches off `main` (`feat/...`, `fix/...`), merged through pull requests.
+- Git: work on feature branches off `main` (`feat/...`, `fix/...`, `chore/...`), merged through pull requests.
+  Add user-facing changes to `CHANGELOG.md` under **Unreleased**.
+- Relative imports may not leave their folder (`../` is a lint error); use aliases. Rust: no `unwrap()` outside tests.
+- Releases: `pnpm release <alpha|beta|rc|stable|patch|minor|major>` on `main`, then `git push --follow-tags`.
+  The version lives in `package.json` (Tauri reads it; the script syncs `Cargo.toml`). Currently in alpha.
 
 ## Commands
 
 - `pnpm app`: run the app (tauri dev)
-- `pnpm typecheck && pnpm lint`: run before finishing a change
+- `pnpm check`: run before finishing a change (types, ESLint, Prettier, rustfmt, clippy `-D warnings`, Rust tests)
+- `pnpm lint:fix`: autofix, including import sorting (packages → aliases → relative)
 - `pnpm format`: Prettier (with tailwind class sorting)
 - `pnpm test:rust`: Rust unit tests. The IMAP end-to-end test is ignored by default (see README, "Testing IMAP sync locally")
 

@@ -1,5 +1,7 @@
 import type { MailboxRole } from "@models";
+
 import { cn } from "@lib/utils";
+
 import { MailboxIcon } from "./MailboxIcon";
 
 interface MailboxItemProps {

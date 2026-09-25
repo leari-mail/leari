@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import { isAppError } from "@models";
 
 /** Human-readable, translated message for errors coming from Rust commands. */

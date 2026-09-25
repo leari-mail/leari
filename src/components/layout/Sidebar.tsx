@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
+
 import { AccountList } from "@components/accounts";
 import { UnifiedFolders } from "@components/mailboxes";
 import { ScrollArea } from "@ui";
+
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarSection } from "./SidebarSection";

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import { LeariLogo } from "@components/brand";
 import { DragRegion, EmptyState } from "@components/common";
 

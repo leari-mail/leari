@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { queryKeys } from "@hooks/queryKeys";
 import {
   accountsService,
   type CreateAccountInput,
   credentialsService,
   syncService,
 } from "@services";
-import { queryKeys } from "../queryKeys";
 
 interface CreateAccountVariables {
   input: CreateAccountInput;

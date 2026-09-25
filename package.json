@@ -1,7 +1,7 @@
 {
   "name": "leari",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,13 +9,19 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "app": "tauri dev",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write .",
+    "lint:fix": "eslint . --fix",
+    "lint:rust": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
+    "format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
+    "format:check": "prettier --check . && cargo fmt --manifest-path src-tauri/Cargo.toml --check",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm lint:rust && pnpm test:rust",
     "db:generate": "drizzle-kit generate",
     "ui:add": "shadcn add -y -o $0 && node scripts/split-ui.ts",
     "ui:split": "node scripts/split-ui.ts",
-    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml"
+    "prepare": "husky",
+    "release": "node scripts/release.ts"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.3.0",
@@ -49,10 +55,14 @@
     "@vitejs/plugin-react": "^6.0.2",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
@@ -67,5 +77,17 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
+  },
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">=24"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,json,css,md,yml,yaml,html}": "prettier --write",
+    "src-tauri/**/*.rs": "cargo fmt --manifest-path src-tauri/Cargo.toml --"
   }
 }

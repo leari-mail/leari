@@ -1,10 +1,12 @@
 import { Inbox, SearchX } from "lucide-react";
 import { type KeyboardEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+
 import { EmptyState } from "@components/common";
 import { useAccounts, useMessages } from "@hooks";
 import { useMailStore } from "@stores";
 import { ScrollArea } from "@ui";
+
 import { MessageListHeader } from "./MessageListHeader";
 import { MessageListItem } from "./MessageListItem";
 import { MessageListSkeleton } from "./MessageListSkeleton";

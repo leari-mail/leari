@@ -5,7 +5,7 @@
 //! - `sync://changed` → `{ accountId }` whenever synced data was written to the database
 
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
 
 use serde::Serialize;
@@ -60,11 +60,12 @@ struct ChangedEvent<'a> {
 
 impl SyncEngine {
     pub fn new(app: AppHandle) -> Arc<Self> {
-        Arc::new(SyncEngine {
-            app,
-            db: OnceCell::new(),
-            state: Mutex::new(State::default()),
-        })
+        Arc::new(SyncEngine { app, db: OnceCell::new(), state: Mutex::new(State::default()) })
+    }
+
+    /// A panic while holding the lock cannot leave `State` inconsistent, so poisoning is ignored.
+    fn state(&self) -> MutexGuard<'_, State> {
+        self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
     pub async fn db(&self) -> Result<&SqlitePool> {
@@ -74,7 +75,7 @@ impl SyncEngine {
     /// Starts the periodic sync loop. Called by the frontend once migrations ran; idempotent.
     pub fn start(self: &Arc<Self>) {
         {
-            let mut state = self.state.lock().unwrap();
+            let mut state = self.state();
             if state.started {
                 return;
             }
@@ -102,13 +103,7 @@ impl SyncEngine {
     }
 
     pub fn statuses(&self) -> Vec<SyncStatus> {
-        self.state
-            .lock()
-            .unwrap()
-            .statuses
-            .values()
-            .cloned()
-            .collect()
+        self.state().statuses.values().cloned().collect()
     }
 
     /// Syncs one account now (or right after its current sync finishes).
@@ -123,7 +118,7 @@ impl SyncEngine {
 
     async fn schedule(self: &Arc<Self>, account_id: String, mut mode: Mode) {
         {
-            let mut state = self.state.lock().unwrap();
+            let mut state = self.state();
             if !state.running.insert(account_id.clone()) {
                 // The next run is always a full sync, which pushes pending changes first.
                 state.rerun.insert(account_id);
@@ -148,7 +143,7 @@ impl SyncEngine {
                 }
             }
 
-            let mut state = self.state.lock().unwrap();
+            let mut state = self.state();
             if !state.rerun.remove(&account_id) {
                 state.running.remove(&account_id);
                 break;
@@ -162,14 +157,10 @@ impl SyncEngine {
         let account = account::load(db, account_id).await?;
 
         if account.incoming_protocol != "imap" {
-            return Err(Error::Unsupported(
-                "POP3 accounts are not supported yet".into(),
-            ));
+            return Err(Error::Unsupported("POP3 accounts are not supported yet".into()));
         }
         if account.auth_type == "oauth2" {
-            return Err(Error::Auth(
-                "sign-in with OAuth is not supported yet".into(),
-            ));
+            return Err(Error::Auth("sign-in with OAuth is not supported yet".into()));
         }
         let password = credentials::get_password(account_id)?;
 
@@ -194,20 +185,13 @@ impl SyncEngine {
 
     fn set_status(&self, account_id: &str, state: &'static str, error: Option<Error>) {
         let status = {
-            let mut guard = self.state.lock().unwrap();
-            let previous = guard
-                .statuses
-                .get(account_id)
-                .and_then(|status| status.last_synced_at);
+            let mut guard = self.state();
+            let previous = guard.statuses.get(account_id).and_then(|status| status.last_synced_at);
             let status = SyncStatus {
                 account_id: account_id.to_owned(),
                 state,
                 error,
-                last_synced_at: if state == "idle" {
-                    Some(db::now_ms())
-                } else {
-                    previous
-                },
+                last_synced_at: if state == "idle" { Some(db::now_ms()) } else { previous },
             };
             guard.statuses.insert(account_id.to_owned(), status.clone());
             status

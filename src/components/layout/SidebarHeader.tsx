@@ -1,5 +1,6 @@
 import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { DragRegion, IconButton } from "@components/common";
 import { useComposerStore } from "@stores";
 

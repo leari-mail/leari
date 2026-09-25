@@ -1,4 +1,5 @@
 import { useAccounts, useMailboxes, useUnreadCounts } from "@hooks";
+
 import { AccountSection } from "./AccountSection";
 
 export function AccountList() {

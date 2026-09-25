@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import { type Theme, useSettingsStore } from "@stores";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@ui";
 

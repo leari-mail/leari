@@ -1,6 +1,6 @@
+import type { Message } from "@models";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useEffect, useRef } from "react";
-import type { Message } from "@models";
 
 interface MessageBodyProps {
   message: Message;

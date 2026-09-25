@@ -1,6 +1,7 @@
-import { asc, count, eq } from "drizzle-orm";
-import { db, mailboxes, messages } from "@db";
 import type { Mailbox } from "@models";
+import { asc, count, eq } from "drizzle-orm";
+
+import { db, mailboxes, messages } from "@db";
 
 export const mailboxesService = {
   list(): Promise<Mailbox[]> {

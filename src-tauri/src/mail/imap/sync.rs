@@ -21,11 +21,7 @@ const BATCH_SIZE: usize = 25;
 const MAX_FULL_FETCH_SIZE: u32 = 15 * 1024 * 1024;
 
 fn flags_of(fetch: &Fetch) -> Flags {
-    let mut flags = Flags {
-        seen: false,
-        flagged: false,
-        draft: false,
-    };
+    let mut flags = Flags { seen: false, flagged: false, draft: false };
     for flag in fetch.flags() {
         match flag {
             Flag::Seen => flags.seen = true,
@@ -73,16 +69,7 @@ pub async fn sync_account(
     let pending = store::pending_message_ids(db, &account.id).await?;
 
     for mailbox in &mailboxes {
-        match sync_mailbox(
-            db,
-            &mut session,
-            &account.id,
-            mailbox,
-            &pending,
-            on_progress,
-        )
-        .await
-        {
+        match sync_mailbox(db, &mut session, &account.id, mailbox, &pending, on_progress).await {
             Ok(()) => {}
             Err(error @ Error::Network(_)) => return Err(error),
             // One broken folder must not stop the others.
@@ -123,10 +110,7 @@ async fn sync_mailbox(
                 .await?
                 .try_collect()
                 .await?;
-            fetches
-                .iter()
-                .filter_map(|fetch| Some((fetch.uid?, flags_of(fetch))))
-                .collect()
+            fetches.iter().filter_map(|fetch| Some((fetch.uid?, flags_of(fetch)))).collect()
         };
 
         let mut gone = Vec::new();
@@ -167,11 +151,7 @@ async fn sync_mailbox(
         }
         None => {
             let start = status.exists.saturating_sub(INITIAL_WINDOW - 1).max(1);
-            session
-                .fetch(format!("{start}:*"), "(UID RFC822.SIZE)")
-                .await?
-                .try_collect()
-                .await?
+            session.fetch(format!("{start}:*"), "(UID RFC822.SIZE)").await?.try_collect().await?
         }
     };
     let max_known = known.keys().max().copied().unwrap_or(0);
@@ -181,29 +161,21 @@ async fn sync_mailbox(
         // `N:*` always returns the last message, even when its UID is below N.
         .filter(|(uid, _)| *uid > max_known)
         .collect();
-    new_messages.sort_by(|a, b| b.0.cmp(&a.0));
+    new_messages.sort_by_key(|(uid, _)| std::cmp::Reverse(*uid));
 
     for batch in new_messages.chunks(BATCH_SIZE) {
-        let (full, headers_only): (Vec<_>, Vec<_>) = batch
-            .iter()
-            .partition(|(_, size)| *size <= MAX_FULL_FETCH_SIZE);
+        let (full, headers_only): (Vec<_>, Vec<_>) =
+            batch.iter().partition(|(_, size)| *size <= MAX_FULL_FETCH_SIZE);
 
         let mut fetched: Vec<Fetch> = Vec::new();
         for (uids, query) in [
             (&full, "(UID FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[])"),
-            (
-                &headers_only,
-                "(UID FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER])",
-            ),
+            (&headers_only, "(UID FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER])"),
         ] {
             if uids.is_empty() {
                 continue;
             }
-            let set = uids
-                .iter()
-                .map(|(uid, _)| uid.to_string())
-                .collect::<Vec<_>>()
-                .join(",");
+            let set = uids.iter().map(|(uid, _)| uid.to_string()).collect::<Vec<_>>().join(",");
             let mut result: Vec<Fetch> = session.uid_fetch(set, query).await?.try_collect().await?;
             fetched.append(&mut result);
         }

@@ -1,5 +1,6 @@
 import { CircleAlert, LoaderCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { useAccountSyncStatus, useErrorMessage } from "@hooks";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@ui";
 

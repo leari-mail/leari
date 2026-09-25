@@ -1,7 +1,10 @@
 import { useTranslation } from "react-i18next";
+
 import { LeariLogo } from "@components/brand";
+import { useAppVersion } from "@hooks";
 import { useDialogStore, useSettingsStore } from "@stores";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Separator, Switch } from "@ui";
+
 import { LanguageSelect } from "./LanguageSelect";
 import { SettingsRow } from "./SettingsRow";
 import { ThemeSelect } from "./ThemeSelect";
@@ -12,6 +15,7 @@ export function SettingsDialog() {
   const closeDialog = useDialogStore((state) => state.closeDialog);
   const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
   const setMarkAsReadOnOpen = useSettingsStore((state) => state.setMarkAsReadOnOpen);
+  const version = useAppVersion();
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeDialog()}>
@@ -47,7 +51,10 @@ export function SettingsDialog() {
 
         <div className="flex items-center gap-3">
           <LeariLogo className="size-10" />
-          <p className="text-xs text-muted-foreground">{t("about")}</p>
+          <div className="space-y-0.5">
+            {version && <p className="text-xs font-medium">leari {version}</p>}
+            <p className="text-xs text-muted-foreground">{t("about")}</p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

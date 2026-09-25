@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
+
 import { fallbackLanguage, languages } from "./languages";
 import { defaultNS, resources } from "./resources";
 
@@ -23,4 +24,4 @@ void i18n
   });
 
 export { i18n };
-export { fallbackLanguage, languages, type Language } from "./languages";
+export { fallbackLanguage, type Language, languages } from "./languages";

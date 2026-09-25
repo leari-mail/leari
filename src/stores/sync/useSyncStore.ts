@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import type { SyncStatus } from "@models";
+import { create } from "zustand";
 
 interface SyncStoreState {
   statuses: Record<string, SyncStatus>;

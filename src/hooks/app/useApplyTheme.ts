@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import { useSettingsStore } from "@stores";
 
 const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");

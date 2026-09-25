@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
+
+import { useAccounts } from "@hooks/accounts";
 import { useMailStore } from "@stores";
-import { useAccounts } from "../accounts";
+
 import { useMailboxes } from "./useMailboxes";
 
 /** Title and subtitle of the folder shown in the message list. */

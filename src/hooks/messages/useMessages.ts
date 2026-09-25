@@ -1,7 +1,8 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
+import { queryKeys } from "@hooks/queryKeys";
 import { messagesService } from "@services";
 import { useMailStore } from "@stores";
-import { queryKeys } from "../queryKeys";
 
 /** Messages of the folder currently selected in the sidebar, filtered by the search box. */
 export function useMessages() {

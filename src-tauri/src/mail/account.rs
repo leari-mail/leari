@@ -79,11 +79,9 @@ pub async fn load(db: &SqlitePool, account_id: &str) -> Result<Account> {
 }
 
 pub async fn list_ids(db: &SqlitePool) -> Result<Vec<String>> {
-    Ok(
-        sqlx::query_scalar("SELECT id FROM accounts WHERE sync_enabled = 1 ORDER BY sort_order")
-            .fetch_all(db)
-            .await?,
-    )
+    Ok(sqlx::query_scalar("SELECT id FROM accounts WHERE sync_enabled = 1 ORDER BY sort_order")
+        .fetch_all(db)
+        .await?)
 }
 
 pub async fn mark_synced(db: &SqlitePool, account_id: &str, at: i64) -> Result<()> {

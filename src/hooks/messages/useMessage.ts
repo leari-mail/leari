@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+
+import { queryKeys } from "@hooks/queryKeys";
 import { messagesService } from "@services";
-import { queryKeys } from "../queryKeys";
 
 export function useMessage(id: string | null) {
   return useQuery({

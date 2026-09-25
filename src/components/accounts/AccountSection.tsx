@@ -1,11 +1,13 @@
+import type { Account, Mailbox } from "@models";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import { MailboxItem } from "@components/mailboxes";
-import type { Account, Mailbox } from "@models";
 import { cn } from "@lib";
 import { useMailStore } from "@stores";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@ui";
+
 import { AccountDot } from "./AccountDot";
 import { AccountSyncIndicator } from "./AccountSyncIndicator";
 import { RemoveAccountDialog } from "./RemoveAccountDialog";

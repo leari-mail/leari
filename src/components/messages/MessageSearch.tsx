@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { useMailStore } from "@stores";
 import { Input } from "@ui";
 

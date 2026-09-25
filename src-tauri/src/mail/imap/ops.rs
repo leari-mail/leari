@@ -66,23 +66,13 @@ impl Pusher<'_> {
 
     async fn store(&mut self, uid: u32, add: bool, flag: &str) -> Result<()> {
         let query = format!("{}FLAGS.SILENT ({flag})", if add { "+" } else { "-" });
-        let _: Vec<_> = self
-            .session
-            .uid_store(uid.to_string(), query)
-            .await?
-            .try_collect()
-            .await?;
+        let _: Vec<_> = self.session.uid_store(uid.to_string(), query).await?.try_collect().await?;
         Ok(())
     }
 
     async fn expunge(&mut self, uid: u32) -> Result<()> {
         if self.support.uidplus {
-            let _: Vec<_> = self
-                .session
-                .uid_expunge(uid.to_string())
-                .await?
-                .try_collect()
-                .await?;
+            let _: Vec<_> = self.session.uid_expunge(uid.to_string()).await?.try_collect().await?;
         } else {
             let _: Vec<_> = self.session.expunge().await?.try_collect().await?;
         }
@@ -144,11 +134,7 @@ pub async fn push(
     .fetch_all(db)
     .await?;
 
-    let mut pusher = Pusher {
-        session,
-        selected: None,
-        support,
-    };
+    let mut pusher = Pusher { session, selected: None, support };
 
     for operation in operations {
         match pusher.apply(&operation).await {

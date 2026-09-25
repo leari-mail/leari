@@ -1,5 +1,7 @@
-import { accountProviders } from "@db/schema";
 import type { AccountProvider } from "@models";
+
+import { accountProviders } from "@db/schema";
+
 import { ProviderOption } from "./ProviderOption";
 
 interface ProviderPickerProps {

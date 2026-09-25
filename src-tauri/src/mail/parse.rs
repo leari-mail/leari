@@ -44,10 +44,7 @@ fn addresses(address: Option<&Address>) -> Vec<MailAddress> {
             list.iter()
                 .filter_map(|addr| {
                     Some(MailAddress {
-                        name: addr
-                            .name()
-                            .map(str::to_owned)
-                            .filter(|name| !name.is_empty()),
+                        name: addr.name().map(str::to_owned).filter(|name| !name.is_empty()),
                         address: addr.address()?.to_owned(),
                     })
                 })
@@ -77,11 +74,8 @@ pub fn parse(raw: &[u8]) -> Option<ParsedMessage> {
     let references = header_ids(message.references());
     let in_reply_to = header_ids(message.in_reply_to()).into_iter().next();
     // Thread root: first entry of References, else the replied message, else itself.
-    let thread_id = references
-        .first()
-        .cloned()
-        .or_else(|| in_reply_to.clone())
-        .or_else(|| message_id.clone());
+    let thread_id =
+        references.first().cloned().or_else(|| in_reply_to.clone()).or_else(|| message_id.clone());
 
     let body_html = message
         .html_part(0)

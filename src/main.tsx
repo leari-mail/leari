@@ -1,9 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { App, AppProviders } from "@app";
-import { detectPlatform } from "@lib";
 import "@i18n";
 import "./styles/globals.css";
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+import { App, AppProviders } from "@app";
+import { detectPlatform } from "@lib";
 
 // Lets CSS adapt to the native window chrome (vibrancy, traffic lights).
 document.documentElement.dataset.platform = detectPlatform();

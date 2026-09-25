@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
 import { messages } from "./messages";
 
 export const attachments = sqliteTable("attachments", {
