@@ -12,7 +12,7 @@ use super::{folders, ops};
 use crate::error::{Error, Result};
 use crate::mail::account::Account;
 use crate::mail::parse;
-use crate::mail::store::{self, Flags, LocalMailbox, NewMessage};
+use crate::mail::store::{self, Flags, InsertedMessage, LocalMailbox, NewMessage};
 
 /// How many of the most recent messages a mailbox downloads on its first sync.
 const INITIAL_WINDOW: u32 = 200;
@@ -55,7 +55,7 @@ pub async fn sync_account(
     account: &Account,
     auth: Auth<'_>,
     on_progress: &(dyn Fn() + Send + Sync),
-) -> Result<()> {
+) -> Result<Vec<InsertedMessage>> {
     let mut session = connection::connect(&account.incoming, &account.username, auth).await?;
 
     let support = server_support(&mut session).await?;
@@ -67,10 +67,11 @@ pub async fn sync_account(
     on_progress();
 
     let pending = store::pending_message_ids(db, &account.id).await?;
+    let mut arrived = Vec::new();
 
     for mailbox in &mailboxes {
         match sync_mailbox(db, &mut session, &account.id, mailbox, &pending, on_progress).await {
-            Ok(()) => {}
+            Ok(mut inserted) => arrived.append(&mut inserted),
             Err(error @ Error::Network(_)) => return Err(error),
             // One broken folder must not stop the others.
             Err(error) => log::warn!("sync of {} failed: {error}", mailbox.path),
@@ -78,9 +79,12 @@ pub async fn sync_account(
     }
 
     session.logout().await.ok();
-    Ok(())
+    Ok(arrived)
 }
 
+/// Syncs one mailbox. Returns the unread messages that newly arrived in an inbox, for
+/// notifications: never on a mailbox's first sync or after a UIDVALIDITY reset, which
+/// download existing mail rather than new mail.
 async fn sync_mailbox(
     db: &SqlitePool,
     session: &mut ImapSession,
@@ -88,10 +92,14 @@ async fn sync_mailbox(
     mailbox: &LocalMailbox,
     pending: &HashSet<String>,
     on_progress: &(dyn Fn() + Send + Sync),
-) -> Result<()> {
+) -> Result<Vec<InsertedMessage>> {
     let status = session.examine(&mailbox.path).await?;
 
     let uid_validity = status.uid_validity;
+    let continuing = mailbox.uid_validity.is_some()
+        && mailbox.uid_validity.map(|value| value as u32) == uid_validity;
+    let announce = continuing && mailbox.role == "inbox";
+    let mut arrived = Vec::new();
     if mailbox.uid_validity.map(|value| value as u32) != uid_validity {
         // UIDs from another UIDVALIDITY epoch are meaningless: start over.
         store::reset_mailbox(db, &mailbox.id, uid_validity).await?;
@@ -137,7 +145,7 @@ async fn sync_mailbox(
     }
 
     if status.exists == 0 {
-        return Ok(());
+        return Ok(arrived);
     }
 
     // 2. New messages: everything above the highest known UID, or the most recent window.
@@ -197,9 +205,12 @@ async fn sync_mailbox(
             })
             .collect();
 
-        store::insert_messages(db, rows).await?;
+        let inserted = store::insert_messages(db, rows).await?;
+        if announce {
+            arrived.extend(inserted.into_iter().filter(|message| !message.is_read));
+        }
         on_progress();
     }
 
-    Ok(())
+    Ok(arrived)
 }

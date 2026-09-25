@@ -169,8 +169,9 @@ impl SyncEngine {
 
         match mode {
             Mode::Full => {
-                imap::sync::sync_account(db, &account, auth, &notify).await?;
+                let arrived = imap::sync::sync_account(db, &account, auth, &notify).await?;
                 account::mark_synced(db, account_id, db::now_ms()).await?;
+                crate::notify::new_mail(&self.app, &account.email, &arrived);
             }
             Mode::PushOnly => {
                 imap::sync::push_account(db, &account, auth).await?;

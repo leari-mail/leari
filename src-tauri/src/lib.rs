@@ -3,6 +3,7 @@ mod credentials;
 mod db;
 mod error;
 mod mail;
+mod notify;
 mod oauth;
 mod sync;
 mod tray;
@@ -26,6 +27,7 @@ pub fn run() {
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
             // No dock icon: leari lives in the menu bar (macOS) / system tray.
@@ -55,6 +57,8 @@ pub fn run() {
             commands::message_inline_images,
             commands::attachments_pick,
             commands::attachments_stat,
+            commands::tray_set_unread,
+            commands::notifications_configure,
         ])
         .on_window_event(window::handle_event)
         .run(tauri::generate_context!())

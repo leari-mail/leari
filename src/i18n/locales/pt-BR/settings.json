@@ -10,5 +10,8 @@
   "language": "Idioma",
   "reading": "Leitura",
   "markAsReadOnOpen": "Marcar mensagens como lidas ao abrir",
-  "about": "O leari é software livre, batizado em homenagem à arara-azul-de-lear (Anodorhynchus leari)."
+  "about": "O leari é software livre, batizado em homenagem à arara-azul-de-lear (Anodorhynchus leari).",
+  "notifications": "Notificações",
+  "notifyNewMail": "Avisar quando chegar e-mail novo",
+  "showUnreadInMenuBar": "Mostrar não lidas na barra de menus"
 }

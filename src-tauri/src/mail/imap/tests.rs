@@ -187,7 +187,9 @@ async fn imap_sync_round_trip() {
     server.append("INBOX", None, None, message("gamma")).await.unwrap();
 
     // 1. Initial sync: folders reconciled, messages and flags pulled.
-    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+    let arrived =
+        sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+    assert!(arrived.is_empty(), "a first sync downloads existing mail, it announces nothing");
 
     let mailboxes: Vec<(String, String, String)> =
         sqlx::query_as("SELECT id, path, role FROM mailboxes ORDER BY sort_order")
@@ -305,7 +307,10 @@ async fn imap_sync_round_trip() {
         .unwrap();
     server.append("INBOX", None, None, message("delta")).await.unwrap();
 
-    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+    let arrived =
+        sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+    let subjects: Vec<_> = arrived.iter().map(|message| message.subject.as_str()).collect();
+    assert_eq!(subjects, ["delta"], "new unread inbox mail is announced once");
 
     assert_eq!(
         local(&db, INBOX).await,

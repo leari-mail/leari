@@ -4,5 +4,7 @@ export { useBootstrap } from "./useBootstrap";
 export { useErrorMessage } from "./useErrorMessage";
 export { useFileDrop } from "./useFileDrop";
 export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+export { useNotificationSettings } from "./useNotificationSettings";
 export { useNow } from "./useNow";
+export { useTrayBadge } from "./useTrayBadge";
 export { useTrayEvents } from "./useTrayEvents";

@@ -1,3 +1,5 @@
+use std::sync::{Mutex, MutexGuard};
+
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem, PredefinedMenuItem},
@@ -49,8 +51,35 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+#[derive(Default, Clone, Copy)]
+struct TrayState {
+    syncing: bool,
+    unread: u32,
+}
+
+fn state() -> MutexGuard<'static, TrayState> {
+    static STATE: Mutex<TrayState> = Mutex::new(TrayState { syncing: false, unread: 0 });
+    STATE.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+fn tooltip(state: TrayState) -> String {
+    let mut parts = vec!["leari".to_owned()];
+    if state.unread > 0 {
+        parts.push(format!("{} unread", state.unread));
+    }
+    if state.syncing {
+        parts.push("syncing…".to_owned());
+    }
+    parts.join(" — ")
+}
+
 /// Reflects sync activity in the menu bar / tray icon and its tooltip.
 pub fn set_syncing(app: &AppHandle, syncing: bool) {
+    let current = {
+        let mut state = state();
+        state.syncing = syncing;
+        *state
+    };
     let Some(tray) = app.tray_by_id(TRAY_ID) else { return };
     let bytes = if syncing { TRAY_ICON_SYNCING } else { TRAY_ICON };
     if let Ok(icon) = Image::from_bytes(bytes) {
@@ -58,5 +87,19 @@ pub fn set_syncing(app: &AppHandle, syncing: bool) {
         // Replacing the image resets the template flag on macOS.
         let _ = tray.set_icon_as_template(true);
     }
-    let _ = tray.set_tooltip(Some(if syncing { "leari — syncing…" } else { "leari" }));
+    let _ = tray.set_tooltip(Some(tooltip(current)));
+}
+
+/// Unread count next to the icon (macOS menu bar, Linux indicators) and in the tooltip.
+pub fn set_unread(app: &AppHandle, unread: u32) {
+    let current = {
+        let mut state = state();
+        state.unread = unread;
+        *state
+    };
+    let Some(tray) = app.tray_by_id(TRAY_ID) else { return };
+    let title =
+        (unread > 0).then(|| if unread > 999 { "999+".to_owned() } else { unread.to_string() });
+    let _ = tray.set_title(title);
+    let _ = tray.set_tooltip(Some(tooltip(current)));
 }
