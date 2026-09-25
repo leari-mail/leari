@@ -161,7 +161,7 @@ async fn sync_mailbox(
         // `N:*` always returns the last message, even when its UID is below N.
         .filter(|(uid, _)| *uid > max_known)
         .collect();
-    new_messages.sort_by(|a, b| b.0.cmp(&a.0));
+    new_messages.sort_by_key(|(uid, _)| std::cmp::Reverse(*uid));
 
     for batch in new_messages.chunks(BATCH_SIZE) {
         let (full, headers_only): (Vec<_>, Vec<_>) =
