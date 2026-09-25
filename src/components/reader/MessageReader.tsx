@@ -46,7 +46,7 @@ export function MessageReader() {
       <ReaderToolbar message={message} />
       <ScrollArea className="min-h-0 flex-1">
         <article className="mx-auto max-w-3xl space-y-6 px-8 py-6">
-          <ReaderHeader message={message} account={account} />
+          <ReaderHeader message={message} account={accounts.length > 1 ? account : undefined} />
           <MessageBody message={message} />
           {visibleAttachments.length > 0 && <AttachmentList attachments={visibleAttachments} />}
         </article>
