@@ -60,7 +60,9 @@
     "bodyPlaceholder": "Escreva sua mensagem…",
     "send": "Enviar",
     "discard": "Descartar",
-    "notImplemented": "O envio ainda não foi implementado."
+    "bcc": "Cco",
+    "sending": "Enviando…",
+    "sendShortcut": "⌘↵ para enviar"
   },
   "sync": {
     "refresh": "Verificar novos e-mails",

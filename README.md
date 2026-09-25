@@ -38,8 +38,8 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors a
 - [x] Add account flow (provider presets for Google and Microsoft)
 - [x] IMAP sync (Rust): folders, messages, flags, expunges; local changes pushed back
 - [ ] POP3 download
-- [ ] SMTP sending
 - [x] OAuth 2 sign-in for Google and Microsoft
+- [x] SMTP sending (password and OAuth), saved to Sent
 - [x] Credentials in the OS keychain
 - [ ] Attachments
 - [ ] Notifications and unread badge on the tray icon
@@ -155,7 +155,8 @@ The sync engine has an end-to-end test that runs against a disposable IMAP serve
 java -Dgreenmail.setup.test.all -Dgreenmail.users=leari:secret@localhost \
   -jar greenmail-standalone.jar
 
-LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
+LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_SMTP=127.0.0.1:3025 \
+LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
   cargo test --manifest-path src-tauri/Cargo.toml imap_ -- --ignored
 ```
 

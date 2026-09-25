@@ -48,6 +48,7 @@ pub fn run() {
             commands::oauth_sign_in,
             commands::oauth_cancel,
             commands::oauth_attach,
+            commands::mail_send,
         ])
         .on_window_event(window::handle_event)
         .run(tauri::generate_context!())

@@ -8,6 +8,7 @@ use crate::credentials;
 use crate::error::Result;
 use crate::mail::account::ServerConfig;
 use crate::mail::imap;
+use crate::mail::send::{self, SendRequest};
 use crate::oauth::{self, OAuthState, Provider, SignInResult};
 use crate::sync::{SyncEngine, SyncStatus};
 
@@ -93,4 +94,15 @@ pub fn oauth_attach(
     handle: String,
 ) -> Result<()> {
     oauth::attach(&state, &account_id, &handle)
+}
+
+/// Sends a message, then syncs the account so the copy in Sent shows up.
+#[tauri::command]
+pub async fn mail_send(engine: State<'_, Arc<SyncEngine>>, request: SendRequest) -> Result<()> {
+    let account_id = request.account_id.clone();
+    send::send(engine.db().await?, request).await?;
+
+    let engine = Arc::clone(&engine);
+    tauri::async_runtime::spawn(async move { engine.sync_account(account_id).await });
+    Ok(())
 }

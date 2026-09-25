@@ -17,6 +17,9 @@ pub enum Error {
     Database(#[from] sqlx::Error),
     #[error("keychain: {0}")]
     Keychain(#[from] keyring::Error),
+    /// Bad user input (e.g. an unparsable recipient); the message is the offending value.
+    #[error("{0}")]
+    Invalid(String),
     #[error("cancelled")]
     Cancelled,
     #[error("{0}")]
@@ -32,6 +35,7 @@ impl Error {
             Error::Unsupported(_) => "unsupported",
             Error::Protocol(_) => "protocol",
             Error::Cancelled => "cancelled",
+            Error::Invalid(_) => "invalid",
             Error::Database(_) | Error::Keychain(_) | Error::Other(_) => "other",
         }
     }
@@ -46,6 +50,7 @@ impl Clone for Error {
             Error::Unsupported(message) => Error::Unsupported(message.clone()),
             Error::Protocol(message) => Error::Protocol(message.clone()),
             Error::Cancelled => Error::Cancelled,
+            Error::Invalid(message) => Error::Invalid(message.clone()),
             other => Error::Other(other.to_string()),
         }
     }

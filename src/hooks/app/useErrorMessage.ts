@@ -6,6 +6,11 @@ import { isAppError } from "@models";
 export function useErrorMessage() {
   const { t } = useTranslation();
   return (error: unknown): string => {
+    if (isAppError(error) && error.kind === "invalid") {
+      return error.message
+        ? t("errors.kinds.invalid", { detail: error.message })
+        : t("errors.noRecipients");
+    }
     if (isAppError(error)) return t(`errors.kinds.${error.kind}`);
     if (error instanceof Error && error.message) return error.message;
     return t("errors.generic");
