@@ -17,7 +17,9 @@
 ---
 
 **leari** is named after the Lear's macaw (_Anodorhynchus leari_), an indigo-blue macaw
-found only in Bahia, Brazil. The name is also a nod to Parrot, an earlier mail client.
+found only in Bahia, Brazil. Another bird is also behind it: leari is a homage to
+[Sparrow](<https://en.wikipedia.org/wiki/Sparrow_(email_client)>), the minimalist Mac mail
+client that inspired its look and feel.
 The macaw's cobalt plumage and yellow eye-ring are the basis of leari's colors and icon.
 
 ## Features
