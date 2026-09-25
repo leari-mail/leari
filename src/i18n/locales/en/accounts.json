@@ -4,7 +4,8 @@
     "description": "Choose your mail provider.",
     "configureTitle": "Configure {{provider}}",
     "configureDescription": "Enter your account details.",
-    "oauthNotice": "You will be redirected to {{provider}} to sign in. Your password is never stored by leari."
+    "oauthNotice": "You will be redirected to {{provider}} to sign in. Your password is never stored by leari.",
+    "testing": "Checking connection…"
   },
   "providers": {
     "google": "Google",

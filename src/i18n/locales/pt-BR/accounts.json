@@ -4,7 +4,8 @@
     "description": "Escolha seu provedor de e-mail.",
     "configureTitle": "Configurar {{provider}}",
     "configureDescription": "Informe os dados da sua conta.",
-    "oauthNotice": "Você será redirecionado para o {{provider}} para entrar. O leari nunca armazena sua senha."
+    "oauthNotice": "Você será redirecionado para o {{provider}} para entrar. O leari nunca armazena sua senha.",
+    "testing": "Verificando conexão…"
   },
   "providers": {
     "google": "Google",

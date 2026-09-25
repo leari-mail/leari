@@ -61,5 +61,10 @@
     "send": "Send",
     "discard": "Discard",
     "notImplemented": "Sending is not implemented yet."
+  },
+  "sync": {
+    "refresh": "Check for new mail",
+    "syncing": "Syncing…",
+    "failed": "Sync failed"
   }
 }

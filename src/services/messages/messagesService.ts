@@ -1,6 +1,6 @@
-import { and, desc, eq, inArray, like, or, type SQL } from "drizzle-orm";
-import { getTableColumns } from "drizzle-orm";
-import { db, mailboxes, messages } from "@db";
+import { and, desc, eq, getTableColumns, inArray, like, or, type SQL } from "drizzle-orm";
+import { db, mailboxes, messages, pendingOperations } from "@db";
+import { newId } from "@lib/ids";
 import type { FolderSelection, Message, MessageSummary } from "@models";
 
 const { bodyText: _bodyText, bodyHtml: _bodyHtml, ...summaryColumns } = getTableColumns(messages);
@@ -30,6 +30,58 @@ function searchFilter(query: string): SQL | undefined {
   );
 }
 
+/** Where a message lives on the server: needed to queue changes for the sync engine. */
+async function locate(id: string) {
+  const [location] = await db
+    .select({
+      accountId: messages.accountId,
+      mailboxId: messages.mailboxId,
+      uid: messages.uid,
+      mailboxPath: mailboxes.path,
+    })
+    .from(messages)
+    .innerJoin(mailboxes, eq(messages.mailboxId, mailboxes.id))
+    .where(eq(messages.id, id))
+    .limit(1);
+  return location;
+}
+
+type Location = NonNullable<Awaited<ReturnType<typeof locate>>>;
+
+interface MovePayload {
+  mailboxPath: string;
+  uid: number;
+  targetPath: string;
+}
+
+async function pendingMove(messageId: string) {
+  const [operation] = await db
+    .select()
+    .from(pendingOperations)
+    .where(and(eq(pendingOperations.messageId, messageId), eq(pendingOperations.kind, "move")))
+    .limit(1);
+  return operation ? { id: operation.id, payload: operation.payload as MovePayload } : undefined;
+}
+
+function enqueue(
+  location: Location,
+  messageId: string,
+  kind: "flags" | "move" | "delete",
+  payload: object,
+) {
+  return db.insert(pendingOperations).values({
+    id: newId(),
+    accountId: location.accountId,
+    messageId,
+    kind,
+    payload,
+  });
+}
+
+/**
+ * Local changes are applied immediately and queued in `pending_operations`; the Rust sync
+ * engine pushes them to the server. Mutations return the account id so callers can trigger a push.
+ */
 export const messagesService = {
   list(folder: FolderSelection, search = ""): Promise<MessageSummary[]> {
     return db
@@ -45,29 +97,78 @@ export const messagesService = {
     return message ?? null;
   },
 
-  async setRead(id: string, isRead: boolean): Promise<void> {
+  async setRead(id: string, isRead: boolean): Promise<string | undefined> {
+    const location = await locate(id);
+    if (!location) return;
+
     await db.update(messages).set({ isRead }).where(eq(messages.id, id));
+    if (location.uid !== null) {
+      await enqueue(location, id, "flags", {
+        mailboxPath: location.mailboxPath,
+        uid: location.uid,
+        seen: isRead,
+      });
+    }
+    return location.accountId;
   },
 
-  async setStarred(id: string, isStarred: boolean): Promise<void> {
+  async setStarred(id: string, isStarred: boolean): Promise<string | undefined> {
+    const location = await locate(id);
+    if (!location) return;
+
     await db.update(messages).set({ isStarred }).where(eq(messages.id, id));
+    if (location.uid !== null) {
+      await enqueue(location, id, "flags", {
+        mailboxPath: location.mailboxPath,
+        uid: location.uid,
+        flagged: isStarred,
+      });
+    }
+    return location.accountId;
   },
 
-  /** Moves a message to its account's mailbox with the given role (e.g. trash, archive). */
-  async moveToRole(id: string, role: "trash" | "archive"): Promise<void> {
-    const message = await this.get(id);
-    if (!message) return;
+  /**
+   * Moves a message to its account's mailbox with the given role. Deleting from the trash
+   * (or when the account has no trash) removes it permanently.
+   */
+  async moveToRole(id: string, role: "trash" | "archive"): Promise<string | undefined> {
+    const location = await locate(id);
+    if (!location) return;
 
     const [target] = await db
-      .select({ id: mailboxes.id })
+      .select({ id: mailboxes.id, path: mailboxes.path })
       .from(mailboxes)
-      .where(and(eq(mailboxes.accountId, message.accountId), eq(mailboxes.role, role)))
+      .where(and(eq(mailboxes.accountId, location.accountId), eq(mailboxes.role, role)))
       .limit(1);
 
-    if (!target || target.id === message.mailboxId) {
-      if (role === "trash") await db.delete(messages).where(eq(messages.id, id));
-      return;
+    const deletePermanently = !target || target.id === location.mailboxId;
+
+    // A message already waiting to be moved has no UID yet: retarget the queued move instead.
+    const queued = location.uid === null ? await pendingMove(id) : undefined;
+    const source = queued
+      ? { mailboxPath: queued.payload.mailboxPath, uid: queued.payload.uid }
+      : location.uid !== null
+        ? { mailboxPath: location.mailboxPath, uid: location.uid }
+        : undefined;
+    if (queued) await db.delete(pendingOperations).where(eq(pendingOperations.id, queued.id));
+
+    if (deletePermanently) {
+      await db.delete(messages).where(eq(messages.id, id));
+      if (source) await enqueue(location, id, "delete", source);
+      return location.accountId;
     }
-    await db.update(messages).set({ mailboxId: target.id }).where(eq(messages.id, id));
+
+    // Moved back to where the server still has it: nothing to push, the UID is valid again.
+    if (source?.mailboxPath === target.path) {
+      await db
+        .update(messages)
+        .set({ mailboxId: target.id, uid: source.uid })
+        .where(eq(messages.id, id));
+      return location.accountId;
+    }
+
+    await db.update(messages).set({ mailboxId: target.id, uid: null }).where(eq(messages.id, id));
+    if (source) await enqueue(location, id, "move", { ...source, targetPath: target.path });
+    return location.accountId;
   },
 };

@@ -20,6 +20,13 @@
   },
   "errors": {
     "generic": "Algo deu errado.",
-    "startup": "O leari não conseguiu abrir o banco de dados."
+    "startup": "O leari não conseguiu abrir o banco de dados.",
+    "kinds": {
+      "auth": "Falha ao entrar. Verifique usuário e senha.",
+      "network": "Não foi possível conectar ao servidor. Verifique servidor, porta e sua conexão.",
+      "unsupported": "Isso ainda não é suportado.",
+      "protocol": "O servidor recusou a solicitação.",
+      "other": "Algo deu errado."
+    }
   }
 }

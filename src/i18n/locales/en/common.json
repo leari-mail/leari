@@ -20,6 +20,13 @@
   },
   "errors": {
     "generic": "Something went wrong.",
-    "startup": "leari could not open its database."
+    "startup": "leari could not open its database.",
+    "kinds": {
+      "auth": "Sign-in failed. Check your username and password.",
+      "network": "Can't reach the server. Check the host, port and your connection.",
+      "unsupported": "This isn't supported yet.",
+      "protocol": "The server rejected the request.",
+      "other": "Something went wrong."
+    }
   }
 }

@@ -7,6 +7,7 @@ import { cn } from "@lib";
 import { useMailStore } from "@stores";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@ui";
 import { AccountDot } from "./AccountDot";
+import { AccountSyncIndicator } from "./AccountSyncIndicator";
 import { RemoveAccountDialog } from "./RemoveAccountDialog";
 
 interface AccountSectionProps {
@@ -43,6 +44,7 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
             />
             <AccountDot color={account.color} />
             <span className="flex-1 truncate text-left font-medium">{account.email}</span>
+            <AccountSyncIndicator accountId={account.id} />
             {!expanded && inboxUnread > 0 && (
               <span className="text-xs text-muted-foreground tabular-nums">{inboxUnread}</span>
             )}
