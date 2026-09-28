@@ -4,25 +4,32 @@ import { useTranslation } from "react-i18next";
 import { AccountEdge } from "@components/accounts";
 import { SenderAvatar } from "@components/common";
 import { cn, formatListDate } from "@lib";
-import type { Account, MessageSummary } from "@models";
+import type { Account, Conversation } from "@models";
 
 interface MessageListItemProps {
-  message: MessageSummary;
+  /** A conversation (or a single message), shown through its newest message. */
+  conversation: Conversation;
   /** Set when the list mixes accounts: shown as a colored left edge. */
   account?: Account;
   selected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: () => void;
 }
 
-export function MessageListItem({ message, account, selected, onSelect }: MessageListItemProps) {
+export function MessageListItem({
+  conversation,
+  account,
+  selected,
+  onSelect,
+}: MessageListItemProps) {
   const { t, i18n } = useTranslation(["mail", "common"]);
-  const unread = !message.isRead;
+  const message = conversation;
+  const unread = conversation.unreadCount > 0;
 
   return (
     <button
       type="button"
       data-message-id={message.id}
-      onClick={() => onSelect(message.id)}
+      onClick={onSelect}
       className={cn(
         "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
         selected
@@ -51,8 +58,19 @@ export function MessageListItem({ message, account, selected, onSelect }: Messag
           >
             {message.fromName || message.fromAddress}
           </span>
+          {conversation.count > 1 && (
+            <span
+              aria-label={t("mail:list.conversationCount", { count: conversation.count })}
+              className={cn(
+                "shrink-0 rounded-full px-1.5 text-[10px] leading-4 font-semibold tabular-nums",
+                selected ? "bg-list-selected-foreground/20" : "bg-muted text-muted-foreground",
+              )}
+            >
+              {conversation.count}
+            </span>
+          )}
           {message.hasAttachments && <Paperclip className="size-3 shrink-0 opacity-60" />}
-          {message.isStarred && (
+          {conversation.starred && (
             <Star
               className={cn("size-3 shrink-0", selected ? "fill-current" : "fill-star text-star")}
             />

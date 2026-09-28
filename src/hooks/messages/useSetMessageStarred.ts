@@ -1,17 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { messagesService, syncService } from "@services";
+import { messagesService } from "@services";
 
+import { applyToMessages } from "./applyToMessages";
 import { useInvalidateMail } from "./useInvalidateMail";
 
 export function useSetMessageStarred() {
   const invalidate = useInvalidateMail();
   return useMutation({
-    mutationFn: ({ id, isStarred }: { id: string; isStarred: boolean }) =>
-      messagesService.setStarred(id, isStarred),
-    onSuccess: (accountId) => {
-      if (accountId) void syncService.push(accountId);
-      return invalidate();
-    },
+    mutationFn: ({ ids, isStarred }: { ids: string[]; isStarred: boolean }) =>
+      applyToMessages(ids, (id) => messagesService.setStarred(id, isStarred)),
+    onSuccess: invalidate,
   });
 }

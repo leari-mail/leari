@@ -1,4 +1,15 @@
-import { and, desc, eq, getTableColumns, inArray, like, or, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  like,
+  notInArray,
+  or,
+  type SQL,
+} from "drizzle-orm";
 
 import { db, mailboxes, messages, pendingOperations } from "@db";
 import { newId } from "@lib/ids";
@@ -96,6 +107,45 @@ export const messagesService = {
   async get(id: string): Promise<Message | null> {
     const [message] = await db.select().from(messages).where(eq(messages.id, id)).limit(1);
     return message ?? null;
+  },
+
+  /**
+   * All messages of a message's conversation in its account (e.g. inbox and your replies in
+   * Sent), oldest first. Trash and spam are left out unless the message itself is there.
+   */
+  async conversation(messageId: string): Promise<Message[]> {
+    const message = await this.get(messageId);
+    if (!message) return [];
+    if (!message.threadId) return [message];
+
+    const hidden = await db
+      .select({ id: mailboxes.id })
+      .from(mailboxes)
+      .where(
+        and(eq(mailboxes.accountId, message.accountId), inArray(mailboxes.role, ["trash", "spam"])),
+      );
+    const hiddenIds = hidden.map((mailbox) => mailbox.id).filter((id) => id !== message.mailboxId);
+
+    const rows = await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          eq(messages.accountId, message.accountId),
+          eq(messages.threadId, message.threadId),
+          hiddenIds.length ? notInArray(messages.mailboxId, hiddenIds) : undefined,
+        ),
+      )
+      .orderBy(asc(messages.date));
+
+    // The same message can exist in two folders (e.g. copied to Archive): show it once.
+    const seen = new Set<string>();
+    return rows.filter((row) => {
+      const key = row.messageIdHeader ?? row.id;
+      if (seen.has(key)) return row.id === message.id;
+      seen.add(key);
+      return true;
+    });
   },
 
   async setRead(id: string, isRead: boolean): Promise<string | undefined> {

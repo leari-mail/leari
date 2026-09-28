@@ -16,6 +16,8 @@ export function SettingsDialog() {
   const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
   const setMarkAsReadOnOpen = useSettingsStore((state) => state.setMarkAsReadOnOpen);
   const version = useAppVersion();
+  const groupByConversation = useSettingsStore((state) => state.groupByConversation);
+  const setGroupByConversation = useSettingsStore((state) => state.setGroupByConversation);
   const notifyNewMail = useSettingsStore((state) => state.notifyNewMail);
   const setNotifyNewMail = useSettingsStore((state) => state.setNotifyNewMail);
   const showUnreadInMenuBar = useSettingsStore((state) => state.showUnreadInMenuBar);
@@ -47,6 +49,13 @@ export function SettingsDialog() {
               id="settings-mark-read"
               checked={markAsReadOnOpen}
               onCheckedChange={setMarkAsReadOnOpen}
+            />
+          </SettingsRow>
+          <SettingsRow label={t("groupByConversation")} htmlFor="settings-conversations">
+            <Switch
+              id="settings-conversations"
+              checked={groupByConversation}
+              onCheckedChange={setGroupByConversation}
             />
           </SettingsRow>
         </section>

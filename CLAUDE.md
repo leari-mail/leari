@@ -37,9 +37,10 @@ closing the window hides it.
 ## Commands
 
 - `pnpm app`: run the app (tauri dev)
-- `pnpm check`: run before finishing a change (types, ESLint, Prettier, rustfmt, clippy `-D warnings`, Rust tests)
+- `pnpm check`: run before finishing a change (types, ESLint, Prettier, Vitest, rustfmt, clippy `-D warnings`, Rust tests)
 - `pnpm lint:fix`: autofix, including import sorting (packages → aliases → relative)
 - `pnpm format`: Prettier (with tailwind class sorting)
+- `pnpm test`: frontend unit tests (Vitest, `src/**/*.test.ts`).
 - `pnpm test:rust`: Rust unit tests. The IMAP end-to-end test is ignored by default (see README, "Testing IMAP sync locally")
 
 ## Brand

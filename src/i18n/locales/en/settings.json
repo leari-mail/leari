@@ -13,5 +13,6 @@
   "about": "Leari is open source software, named after the Lear's macaw (Anodorhynchus leari).",
   "notifications": "Notifications",
   "notifyNewMail": "Notify me about new mail",
-  "showUnreadInMenuBar": "Show unread count in the menu bar"
+  "showUnreadInMenuBar": "Show unread count in the menu bar",
+  "groupByConversation": "Group messages by conversation"
 }

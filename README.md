@@ -48,10 +48,7 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
 - [x] New mail notifications and unread count in the menu bar
 - [x] POP3 download (mail left on the server; everything else local)
 - [x] Instant new mail (IMAP IDLE)
-
-**Next**
-
-- [ ] Threaded conversations
+- [x] Threaded conversations
 
 **Enterprise**
 
@@ -125,6 +122,7 @@ signature, and every rebuild is a new binary. Dev builds are therefore signed wi
 | `pnpm typecheck`      | TypeScript check                                                  |
 | `pnpm lint`           | ESLint (`pnpm lint:fix` to autofix, `pnpm lint:rust` for clippy)  |
 | `pnpm format`         | Prettier and rustfmt (`pnpm format:check` to verify only)         |
+| `pnpm test`           | Frontend unit tests (Vitest)                                      |
 | `pnpm test:rust`      | Rust unit tests                                                   |
 | `pnpm db:generate`    | Generate a migration after changing `src/db/schema`               |
 | `pnpm ui:add <name>`  | Add a shadcn/ui component, split into one file per component      |

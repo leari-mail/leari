@@ -33,7 +33,9 @@
     "emptyDescription": "Nenhuma mensagem aqui. Aproveite o silêncio.",
     "noResultsTitle": "Nenhum resultado",
     "noResultsDescription": "Nada encontrado para \"{{query}}\".",
-    "noSubject": "(sem assunto)"
+    "noSubject": "(sem assunto)",
+    "conversationCount_one": "{{count}} mensagem",
+    "conversationCount_other": "{{count}} mensagens"
   },
   "reader": {
     "emptyTitle": "Nenhuma mensagem selecionada",
@@ -49,7 +51,9 @@
     "markUnread": "Marcar como não lida",
     "to": "Para",
     "cc": "Cc",
-    "attachments": "Possui anexos"
+    "attachments": "Possui anexos",
+    "messageCount_one": "{{count}} mensagem",
+    "messageCount_other": "{{count}} mensagens"
   },
   "composer": {
     "title": "Nova mensagem",

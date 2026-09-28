@@ -494,7 +494,58 @@ async fn pop3_download_round_trip() {
         .unwrap();
     let raw = crate::mail::pop3::sync::fetch_raw(&account, &env.password, &uidl).await.unwrap();
     assert!(String::from_utf8_lossy(&raw).contains("Subject: two"));
+}
 
+/// A reply that only names its parent (In-Reply-To, no References) joins the parent's thread.
+#[tokio::test]
+#[ignore = "needs a disposable IMAP server, see module docs"]
+async fn imap_threads_follow_in_reply_to() {
+    let _server = SERVER_LOCK.lock().await;
+    let env = env();
+    let db = database().await;
+    let account = create_account(&db, &env).await;
+    let mut server = server_session(&env).await;
+    reset_server(&mut server).await;
+
+    let mail = |id: &str, subject: &str, headers: &str| {
+        format!(
+            "From: Ana <ana@example.com>\r\nTo: leari@localhost\r\nSubject: {subject}\r\n\
+             Message-ID: <{id}>\r\n{headers}Date: Tue, 1 Sep 2026 10:00:00 +0000\r\n\r\nBody\r\n"
+        )
+    };
+    server.append("INBOX", None, None, mail("root@x", "Plan", "")).await.unwrap();
+    server
+        .append(
+            "INBOX",
+            None,
+            None,
+            mail("r1@x", "Re: Plan", "In-Reply-To: <root@x>\r\nReferences: <root@x>\r\n"),
+        )
+        .await
+        .unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+
+    // Only In-Reply-To, pointing at a reply: must still land in the root's thread.
+    server
+        .append("INBOX", None, None, mail("r2@x", "Re: Plan", "In-Reply-To: <r1@x>\r\n"))
+        .await
+        .unwrap();
+    sync::sync_account(&db, &account, Auth::Password(&env.password), &|| {}).await.unwrap();
+
+    let threads: Vec<(String, Option<String>)> = sqlx::query_as(
+        "SELECT message_id_header, thread_id FROM messages ORDER BY message_id_header",
+    )
+    .fetch_all(&db)
+    .await
+    .unwrap();
+    assert_eq!(
+        threads,
+        [
+            ("r1@x".into(), Some("root@x".into())),
+            ("r2@x".into(), Some("root@x".into())),
+            ("root@x".into(), Some("root@x".into())),
+        ]
+    );
     server.logout().await.ok();
 }
 

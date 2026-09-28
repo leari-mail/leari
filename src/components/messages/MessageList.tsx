@@ -3,7 +3,7 @@ import { type KeyboardEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@components/common";
-import { useAccounts, useMessages } from "@hooks";
+import { useAccounts, useConversations } from "@hooks";
 import { useMailStore } from "@stores";
 import { ScrollArea } from "@ui";
 
@@ -14,7 +14,7 @@ import { MessageListSkeleton } from "./MessageListSkeleton";
 /** Middle pane: folder header, search and the list of messages. */
 export function MessageList() {
   const { t } = useTranslation("mail");
-  const { data: messages = [], isPending } = useMessages();
+  const { data: messages = [], conversations, isPending } = useConversations();
   const { data: accounts = [] } = useAccounts();
   const isUnified = useMailStore((state) => state.folder.kind === "unified");
   const search = useMailStore((state) => state.searchQuery);
@@ -32,18 +32,18 @@ export function MessageList() {
   // ↑/↓ (or k/j) moves the selection through the list.
   const onKeyDown = (event: KeyboardEvent) => {
     const step = { ArrowDown: 1, j: 1, ArrowUp: -1, k: -1 }[event.key];
-    if (!step || messages.length === 0) return;
+    if (!step || conversations.length === 0) return;
     event.preventDefault();
 
-    const index = messages.findIndex((message) => message.id === selectedId);
-    const next = messages[Math.min(Math.max(index + step, 0), messages.length - 1)];
-    selectMessage(next.id);
+    const index = conversations.findIndex((conversation) => conversation.id === selectedId);
+    const next = conversations[Math.min(Math.max(index + step, 0), conversations.length - 1)];
+    selectMessage(next.id, next.messageIds);
     document.querySelector(`[data-message-id="${next.id}"]`)?.scrollIntoView({ block: "nearest" });
   };
 
   const renderBody = () => {
     if (isPending) return <MessageListSkeleton />;
-    if (messages.length === 0) {
+    if (conversations.length === 0) {
       return search ? (
         <EmptyState
           icon={<SearchX />}
@@ -66,13 +66,13 @@ export function MessageList() {
           onKeyDown={onKeyDown}
           className="space-y-0.5 p-2 outline-none"
         >
-          {messages.map((message) => (
+          {conversations.map((conversation) => (
             <MessageListItem
-              key={message.id}
-              message={message}
-              account={showAccounts ? accountsById.get(message.accountId) : undefined}
-              selected={message.id === selectedId}
-              onSelect={selectMessage}
+              key={conversation.id}
+              conversation={conversation}
+              account={showAccounts ? accountsById.get(conversation.accountId) : undefined}
+              selected={conversation.id === selectedId}
+              onSelect={() => selectMessage(conversation.id, conversation.messageIds)}
             />
           ))}
         </div>
