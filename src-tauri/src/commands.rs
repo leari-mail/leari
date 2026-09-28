@@ -51,8 +51,10 @@ pub fn credentials_set_password(account_id: String, password: String) -> Result<
     credentials::set_password(&account_id, &password)
 }
 
+/// Removes an account's secrets and stops its IDLE connection.
 #[tauri::command]
-pub fn credentials_delete(account_id: String) -> Result<()> {
+pub fn credentials_delete(engine: State<'_, Arc<SyncEngine>>, account_id: String) -> Result<()> {
+    engine.stop_watcher(&account_id);
     credentials::delete(&account_id)
 }
 

@@ -497,3 +497,36 @@ async fn pop3_download_round_trip() {
 
     server.logout().await.ok();
 }
+
+/// IDLE wakes up when another client delivers mail, and times out quietly otherwise.
+#[tokio::test]
+#[ignore = "needs a disposable IMAP server, see module docs"]
+async fn imap_idle_wakes_on_new_mail() {
+    let _server = SERVER_LOCK.lock().await;
+    let env = env();
+    let mut watcher = server_session(&env).await;
+    let mut other = server_session(&env).await;
+    reset_server(&mut other).await;
+
+    // Quiet mailbox: IDLE ends by timeout and the session stays usable.
+    watcher.examine("INBOX").await.unwrap();
+    let (watcher, wake) =
+        super::idle::wait_for_change(watcher, std::time::Duration::from_secs(2)).await.unwrap();
+    assert_eq!(wake, super::idle::Wake::Timeout);
+
+    // New mail from another connection wakes it up.
+    let delivery = tokio::spawn(async move {
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        other.append("INBOX", None, None, message("pushed")).await.unwrap();
+        other
+    });
+    let started = std::time::Instant::now();
+    let (mut watcher, wake) =
+        super::idle::wait_for_change(watcher, std::time::Duration::from_secs(20)).await.unwrap();
+    assert_eq!(wake, super::idle::Wake::Changed);
+    assert!(started.elapsed() < std::time::Duration::from_secs(10), "woke up promptly");
+
+    watcher.noop().await.unwrap();
+    watcher.logout().await.ok();
+    delivery.await.unwrap().logout().await.ok();
+}

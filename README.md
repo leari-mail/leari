@@ -47,11 +47,11 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
 - [x] Attachments (open, save, attach, forward) and embedded images
 - [x] New mail notifications and unread count in the menu bar
 - [x] POP3 download (mail left on the server; everything else local)
+- [x] Instant new mail (IMAP IDLE)
 
 **Next**
 
 - [ ] Threaded conversations
-- [ ] Instant new mail (IMAP IDLE)
 
 **Enterprise**
 
@@ -184,7 +184,8 @@ security **None**, username `leari` and password `secret`.
 ## How sync works
 
 - The Rust engine (`src-tauri/src/mail`, `src-tauri/src/sync`) syncs every account on start
-  and every 5 minutes. It opens the same SQLite file as the UI, in WAL mode.
+  and every 5 minutes, and keeps an IMAP IDLE connection per account so new mail arrives
+  instantly. It opens the same SQLite file as the UI, in WAL mode.
 - Each sync pushes queued local changes first, then reconciles folders, updates flags,
   removes expunged messages and downloads new ones (the latest 200 per folder on first sync).
 - Changes made in the UI (read, star, archive, delete) are applied locally right away and

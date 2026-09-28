@@ -9,21 +9,20 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Added
+
+- Instant new mail: IMAP accounts keep an IDLE connection to the inbox, so new mail shows up
+  (and notifies) right away instead of at the next 5-minute sync
+- Notifications for new mail in inboxes (one per message, or a summary when many arrive)
+- Unread count next to the menu bar icon (tooltip on Windows)
+- Settings to turn both off
+- POP3 accounts: new mail is downloaded into the inbox and left on the server; read state,
+  folders and deleting are local; sent mail is kept in the local Sent folder
+
 ### Changed
 
 - The product is written "Leari" (capital L) in the app's texts, menu bar and docs; file names
   (`leari.app`, installers) stay lowercase
-
-### Added
-
-- POP3 accounts: new mail is downloaded into the inbox and left on the server; read state,
-  folders and deleting are local; sent mail is kept in the local Sent folder
-- Notifications for new mail in inboxes (one per message, or a summary when many arrive)
-- Unread count next to the menu bar icon (tooltip on Windows)
-- Settings to turn both off
-
-### Changed
-
 - The account marker in lists is now a background tint in the account's color, fading from left
   to right (the old dot looked like an unread marker); the reader names the account the same
   way. Both are hidden with a single account
