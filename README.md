@@ -22,6 +22,14 @@ found only in Bahia, Brazil. Another bird is also behind it: Leari is a homage t
 client that inspired its look and feel.
 The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors and icon.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/leari-dark.png" />
+    <img src="docs/screenshots/leari-light.png" width="900"
+      alt="Leari with two accounts: the unified inbox, and a conversation open in the reader" />
+  </picture>
+</p>
+
 ## Features
 
 - **Multi-account:** Google / Workspace, Outlook / Microsoft 365, and any IMAP or POP3 server
@@ -127,6 +135,7 @@ signature, and every rebuild is a new binary. Dev builds are therefore signed wi
 | `pnpm db:generate`    | Generate a migration after changing `src/db/schema`               |
 | `pnpm ui:add <name>`  | Add a shadcn/ui component, split into one file per component      |
 | `pnpm release <bump>` | Cut a release (see [Releasing](#releasing))                       |
+| `pnpm screenshots`    | macOS: regenerate the README screenshots from demo data           |
 
 A pre-commit hook (husky + lint-staged) lints and formats staged files.
 

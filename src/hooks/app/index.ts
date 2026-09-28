@@ -6,5 +6,6 @@ export { useFileDrop } from "./useFileDrop";
 export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 export { useNotificationSettings } from "./useNotificationSettings";
 export { useNow } from "./useNow";
+export { useScreenshotMode } from "./useScreenshotMode";
 export { useTrayBadge } from "./useTrayBadge";
 export { useTrayEvents } from "./useTrayEvents";

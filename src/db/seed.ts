@@ -4,14 +4,14 @@ import { newId } from "@lib/ids";
 import type { MailboxRole, NewMailbox, NewMessage } from "@models";
 
 import { db } from "./client";
-import { accounts, mailboxes, messages } from "./schema";
+import { accounts, attachments, mailboxes, messages } from "./schema";
 
-const HOUR = 60 * 60 * 1000;
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 const standardMailboxes: Array<{ role: MailboxRole; name: string; path: string }> = [
   { role: "inbox", name: "Inbox", path: "INBOX" },
-  { role: "starred", name: "Starred", path: "Starred" },
   { role: "sent", name: "Sent", path: "Sent" },
   { role: "drafts", name: "Drafts", path: "Drafts" },
   { role: "archive", name: "Archive", path: "Archive" },
@@ -24,93 +24,120 @@ interface DemoMessage {
   subject: string;
   body: string;
   ago: number;
+  /** Folder role (default inbox). */
+  folder?: MailboxRole;
   isRead?: boolean;
   isStarred?: boolean;
-  hasAttachments?: boolean;
+  /** Messages with the same thread show as one conversation. */
+  thread?: string;
+  attachments?: Array<[string, string, number]>;
 }
 
-const personalInbox: DemoMessage[] = [
+/** Fictional persona and mail, used for development and README screenshots. */
+const me = { name: "Maya Oliveira" };
+
+const personal: DemoMessage[] = [
   {
-    from: ["Instituto Arara-azul", "news@araraazul.org"],
-    subject: "Lear's macaw census: population keeps growing",
-    body: "Great news from the Raso da Catarina! This season's count shows the Lear's macaw population continuing to recover thanks to licuri palm protection.\n\nThank you for supporting the project.",
-    ago: 0.4 * HOUR,
+    from: ["Rafael Lima", "rafael@example.com"],
+    subject: "Weekend trip to Bahia",
+    body: "Hey Maya!\n\nWe're thinking of driving up to the Raso da Catarina on Saturday to see the macaws at sunrise. Want to join? We'd leave at 4 a.m. — I know, I know.\n\nRafa",
+    ago: 1 * DAY + 3 * HOUR,
+    thread: "trip",
+  },
+  {
+    from: [me.name, "maya@example.com"],
+    subject: "Re: Weekend trip to Bahia",
+    body: "Count me in! I'll bring coffee (a lot of it) and the binoculars.\n\n> We'd leave at 4 a.m.\n\nOnly for the macaws.",
+    ago: 1 * DAY,
+    folder: "sent",
+    thread: "trip",
+  },
+  {
+    from: ["Rafael Lima", "rafael@example.com"],
+    subject: "Re: Weekend trip to Bahia",
+    body: "Perfect. Marina is coming too, she has a spot in her car for the three of us.\n\nThe guide says there were more than 200 birds at the canyon last week. Bring a jacket, it's cold before dawn!\n\nSee you Saturday 🦜",
+    ago: 25 * MINUTE,
+    isRead: false,
+    thread: "trip",
+  },
+  {
+    from: ["Instituto Arara-azul", "news@araraazul.example"],
+    subject: "Lear's macaw census: the population keeps growing",
+    body: "This season's count at the Raso da Catarina shows the Lear's macaw population recovering, thanks to the protection of licuri palms and the work of local communities.\n\nThank you for supporting the project.",
+    ago: 3 * HOUR,
+    isRead: false,
+    isStarred: true,
   },
   {
     from: ["Marina Costa", "marina@example.com"],
-    subject: "Trip photos 📸",
-    body: "Hey! I finally uploaded the photos from Bahia. The ones at sunset near the cliffs are my favorites.\n\nLet me know which ones you want printed.",
-    ago: 3 * HOUR,
-    hasAttachments: true,
+    subject: "Photos from the canyon",
+    body: "Uploaded my favorites from last month — the sunset ones came out great.",
+    ago: 6 * HOUR,
+    attachments: [
+      ["canyon-sunset.jpg", "image/jpeg", 2_480_000],
+      ["macaws-flying.jpg", "image/jpeg", 3_120_000],
+    ],
   },
   {
-    from: ["GitHub", "noreply@github.com"],
-    subject: "[leari-mail/leari] New star on your repository",
-    body: "Someone starred leari-mail/leari. Keep building!",
-    ago: 20 * HOUR,
-    isRead: true,
+    from: ["Bookshelf Club", "hello@bookshelf.example"],
+    subject: "October pick: “The Birds of Brazil”",
+    body: "Our next read is a field guide with a twist: stories from the naturalists who first described Brazil's birds. Meetup on the 14th.",
+    ago: 2 * DAY,
   },
   {
-    from: ["Rafael Lima", "rafa@example.com"],
-    subject: "Churrasco no sábado?",
-    body: "Fala! Vamos marcar aquele churrasco no sábado? Eu levo a picanha, você leva a farofa.\n\nAbraço",
-    ago: 1.2 * DAY,
-    isStarred: true,
-  },
-  {
-    from: ["Nubank", "no-reply@nubank.com.br"],
-    subject: "Sua fatura fechou",
-    body: "Olá! A fatura do seu cartão fechou. Confira os detalhes no app.",
+    from: ["Northwind Travel", "trips@northwind-travel.example"],
+    subject: "Your booking is confirmed",
+    body: "Salvador → Paulo Afonso, Friday 8:40 AM. Seat 4A. Have a great trip!",
     ago: 3 * DAY,
-    isRead: true,
-  },
-  {
-    from: ["Tauri", "newsletter@tauri.app"],
-    subject: "What's new in Tauri 2",
-    body: "Mobile support, a new plugin system, capabilities and much more. Read the full release notes on our blog.",
-    ago: 9 * DAY,
-    isRead: true,
   },
 ];
 
-const workInbox: DemoMessage[] = [
+const work: DemoMessage[] = [
   {
-    from: ["Ana Ribeiro", "ana.ribeiro@contoso.com"],
+    from: ["Ana Ribeiro", "ana@northwind.example"],
     subject: "Q4 roadmap review",
-    body: "Hi team,\n\nPlease review the Q4 roadmap draft before Thursday's meeting. I've highlighted the items that still need owners.\n\nThanks,\nAna",
-    ago: 1.5 * HOUR,
+    body: "Hi team,\n\nPlease review the Q4 roadmap before Thursday's meeting. I highlighted the items that still need owners.\n\nThanks,\nAna",
+    ago: 90 * MINUTE,
+    isRead: false,
     isStarred: true,
-    hasAttachments: true,
+    attachments: [["roadmap-q4.pdf", "application/pdf", 842_000]],
   },
   {
-    from: ["Microsoft Teams", "noreply@teams.microsoft.com"],
-    subject: "You have 3 unread messages in #design",
-    body: "Catch up on the conversation in #design.",
-    ago: 5 * HOUR,
+    from: ["Carlos Mendes", "carlos@northwind.example"],
+    subject: "Release checklist",
+    body: "Draft of the release checklist is in the shared folder. Can you check the QA section?",
+    ago: 1 * DAY + 5 * HOUR,
+    thread: "release",
   },
   {
-    from: ["Carlos Mendes", "carlos.mendes@contoso.com"],
-    subject: "Re: Onboarding checklist",
-    body: "Looks good to me. I added two items about VPN access and the security training.",
-    ago: 2 * DAY,
-    isRead: true,
+    from: [me.name, "maya@northwind.example"],
+    subject: "Re: Release checklist",
+    body: "Looks good. I added two items about the migration and the rollback plan.",
+    ago: 1 * DAY + 2 * HOUR,
+    folder: "sent",
+    thread: "release",
   },
   {
-    from: ["HR", "hr@contoso.com"],
+    from: ["Carlos Mendes", "carlos@northwind.example"],
+    subject: "Re: Release checklist",
+    body: "Great additions, merged them. We're good to go on Monday.",
+    ago: 4 * HOUR,
+    thread: "release",
+  },
+  {
+    from: ["People Team", "people@northwind.example"],
     subject: "Holiday calendar 2027",
     body: "The holiday calendar for next year is now available on the intranet.",
-    ago: 6 * DAY,
-    isRead: true,
+    ago: 4 * DAY,
   },
 ];
 
 async function seedAccount(options: {
-  name: string;
   email: string;
   color: string;
   provider: "google" | "microsoft";
   sortOrder: number;
-  inbox: DemoMessage[];
+  mail: DemoMessage[];
 }) {
   const accountId = newId();
   const isGoogle = options.provider === "google";
@@ -118,7 +145,7 @@ async function seedAccount(options: {
   await db.insert(accounts).values({
     id: accountId,
     provider: options.provider,
-    name: options.name,
+    name: me.name,
     email: options.email,
     color: options.color,
     authType: "oauth2",
@@ -131,6 +158,9 @@ async function seedAccount(options: {
     smtpPort: isGoogle ? 465 : 587,
     smtpSecurity: isGoogle ? "ssl" : "starttls",
     sortOrder: options.sortOrder,
+    // Demo accounts have no real server: never try to sync them.
+    syncEnabled: false,
+    lastSyncedAt: new Date(Date.now() - 3 * MINUTE),
   });
 
   const boxes: NewMailbox[] = standardMailboxes.map((mailbox, index) => ({
@@ -140,32 +170,49 @@ async function seedAccount(options: {
     sortOrder: index,
   }));
   await db.insert(mailboxes).values(boxes);
+  const boxId = (role: MailboxRole) => boxes.find((box) => box.role === role)!.id;
 
-  const inbox = boxes[0];
   const now = Date.now();
-  const rows: NewMessage[] = options.inbox.map((demo, index) => ({
-    id: newId(),
-    accountId,
-    mailboxId: inbox.id,
-    uid: index + 1,
-    subject: demo.subject,
-    fromName: demo.from[0],
-    fromAddress: demo.from[1],
-    to: [{ name: options.name, address: options.email }],
-    snippet: demo.body.replace(/\s+/g, " ").slice(0, 140),
-    bodyText: demo.body,
-    date: new Date(now - demo.ago),
-    isRead: demo.isRead ?? false,
-    isStarred: demo.isStarred ?? false,
-    hasAttachments: demo.hasAttachments ?? false,
-  }));
-  await db.insert(messages).values(rows);
+  for (const [index, demo] of options.mail.entries()) {
+    const id = newId();
+    const row: NewMessage = {
+      id,
+      accountId,
+      mailboxId: boxId(demo.folder ?? "inbox"),
+      uid: index + 1,
+      messageIdHeader: `${id}@demo.example`,
+      threadId: demo.thread ? `${demo.thread}@${options.email}` : null,
+      subject: demo.subject,
+      fromName: demo.from[0],
+      fromAddress: demo.from[1],
+      to:
+        demo.folder === "sent"
+          ? [{ name: "Rafael Lima", address: "rafael@example.com" }]
+          : [{ name: me.name, address: options.email }],
+      snippet: demo.body.replace(/\s+/g, " ").slice(0, 160),
+      bodyText: demo.body,
+      date: new Date(now - demo.ago),
+      isRead: demo.isRead ?? true,
+      isStarred: demo.isStarred ?? false,
+      hasAttachments: !!demo.attachments?.length,
+    };
+    await db.insert(messages).values(row);
+    for (const [partIndex, [filename, mimeType, size]] of (demo.attachments ?? []).entries()) {
+      await db
+        .insert(attachments)
+        .values({ id: newId(), messageId: id, filename, mimeType, size, partIndex });
+    }
+  }
 
-  const unread = rows.filter((row) => !row.isRead).length;
+  const inboxId = boxId("inbox");
+  const inbox = options.mail.filter((demo) => (demo.folder ?? "inbox") === "inbox");
   await db
     .update(mailboxes)
-    .set({ unreadCount: unread, totalCount: rows.length })
-    .where(eq(mailboxes.id, inbox.id));
+    .set({
+      totalCount: inbox.length,
+      unreadCount: inbox.filter((demo) => demo.isRead === false).length,
+    })
+    .where(eq(mailboxes.id, inboxId));
 }
 
 /** Development only: fills an empty database with demo accounts and messages. */
@@ -174,19 +221,17 @@ export async function seedDemoData(): Promise<void> {
   if (existing.length > 0) return;
 
   await seedAccount({
-    name: "Pablo Souza",
-    email: "pablo@gmail.com",
+    email: "maya@example.com",
     color: "#3552b8",
     provider: "google",
     sortOrder: 0,
-    inbox: personalInbox,
+    mail: personal,
   });
   await seedAccount({
-    name: "Pablo Souza",
-    email: "pablo.souza@contoso.com",
+    email: "maya@northwind.example",
     color: "#e8b923",
     provider: "microsoft",
     sortOrder: 1,
-    inbox: workInbox,
+    mail: work,
   });
 }
