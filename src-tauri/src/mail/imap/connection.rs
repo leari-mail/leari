@@ -1,22 +1,12 @@
-use std::fmt::Debug;
-use std::time::Duration;
-
 use async_imap::{Client, Session};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::net::TcpStream;
 use tokio::time::timeout;
-use tokio_native_tls::{native_tls, TlsConnector};
 
 use crate::error::{Error, Result};
 use crate::mail::account::{Security, ServerConfig};
 pub use crate::mail::auth::Auth;
-
-const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
-
-pub trait Stream: AsyncRead + AsyncWrite + Unpin + Send + Debug {}
-impl<T: AsyncRead + AsyncWrite + Unpin + Send + Debug> Stream for T {}
+use crate::mail::net::{self, Stream, CONNECT_TIMEOUT};
 
 pub type ImapSession = Session<Box<dyn Stream>>;
 
@@ -37,12 +27,6 @@ pub fn xoauth2_payload(username: &str, access_token: &str) -> String {
     format!("user={username}\x01auth=Bearer {access_token}\x01\x01")
 }
 
-async fn tls_wrap(host: &str, tcp: TcpStream) -> Result<Box<dyn Stream>> {
-    let connector = TlsConnector::from(native_tls::TlsConnector::new()?);
-    let tls = timeout(CONNECT_TIMEOUT, connector.connect(host, tcp)).await??;
-    Ok(Box::new(tls))
-}
-
 async fn read_greeting<T: Stream>(client: &mut Client<T>) -> Result<()> {
     match timeout(CONNECT_TIMEOUT, client.read_response()).await?? {
         Some(_) => Ok(()),
@@ -52,12 +36,11 @@ async fn read_greeting<T: Stream>(client: &mut Client<T>) -> Result<()> {
 
 /// Opens a connection (implicit TLS, STARTTLS or plain) and logs in.
 pub async fn connect(server: &ServerConfig, username: &str, auth: Auth<'_>) -> Result<ImapSession> {
-    let tcp =
-        timeout(CONNECT_TIMEOUT, TcpStream::connect((server.host.as_str(), server.port))).await??;
+    let tcp = net::tcp(&server.host, server.port).await?;
 
     let client: Client<Box<dyn Stream>> = match server.security {
         Security::Ssl => {
-            let mut client = Client::new(tls_wrap(&server.host, tcp).await?);
+            let mut client = Client::new(net::tls(&server.host, tcp).await?);
             read_greeting(&mut client).await?;
             client
         }
@@ -65,7 +48,7 @@ pub async fn connect(server: &ServerConfig, username: &str, auth: Auth<'_>) -> R
             let mut plain = Client::new(tcp);
             read_greeting(&mut plain).await?;
             plain.run_command_and_check_ok("STARTTLS", None).await?;
-            Client::new(tls_wrap(&server.host, plain.into_inner()).await?)
+            Client::new(net::tls(&server.host, plain.into_inner()).await?)
         }
         Security::None => {
             let mut client = Client::new(Box::new(tcp) as Box<dyn Stream>);

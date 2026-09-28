@@ -209,3 +209,14 @@ pub fn tray_set_unread(app: AppHandle, count: u32) {
 pub fn notifications_configure(enabled: bool, language: String) {
     crate::notify::configure(enabled, language);
 }
+
+/// Checks that a POP3 server is reachable and accepts the credentials.
+#[tauri::command]
+pub async fn pop3_test_connection(
+    server: ServerConfig,
+    username: String,
+    password: String,
+) -> Result<()> {
+    crate::mail::pop3::client::Pop3::connect(&server, &username, &password).await?.quit().await;
+    Ok(())
+}

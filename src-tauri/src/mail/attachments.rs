@@ -14,6 +14,7 @@ use super::account;
 use super::auth::{self, Auth};
 use super::imap::connection;
 use super::parse;
+use super::pop3;
 use crate::error::{Error, Result};
 
 #[derive(sqlx::FromRow)]
@@ -28,6 +29,7 @@ struct AttachmentRow {
 struct MessageLocation {
     account_id: String,
     uid: Option<i64>,
+    remote_id: Option<String>,
     path: String,
 }
 
@@ -44,16 +46,13 @@ pub struct LocalFile {
 /// Uses the account's stored credentials unless `auth` is given.
 async fn fetch_raw(db: &SqlitePool, message_id: &str, auth: Option<Auth<'_>>) -> Result<Vec<u8>> {
     let location: MessageLocation = sqlx::query_as(
-        "SELECT m.account_id, m.uid, b.path FROM messages m JOIN mailboxes b ON b.id = m.mailbox_id \
+        "SELECT m.account_id, m.uid, m.remote_id, b.path FROM messages m JOIN mailboxes b ON b.id = m.mailbox_id \
          WHERE m.id = ?",
     )
     .bind(message_id)
     .fetch_optional(db)
     .await?
     .ok_or_else(|| Error::Other("message not found".into()))?;
-    // Just moved and not synced back yet: its UID in the new folder is unknown.
-    let uid = location.uid.ok_or_else(|| Error::Other("message is still being moved".into()))?;
-
     let account = account::load(db, &location.account_id).await?;
     let secret;
     let auth = match auth {
@@ -63,6 +62,16 @@ async fn fetch_raw(db: &SqlitePool, message_id: &str, auth: Option<Auth<'_>>) ->
             secret.auth()
         }
     };
+
+    if account.incoming_protocol == "pop3" {
+        let (Some(uidl), Auth::Password(password)) = (&location.remote_id, auth) else {
+            return Err(Error::Other("this message is only stored locally".into()));
+        };
+        return pop3::sync::fetch_raw(&account, password, uidl).await;
+    }
+
+    // Just moved and not synced back yet: its UID in the new folder is unknown.
+    let uid = location.uid.ok_or_else(|| Error::Other("message is still being moved".into()))?;
     let mut session = connection::connect(&account.incoming, &account.username, auth).await?;
     session.examine(&location.path).await?;
     let fetches: Vec<_> =

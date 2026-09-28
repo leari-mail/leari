@@ -16,7 +16,8 @@ use tokio::time::timeout;
 
 use crate::db;
 use crate::error::{Error, Result};
-use crate::mail::{account, auth, imap};
+use crate::mail::auth::Auth;
+use crate::mail::{account, auth, imap, pop3};
 
 const SYNC_INTERVAL: Duration = Duration::from_secs(5 * 60);
 const ACCOUNT_SYNC_TIMEOUT: Duration = Duration::from_secs(15 * 60);
@@ -155,9 +156,6 @@ impl SyncEngine {
         let db = self.db().await?;
         let account = account::load(db, account_id).await?;
 
-        if account.incoming_protocol != "imap" {
-            return Err(Error::Unsupported("POP3 accounts are not supported yet".into()));
-        }
         let secret = auth::secret_for(&account).await?;
         let auth = secret.auth();
 
@@ -166,6 +164,23 @@ impl SyncEngine {
         let notify = move || {
             let _ = app.emit("sync://changed", ChangedEvent { account_id: &id });
         };
+
+        if account.incoming_protocol == "pop3" {
+            // POP3 has no folders or flags on the server: local changes stay local.
+            sqlx::query("DELETE FROM pending_operations WHERE account_id = ?")
+                .bind(account_id)
+                .execute(db)
+                .await?;
+            let Auth::Password(password) = auth else {
+                return Err(Error::Unsupported("POP3 with OAuth sign-in".into()));
+            };
+            if mode == Mode::Full {
+                let arrived = pop3::sync::sync_account(db, &account, password, &notify).await?;
+                account::mark_synced(db, account_id, db::now_ms()).await?;
+                crate::notify::new_mail(&self.app, &account.email, &arrived);
+            }
+            return Ok(());
+        }
 
         match mode {
             Mode::Full => {

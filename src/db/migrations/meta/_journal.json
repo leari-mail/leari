@@ -22,6 +22,13 @@
       "when": 1790333316075,
       "tag": "0002_attachment_part_index",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790633589678,
+      "tag": "0003_message_remote_id",
+      "breakpoints": true
     }
   ]
 }

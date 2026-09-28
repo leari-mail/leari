@@ -21,8 +21,9 @@ export function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ input, password, oauthHandle }: CreateAccountVariables) => {
-      if (password !== undefined && input.incomingProtocol === "imap") {
+      if (password !== undefined) {
         await syncService.testConnection(
+          input.incomingProtocol,
           { host: input.incomingHost, port: input.incomingPort, security: input.incomingSecurity },
           input.username,
           password,

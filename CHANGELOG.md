@@ -16,6 +16,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- POP3 accounts: new mail is downloaded into the inbox and left on the server; read state,
+  folders and deleting are local; sent mail is kept in the local Sent folder
 - Notifications for new mail in inboxes (one per message, or a summary when many arrive)
 - Unread count next to the menu bar icon (tooltip on Windows)
 - Settings to turn both off

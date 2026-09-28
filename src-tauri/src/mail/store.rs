@@ -202,7 +202,10 @@ pub async fn update_flags(db: &SqlitePool, updates: &[(String, Flags)]) -> Resul
 pub struct NewMessage<'a> {
     pub account_id: &'a str,
     pub mailbox_id: &'a str,
-    pub uid: u32,
+    /// IMAP UID; `None` for POP3 and local copies.
+    pub uid: Option<u32>,
+    /// POP3 UIDL.
+    pub remote_id: Option<String>,
     pub size: Option<u32>,
     pub internal_date_ms: Option<i64>,
     pub flags: Flags,
@@ -247,16 +250,17 @@ async fn insert_message(
     let date = parsed.date_ms.or(message.internal_date_ms).unwrap_or_else(crate::db::now_ms);
 
     let result = sqlx::query(
-        "INSERT INTO messages (id, account_id, mailbox_id, uid, message_id_header, thread_id, in_reply_to, \
+        "INSERT INTO messages (id, account_id, mailbox_id, uid, remote_id, message_id_header, thread_id, in_reply_to, \
          subject, from_name, from_address, \"to\", cc, bcc, reply_to, snippet, body_text, body_html, date, size, \
          is_read, is_starred, is_draft, has_attachments) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
-         ON CONFLICT (mailbox_id, uid) DO NOTHING",
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
+         ON CONFLICT DO NOTHING",
     )
     .bind(&id)
     .bind(message.account_id)
     .bind(message.mailbox_id)
-    .bind(i64::from(message.uid))
+    .bind(message.uid.map(i64::from))
+    .bind(&message.remote_id)
     .bind(&parsed.message_id)
     .bind(&parsed.thread_id)
     .bind(&parsed.in_reply_to)
