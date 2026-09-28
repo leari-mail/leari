@@ -18,6 +18,9 @@ the new version, and the release workflow publishes it as the GitHub release not
 - Settings to turn both off
 - POP3 accounts: new mail is downloaded into the inbox and left on the server; read state,
   folders and deleting are local; sent mail is kept in the local Sent folder
+- Conversations: messages of the same thread show as one row (with a count) and together in
+  the reader, oldest first, including your replies; older messages collapse to one line.
+  Archive, delete, read and star apply to the conversation. Can be turned off in Settings
 
 ### Changed
 

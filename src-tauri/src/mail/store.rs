@@ -253,7 +253,10 @@ async fn insert_message(
         "INSERT INTO messages (id, account_id, mailbox_id, uid, remote_id, message_id_header, thread_id, in_reply_to, \
          subject, from_name, from_address, \"to\", cc, bcc, reply_to, snippet, body_text, body_html, date, size, \
          is_read, is_starred, is_draft, has_attachments) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
+         VALUES (?, ?, ?, ?, ?, ?, \
+           COALESCE((SELECT p.thread_id FROM messages p WHERE p.account_id = ? AND p.message_id_header = ? \
+             AND p.thread_id IS NOT NULL LIMIT 1), ?), \
+           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
          ON CONFLICT DO NOTHING",
     )
     .bind(&id)
@@ -262,6 +265,10 @@ async fn insert_message(
     .bind(message.uid.map(i64::from))
     .bind(&message.remote_id)
     .bind(&parsed.message_id)
+    // A reply joins its parent's thread when the parent is already stored (some clients only
+    // send In-Reply-To, without the References that name the thread root).
+    .bind(message.account_id)
+    .bind(&parsed.in_reply_to)
     .bind(&parsed.thread_id)
     .bind(&parsed.in_reply_to)
     .bind(&parsed.subject)

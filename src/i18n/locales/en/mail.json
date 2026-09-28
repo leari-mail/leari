@@ -33,7 +33,9 @@
     "emptyDescription": "No messages here. Enjoy the quiet.",
     "noResultsTitle": "No results",
     "noResultsDescription": "Nothing matches \"{{query}}\".",
-    "noSubject": "(no subject)"
+    "noSubject": "(no subject)",
+    "conversationCount_one": "{{count}} message",
+    "conversationCount_other": "{{count}} messages"
   },
   "reader": {
     "emptyTitle": "No message selected",
@@ -49,7 +51,9 @@
     "markUnread": "Mark as unread",
     "to": "To",
     "cc": "Cc",
-    "attachments": "Has attachments"
+    "attachments": "Has attachments",
+    "messageCount_one": "{{count}} message",
+    "messageCount_other": "{{count}} messages"
   },
   "composer": {
     "title": "New message",

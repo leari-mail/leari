@@ -1,33 +1,17 @@
-import { useEffect } from "react";
+import { useAccounts, useConversation } from "@hooks";
+import { useMailStore } from "@stores";
 
-import { AttachmentList } from "@components/attachments";
-import { useAccounts, useMessage, useMessageAttachments, useSetMessageRead } from "@hooks";
-import { useMailStore, useSettingsStore } from "@stores";
-import { ScrollArea } from "@ui";
-
-import { MessageBody } from "./MessageBody";
+import { ConversationView } from "./ConversationView";
 import { ReaderEmpty } from "./ReaderEmpty";
-import { ReaderHeader } from "./ReaderHeader";
-import { ReaderToolbar } from "./ReaderToolbar";
 
-/** Right pane: the selected message. */
+/** Right pane: the selected message, or its whole conversation. */
 export function MessageReader() {
   const selectedId = useMailStore((state) => state.selectedMessageId);
-  const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
-  const { data: message } = useMessage(selectedId);
+  const selectedIds = useMailStore((state) => state.selectedIds);
+  const { data: messages } = useConversation(selectedId);
   const { data: accounts = [] } = useAccounts();
-  const { data: attachments = [] } = useMessageAttachments(message?.id);
-  const { mutate: setRead } = useSetMessageRead();
 
-  const messageId = message?.id;
-  const isRead = message?.isRead;
-  useEffect(() => {
-    if (markAsReadOnOpen && messageId && isRead === false) setRead({ id: messageId, isRead: true });
-    // Only when a different message is opened, so "mark as unread" sticks.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messageId]);
-
-  if (!message) {
+  if (!selectedId || !messages?.length) {
     return (
       <section className="h-full bg-background">
         <ReaderEmpty />
@@ -35,22 +19,14 @@ export function MessageReader() {
     );
   }
 
-  const account = accounts.find((item) => item.id === message.accountId);
-  // Embedded images (referenced from the HTML body) are not listed as attachments.
-  const visibleAttachments = attachments.filter(
-    (attachment) => !(attachment.isInline && attachment.contentId),
-  );
-
+  const account = accounts.find((item) => item.id === messages[0].accountId);
   return (
-    <section className="flex h-full flex-col bg-background">
-      <ReaderToolbar message={message} />
-      <ScrollArea className="min-h-0 flex-1">
-        <article className="mx-auto max-w-3xl space-y-6 px-8 py-6">
-          <ReaderHeader message={message} account={accounts.length > 1 ? account : undefined} />
-          <MessageBody message={message} />
-          {visibleAttachments.length > 0 && <AttachmentList attachments={visibleAttachments} />}
-        </article>
-      </ScrollArea>
-    </section>
+    <ConversationView
+      key={selectedId}
+      messages={messages}
+      targetIds={selectedIds.length ? selectedIds : [selectedId]}
+      account={account}
+      showAccount={accounts.length > 1}
+    />
   );
 }
