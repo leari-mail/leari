@@ -3,7 +3,7 @@ import { type KeyboardEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@components/common";
-import { useAccounts, useConversations } from "@hooks";
+import { useAccounts, useConversations, useScreenshotMode } from "@hooks";
 import { useMailStore } from "@stores";
 import { ScrollArea } from "@ui";
 
@@ -15,6 +15,7 @@ import { MessageListSkeleton } from "./MessageListSkeleton";
 export function MessageList() {
   const { t } = useTranslation("mail");
   const { data: messages = [], conversations, isPending } = useConversations();
+  useScreenshotMode(conversations);
   const { data: accounts = [] } = useAccounts();
   const isUnified = useMailStore((state) => state.folder.kind === "unified");
   const search = useMailStore((state) => state.searchQuery);

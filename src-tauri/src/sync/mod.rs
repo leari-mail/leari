@@ -183,8 +183,10 @@ impl SyncEngine {
                 Err(elapsed) => Err(elapsed.into()),
             };
             match result {
-                Ok(()) if mode == Mode::PushOnly => {}
-                Ok(()) => {
+                // Accounts with sync turned off were not contacted: drop the "syncing" state.
+                Ok(false) => self.clear_status(&account_id),
+                Ok(true) if mode == Mode::PushOnly => {}
+                Ok(true) => {
                     self.set_status(&account_id, "idle", None);
                     // New accounts get instant updates without waiting for the next full cycle.
                     self.ensure_watcher(&account_id);
@@ -204,9 +206,19 @@ impl SyncEngine {
         }
     }
 
-    async fn run(&self, account_id: &str, mode: Mode) -> Result<()> {
+    /// Syncs (or pushes) an account. `Ok(false)` when it has sync turned off.
+    async fn run(&self, account_id: &str, mode: Mode) -> Result<bool> {
         let db = self.db().await?;
         let account = account::load(db, account_id).await?;
+        // Accounts with sync turned off (e.g. the demo data) are never contacted, not even to
+        // push local changes.
+        let enabled: bool = sqlx::query_scalar("SELECT sync_enabled FROM accounts WHERE id = ?")
+            .bind(account_id)
+            .fetch_one(db)
+            .await?;
+        if !enabled {
+            return Ok(false);
+        }
 
         let secret = auth::secret_for(&account).await?;
         let auth = secret.auth();
@@ -231,7 +243,7 @@ impl SyncEngine {
                 account::mark_synced(db, account_id, db::now_ms()).await?;
                 crate::notify::new_mail(&self.app, &account.email, &arrived);
             }
-            return Ok(());
+            return Ok(true);
         }
 
         match mode {
@@ -245,7 +257,22 @@ impl SyncEngine {
                 notify();
             }
         }
-        Ok(())
+        Ok(true)
+    }
+
+    /// Forgets an account's sync state (e.g. sync turned off); the UI falls back to the
+    /// last sync time stored in the database.
+    fn clear_status(&self, account_id: &str) {
+        self.state().statuses.remove(account_id);
+        let syncing = self.state().statuses.values().any(|status| status.state == "syncing");
+        crate::tray::set_syncing(&self.app, syncing);
+        let status = SyncStatus {
+            account_id: account_id.to_owned(),
+            state: "idle",
+            error: None,
+            last_synced_at: None,
+        };
+        let _ = self.app.emit("sync://status", status);
     }
 
     fn set_status(&self, account_id: &str, state: &'static str, error: Option<Error>) {

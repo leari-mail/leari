@@ -11,6 +11,7 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- README screenshots (light and dark), generated from fictional demo data with `pnpm screenshots`
 - Instant new mail: IMAP accounts keep an IDLE connection to the inbox, so new mail shows up
   (and notifies) right away instead of at the next 5-minute sync
 - Notifications for new mail in inboxes (one per message, or a summary when many arrive)
@@ -29,6 +30,10 @@ the new version, and the release workflow publishes it as the GitHub release not
 - The account marker in lists is now a background tint in the account's color, fading from left
   to right (the old dot looked like an unread marker); the reader names the account the same
   way. Both are hidden with a single account
+
+### Fixed
+
+- Accounts with sync turned off were still contacted to push local changes
 
 ## [0.1.0-alpha.2] - 2026-09-25
 

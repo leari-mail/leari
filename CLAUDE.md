@@ -41,6 +41,8 @@ closing the window hides it.
 - `pnpm lint:fix`: autofix, including import sorting (packages → aliases → relative)
 - `pnpm format`: Prettier (with tailwind class sorting)
 - `pnpm test`: frontend unit tests (Vitest, `src/**/*.test.ts`).
+- `pnpm screenshots`: regenerate `docs/screenshots/*` (macOS) from the fictional demo data in `src/db/seed.ts`,
+  in a separate app profile; never capture real mail for docs.
 - `pnpm test:rust`: Rust unit tests. The IMAP end-to-end test is ignored by default (see README, "Testing IMAP sync locally")
 
 ## Brand
