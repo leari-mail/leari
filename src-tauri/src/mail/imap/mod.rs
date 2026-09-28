@@ -2,6 +2,7 @@
 
 pub mod connection;
 pub mod folders;
+pub mod idle;
 pub mod ops;
 pub mod sync;
 

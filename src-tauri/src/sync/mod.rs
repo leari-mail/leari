@@ -14,6 +14,8 @@ use tauri::{AppHandle, Emitter};
 use tokio::sync::OnceCell;
 use tokio::time::timeout;
 
+mod watch;
+
 use crate::db;
 use crate::error::{Error, Result};
 use crate::mail::auth::Auth;
@@ -40,6 +42,10 @@ enum Mode {
 
 #[derive(Default)]
 struct State {
+    /// IDLE watchers by account id (see watch.rs).
+    watchers: HashMap<String, tauri::async_runtime::JoinHandle<()>>,
+    /// Accounts whose server has no IDLE (or POP3): not retried until restart.
+    without_idle: HashSet<String>,
     running: HashSet<String>,
     rerun: HashSet<String>,
     statuses: HashMap<String, SyncStatus>,
@@ -98,8 +104,50 @@ impl SyncEngine {
                 return;
             }
         };
+        self.reconcile_watchers(&ids);
         let tasks: Vec<_> = ids.into_iter().map(|id| self.sync_account(id)).collect();
         futures::future::join_all(tasks).await;
+    }
+
+    /// Starts IDLE watchers for new accounts and stops the ones of removed accounts.
+    fn reconcile_watchers(self: &Arc<Self>, account_ids: &[String]) {
+        let mut state = self.state();
+        state.watchers.retain(|id, handle| {
+            let keep = account_ids.contains(id);
+            if !keep {
+                handle.abort();
+            }
+            keep
+        });
+        drop(state);
+        for id in account_ids {
+            self.ensure_watcher(id);
+        }
+    }
+
+    fn ensure_watcher(self: &Arc<Self>, account_id: &str) {
+        let mut state = self.state();
+        if !state.watchers.contains_key(account_id) && !state.without_idle.contains(account_id) {
+            let handle =
+                tauri::async_runtime::spawn(watch::watch(Arc::clone(self), account_id.to_owned()));
+            state.watchers.insert(account_id.to_owned(), handle);
+        }
+    }
+
+    /// Called by a watcher that stopped on its own (account removed, IDLE unsupported).
+    fn watcher_finished(&self, account_id: &str, idle_supported: bool) {
+        let mut state = self.state();
+        state.watchers.remove(account_id);
+        if !idle_supported {
+            state.without_idle.insert(account_id.to_owned());
+        }
+    }
+
+    /// Stops an account's IDLE watcher right away (e.g. when the account is removed).
+    pub fn stop_watcher(&self, account_id: &str) {
+        if let Some(handle) = self.state().watchers.remove(account_id) {
+            handle.abort();
+        }
     }
 
     pub fn statuses(&self) -> Vec<SyncStatus> {
@@ -136,7 +184,11 @@ impl SyncEngine {
             };
             match result {
                 Ok(()) if mode == Mode::PushOnly => {}
-                Ok(()) => self.set_status(&account_id, "idle", None),
+                Ok(()) => {
+                    self.set_status(&account_id, "idle", None);
+                    // New accounts get instant updates without waiting for the next full cycle.
+                    self.ensure_watcher(&account_id);
+                }
                 Err(error) => {
                     log::warn!("sync of account {account_id} failed: {error}");
                     self.set_status(&account_id, "error", Some(error));
