@@ -6,7 +6,8 @@
 //! LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
 //!   cargo test imap_ -- --ignored
 //! ```
-//! The send test also needs SMTP (`LEARI_TEST_SMTP=127.0.0.1:3025`).
+//! The send test also needs SMTP (`LEARI_TEST_SMTP=127.0.0.1:3025`), the POP3 test POP3
+//! (`LEARI_TEST_POP3=127.0.0.1:3110`).
 //! ```sh
 //! ```
 //! The test wipes the account's mailboxes, so never point it at a real account.
@@ -24,10 +25,11 @@ use crate::mail::account::{Account, Security, ServerConfig};
 /// The tests share one server mailbox, so they run one at a time.
 static SERVER_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
-const MIGRATIONS: [&str; 3] = [
+const MIGRATIONS: [&str; 4] = [
     include_str!("../../../../src/db/migrations/0000_init.sql"),
     include_str!("../../../../src/db/migrations/0001_pending_operations.sql"),
     include_str!("../../../../src/db/migrations/0002_attachment_part_index.sql"),
+    include_str!("../../../../src/db/migrations/0003_message_remote_id.sql"),
 ];
 
 /// Fails when a new drizzle migration is not added to [`MIGRATIONS`] above.
@@ -437,6 +439,61 @@ async fn imap_smtp_send_round_trip() {
     .unwrap();
     assert!(downloaded.to_string_lossy().ends_with("notes.txt"));
     assert_eq!(std::fs::read_to_string(&downloaded).unwrap(), "attached text");
+
+    server.logout().await.ok();
+}
+
+/// POP3 accounts: first sync downloads existing mail quietly, later mail is downloaded once and
+/// announced, nothing is duplicated, and a message can be fetched again by UIDL.
+#[tokio::test]
+#[ignore = "needs a disposable IMAP + POP3 server, see module docs"]
+async fn pop3_download_round_trip() {
+    let _server = SERVER_LOCK.lock().await;
+    let env = env();
+    let pop3_address = std::env::var("LEARI_TEST_POP3").expect("LEARI_TEST_POP3=host:port");
+    let (pop3_host, pop3_port) = pop3_address.rsplit_once(':').expect("host:port");
+
+    let db = database().await;
+    create_account(&db, &env).await;
+    sqlx::query("UPDATE accounts SET incoming_protocol = 'pop3', incoming_host = ?, incoming_port = ? WHERE id = 'acc'")
+        .bind(pop3_host)
+        .bind(pop3_port.parse::<i64>().unwrap())
+        .execute(&db)
+        .await
+        .unwrap();
+    let account = crate::mail::account::load(&db, "acc").await.unwrap();
+
+    let mut server = server_session(&env).await;
+    reset_server(&mut server).await;
+    server.append("INBOX", None, None, message("one")).await.unwrap();
+    server.append("INBOX", None, None, message("two")).await.unwrap();
+
+    let sync_pop3 = || crate::mail::pop3::sync::sync_account(&db, &account, &env.password, &|| {});
+    let stored = || async {
+        sqlx::query_scalar::<_, String>(
+            "SELECT subject FROM messages WHERE remote_id IS NOT NULL ORDER BY subject",
+        )
+        .fetch_all(&db)
+        .await
+        .unwrap()
+    };
+
+    let arrived = sync_pop3().await.unwrap();
+    assert!(arrived.is_empty(), "first sync downloads existing mail without announcing it");
+    assert_eq!(stored().await, ["one", "two"]);
+
+    server.append("INBOX", None, None, message("three")).await.unwrap();
+    let arrived = sync_pop3().await.unwrap();
+    assert_eq!(arrived.iter().map(|m| m.subject.as_str()).collect::<Vec<_>>(), ["three"]);
+    assert!(sync_pop3().await.unwrap().is_empty(), "nothing new, nothing announced");
+    assert_eq!(stored().await, ["one", "three", "two"], "no duplicates");
+
+    let uidl: String = sqlx::query_scalar("SELECT remote_id FROM messages WHERE subject = 'two'")
+        .fetch_one(&db)
+        .await
+        .unwrap();
+    let raw = crate::mail::pop3::sync::fetch_raw(&account, &env.password, &uidl).await.unwrap();
+    assert!(String::from_utf8_lossy(&raw).contains("Subject: two"));
 
     server.logout().await.ok();
 }

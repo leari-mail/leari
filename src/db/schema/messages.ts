@@ -19,6 +19,8 @@ export const messages = sqliteTable(
       .notNull()
       .references(() => mailboxes.id, { onDelete: "cascade" }),
     uid: integer("uid"),
+    /** Server-side id for protocols without UIDs (POP3 UIDL). */
+    remoteId: text("remote_id"),
     messageIdHeader: text("message_id_header"),
     threadId: text("thread_id"),
     inReplyTo: text("in_reply_to"),
@@ -44,6 +46,7 @@ export const messages = sqliteTable(
   },
   (table) => [
     unique("messages_mailbox_uid_unique").on(table.mailboxId, table.uid),
+    unique("messages_mailbox_remote_id_unique").on(table.mailboxId, table.remoteId),
     index("messages_mailbox_date_idx").on(table.mailboxId, table.date),
     index("messages_account_date_idx").on(table.accountId, table.date),
     index("messages_thread_idx").on(table.threadId),

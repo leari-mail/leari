@@ -10,7 +10,9 @@ use super::account::{self, Account};
 use super::attachments;
 use super::auth::{self, Auth};
 use super::imap::connection;
+use super::parse;
 use super::smtp::{self, Outgoing, OutgoingAttachment};
+use super::store::{self, Flags, NewMessage};
 use crate::error::{Error, Result};
 
 #[derive(Debug, Deserialize)]
@@ -118,6 +120,32 @@ async fn append_to_sent(
     Ok(())
 }
 
+/// Files a sent message in the account's local Sent folder (POP3 accounts).
+async fn store_local_sent(db: &SqlitePool, account: &Account, raw: &[u8]) -> Result<()> {
+    let sent: Option<String> = sqlx::query_scalar(
+        "SELECT id FROM mailboxes WHERE account_id = ? AND role = 'sent' LIMIT 1",
+    )
+    .bind(&account.id)
+    .fetch_optional(db)
+    .await?;
+    let Some(sent) = sent else { return Ok(()) };
+    store::insert_messages(
+        db,
+        vec![NewMessage {
+            account_id: &account.id,
+            mailbox_id: &sent,
+            uid: None,
+            remote_id: None,
+            size: u32::try_from(raw.len()).ok(),
+            internal_date_ms: None,
+            flags: Flags { seen: true, flagged: false, draft: false },
+            parsed: parse::parse(raw).unwrap_or_default(),
+        }],
+    )
+    .await?;
+    Ok(())
+}
+
 pub async fn send(db: &SqlitePool, cache_dir: &Path, request: SendRequest) -> Result<()> {
     let account = account::load(db, &request.account_id).await?;
     let secret = auth::secret_for(&account).await?;
@@ -160,7 +188,12 @@ pub(crate) async fn send_as(
     smtp::send(&account.smtp, &account.username, auth, &message).await?;
 
     // The message is already sent: failing to file a copy must not report the send as failed.
-    if !server_saves_sent(account) {
+    if account.incoming_protocol == "pop3" {
+        // No server folders: keep the copy locally.
+        if let Err(error) = store_local_sent(db, account, &message.formatted()).await {
+            log::warn!("could not save sent message for {}: {error}", account.id);
+        }
+    } else if !server_saves_sent(account) {
         if let Err(error) = append_to_sent(db, account, auth, &message.formatted()).await {
             log::warn!("could not save sent message for {}: {error}", account.id);
         }

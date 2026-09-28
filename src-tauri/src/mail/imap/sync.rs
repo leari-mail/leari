@@ -196,7 +196,8 @@ async fn sync_mailbox(
                 Some(NewMessage {
                     account_id,
                     mailbox_id: &mailbox.id,
-                    uid,
+                    uid: Some(uid),
+                    remote_id: None,
                     size: fetch.size,
                     internal_date_ms: fetch.internal_date().map(|date| date.timestamp_millis()),
                     flags: flags_of(fetch),

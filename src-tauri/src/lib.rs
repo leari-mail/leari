@@ -47,6 +47,7 @@ pub fn run() {
             commands::credentials_set_password,
             commands::credentials_delete,
             commands::imap_test_connection,
+            commands::pop3_test_connection,
             commands::oauth_providers,
             commands::oauth_sign_in,
             commands::oauth_cancel,

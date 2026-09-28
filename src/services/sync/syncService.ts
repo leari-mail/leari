@@ -22,8 +22,13 @@ export const syncService = {
 
   statuses: () => invoke<SyncStatus[]>("sync_statuses"),
 
-  testConnection: (server: ServerConfig, username: string, password: string) =>
-    invoke<void>("imap_test_connection", { server, username, password }),
+  /** Checks the incoming server login (IMAP or POP3) before an account is saved. */
+  testConnection: (
+    protocol: "imap" | "pop3",
+    server: ServerConfig,
+    username: string,
+    password: string,
+  ) => invoke<void>(`${protocol}_test_connection`, { server, username, password }),
 
   onStatus: (handler: (status: SyncStatus) => void): Promise<UnlistenFn> =>
     listen<SyncStatus>("sync://status", (event) => handler(event.payload)),

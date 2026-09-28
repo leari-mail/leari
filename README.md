@@ -34,18 +34,36 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
 
 ### Roadmap
 
+**Done**
+
 - [x] App shell: tray / menu bar, window behavior, single instance
 - [x] Local database with migrations
 - [x] Mail UI: sidebar, message list, reader, composer, settings
 - [x] Add account flow (provider presets for Google and Microsoft)
 - [x] IMAP sync (Rust): folders, messages, flags, expunges; local changes pushed back
-- [ ] POP3 download
+- [x] Credentials in the OS keychain
 - [x] OAuth 2 sign-in for Google and Microsoft
 - [x] SMTP sending (password and OAuth), saved to Sent
 - [x] Attachments (open, save, attach, forward) and embedded images
 - [x] New mail notifications and unread count in the menu bar
-- [x] Credentials in the OS keychain
+- [x] POP3 download (mail left on the server; everything else local)
+
+**Next**
+
 - [ ] Threaded conversations
+- [ ] Instant new mail (IMAP IDLE)
+
+**Enterprise**
+
+- [ ] Microsoft Graph backend for Microsoft 365: works when admins disable IMAP / SMTP AUTH,
+      native folders, categories and server-side search
+- [ ] Microsoft Publisher Verification, so users in managed tenants can consent without an admin
+- [ ] Clear guidance when a tenant requires admin approval (with an admin consent link)
+- [ ] Google OAuth verification (restricted Gmail scope) for sign-in beyond 100 test users
+- [ ] Sovereign clouds (GCC High, DoD, 21Vianet)
+
+Not planned for now: Exchange Server on-premises beyond IMAP with a password, and Kerberos /
+NTLM / client-certificate authentication.
 
 ## Install
 
@@ -155,9 +173,9 @@ The sync engine has an end-to-end test that runs against a disposable IMAP serve
 java -Dgreenmail.setup.test.all -Dgreenmail.users=leari:secret@localhost \
   -jar greenmail-standalone.jar
 
-LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_SMTP=127.0.0.1:3025 \
+LEARI_TEST_IMAP=127.0.0.1:3143 LEARI_TEST_SMTP=127.0.0.1:3025 LEARI_TEST_POP3=127.0.0.1:3110 \
 LEARI_TEST_USER=leari LEARI_TEST_PASS=secret \
-  cargo test --manifest-path src-tauri/Cargo.toml imap_ -- --ignored
+  cargo test --manifest-path src-tauri/Cargo.toml -- --ignored
 ```
 
 To try it in the app, add an **IMAP** account with server `127.0.0.1`, port `3143`,
