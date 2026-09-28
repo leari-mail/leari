@@ -12,6 +12,7 @@ function message(overrides: Partial<MessageSummary>): MessageSummary {
     accountId: "a1",
     mailboxId: "inbox",
     uid: next,
+    remoteId: null,
     messageIdHeader: null,
     threadId: null,
     inReplyTo: null,
