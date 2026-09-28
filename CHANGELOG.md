@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] - 2026-09-28
+
 ### Added
 
 - README screenshots (light and dark), generated from fictional demo data with `pnpm screenshots`

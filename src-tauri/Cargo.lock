@@ -2487,7 +2487,7 @@ dependencies = [
 
 [[package]]
 name = "leari"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "async-imap",
  "base64 0.22.1",
