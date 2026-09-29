@@ -101,5 +101,49 @@
     "open": "Open",
     "save": "Save…",
     "remove": "Remove {{name}}"
+  },
+  "actions": {
+    "archive": "Archive",
+    "delete": "Delete",
+    "deletePermanently": "Delete permanently",
+    "moveTo": "Move to",
+    "noFolders": "No other folders",
+    "markRead": "Mark as read",
+    "markUnread": "Mark as unread",
+    "star": "Star",
+    "unstar": "Unstar",
+    "spam": "Mark as spam",
+    "notSpam": "Not spam",
+    "deleteTitle_one": "Delete permanently?",
+    "deleteTitle_other": "Delete {{count}} conversations permanently?",
+    "deleteDescription_one": "It will be deleted from the server. This can't be undone.",
+    "deleteDescription_other": "They will be deleted from the server. This can't be undone."
+  },
+  "selection": {
+    "count_one": "{{count}} conversation selected",
+    "count_other": "{{count}} conversations selected",
+    "clear": "Clear selection",
+    "hint": "⌘-click to add or remove, ⇧-click to select a range"
+  },
+  "folderMenu": {
+    "newFolder": "New folder…",
+    "newSubfolder": "New subfolder…",
+    "rename": "Rename…",
+    "delete": "Delete folder…",
+    "markAllRead": "Mark all as read",
+    "empty": "Empty folder…",
+    "emptyTrash": "Empty Trash…",
+    "emptySpam": "Empty Spam…",
+    "newTitle": "New folder",
+    "newIn": "New folder in “{{name}}”",
+    "renameTitle": "Rename folder",
+    "nameLabel": "Name",
+    "create": "Create",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteDescription": "The folder, its subfolders and all their mail will be deleted from the server. This can't be undone.",
+    "emptyTitle": "Empty “{{name}}”?",
+    "emptyPermanent": "All mail in it will be deleted permanently. This can't be undone.",
+    "emptyToTrash": "All mail in it will be moved to Trash.",
+    "emptyConfirm": "Empty"
   }
 }

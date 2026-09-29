@@ -582,3 +582,134 @@ async fn imap_idle_wakes_on_new_mail() {
     watcher.logout().await.ok();
     delivery.await.unwrap().logout().await.ok();
 }
+
+async fn server_folders(session: &mut ImapSession) -> Vec<String> {
+    let names: Vec<_> =
+        session.list(Some(""), Some("*")).await.unwrap().try_collect().await.unwrap();
+    let mut folders: Vec<String> = names.iter().map(|name| name.name().to_owned()).collect();
+    folders.sort();
+    folders
+}
+
+async fn queue(db: &SqlitePool, kind: &str, payload: String) {
+    sqlx::query(
+        "INSERT INTO pending_operations (id, account_id, message_id, kind, payload) VALUES (?, 'acc', NULL, ?, ?)",
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind(kind)
+    .bind(payload)
+    .execute(db)
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+#[ignore = "needs a disposable IMAP server, see module docs"]
+async fn imap_folder_management_and_bulk_changes() {
+    let _server = SERVER_LOCK.lock().await;
+    let env = env();
+    let db = database().await;
+    let account = create_account(&db, &env).await;
+    let auth = || Auth::Password(&env.password);
+    let mut server = server_session(&env).await;
+    reset_server(&mut server).await;
+    // Leftovers of an earlier run, deepest first.
+    let mut stale: Vec<String> = server_folders(&mut server)
+        .await
+        .into_iter()
+        .filter(|path| path.starts_with("Receipts") || path.starts_with("Bills"))
+        .collect();
+    stale.sort_by_key(|path| std::cmp::Reverse(path.len()));
+    for path in stale {
+        server.delete(&path).await.unwrap();
+    }
+    sync::sync_account(&db, &account, auth(), &|| {}).await.unwrap();
+
+    // Create a folder and a subfolder, on the server and locally.
+    crate::mail::mailboxes::create(&db, &account, Some(auth()), None, "Receipts").await.unwrap();
+    let receipts: (String, Option<String>) =
+        sqlx::query_as("SELECT id, delimiter FROM mailboxes WHERE path = 'Receipts'")
+            .fetch_one(&db)
+            .await
+            .unwrap();
+    let delimiter = receipts.1.clone().unwrap();
+    crate::mail::mailboxes::create(&db, &account, Some(auth()), Some(&receipts.0), "2026")
+        .await
+        .unwrap();
+    assert!(server_folders(&mut server).await.contains(&format!("Receipts{delimiter}2026")));
+
+    server.append("Receipts", None, None, message("rent")).await.unwrap();
+    server.append("Receipts", None, None, message("power")).await.unwrap();
+    sync::sync_account(&db, &account, auth(), &|| {}).await.unwrap();
+    let before: Vec<(String,)> =
+        sqlx::query_as("SELECT id FROM messages WHERE mailbox_id = ? ORDER BY id")
+            .bind(&receipts.0)
+            .fetch_all(&db)
+            .await
+            .unwrap();
+    assert_eq!(before.len(), 2);
+
+    // Rename keeps the local folder (and its mail) and moves the subfolder along.
+    crate::mail::mailboxes::rename(&db, &account, Some(auth()), &receipts.0, "Bills")
+        .await
+        .unwrap();
+    let folders = server_folders(&mut server).await;
+    assert!(folders.contains(&"Bills".to_owned()) && !folders.contains(&"Receipts".to_owned()));
+    assert!(folders.contains(&format!("Bills{delimiter}2026")));
+    sync::sync_account(&db, &account, auth(), &|| {}).await.unwrap();
+    let after: Vec<(String,)> =
+        sqlx::query_as("SELECT id FROM messages WHERE mailbox_id = ? ORDER BY id")
+            .bind(&receipts.0)
+            .fetch_all(&db)
+            .await
+            .unwrap();
+    assert_eq!(after, before, "renaming must not re-download the folder");
+
+    // Whole-folder changes: mark all read, move all to Trash, delete all from Trash.
+    let max_uid: i64 = sqlx::query_scalar("SELECT MAX(uid) FROM messages WHERE mailbox_id = ?")
+        .bind(&receipts.0)
+        .fetch_one(&db)
+        .await
+        .unwrap();
+    queue(&db, "read_all", format!(r#"{{"mailboxPath":"Bills","maxUid":{max_uid}}}"#)).await;
+    sync::push_account(&db, &account, auth()).await.unwrap();
+    assert!(server_flags(&mut server, "Bills")
+        .await
+        .iter()
+        .all(|(_, flags)| flags.iter().any(|flag| flag.contains("Seen"))));
+
+    queue(
+        &db,
+        "move_all",
+        format!(r#"{{"mailboxPath":"Bills","maxUid":{max_uid},"targetPath":"Trash"}}"#),
+    )
+    .await;
+    sync::push_account(&db, &account, auth()).await.unwrap();
+    assert!(server_flags(&mut server, "Bills").await.is_empty());
+    assert_eq!(server_flags(&mut server, "Trash").await.len(), 2);
+
+    server.select("Trash").await.unwrap();
+    let trash_uids: Vec<u32> = server.uid_search("ALL").await.unwrap().into_iter().collect();
+    let trash_max = trash_uids.into_iter().max().unwrap();
+    queue(&db, "delete_all", format!(r#"{{"mailboxPath":"Trash","maxUid":{trash_max}}}"#)).await;
+    sync::push_account(&db, &account, auth()).await.unwrap();
+    assert!(server_flags(&mut server, "Trash").await.is_empty());
+
+    // Deleting removes the folder with its subfolder, on the server and locally.
+    crate::mail::mailboxes::delete(&db, &account, Some(auth()), &receipts.0).await.unwrap();
+    let folders = server_folders(&mut server).await;
+    assert!(!folders.iter().any(|path| path.starts_with("Bills")));
+    let left: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM mailboxes WHERE path LIKE 'Bills%'")
+        .fetch_one(&db)
+        .await
+        .unwrap();
+    assert_eq!(left, 0);
+    assert!(pending_is_empty(&db).await);
+    server.logout().await.ok();
+}
+
+async fn pending_is_empty(db: &SqlitePool) -> bool {
+    let count: i64 =
+        sqlx::query_scalar("SELECT COUNT(*) FROM pending_operations").fetch_one(db).await.unwrap();
+    count == 0
+}

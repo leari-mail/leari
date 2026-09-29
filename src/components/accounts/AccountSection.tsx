@@ -1,10 +1,10 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, FolderPlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { MailboxItem } from "@components/mailboxes";
-import { useErrorMessage, useReauthorizeAccount } from "@hooks";
-import { cn } from "@lib";
+import { FolderNameDialog, MailboxItem, MailboxMenu } from "@components/mailboxes";
+import { useCreateMailbox, useErrorMessage, useMailboxLabel, useReauthorizeAccount } from "@hooks";
+import { cn, nestMailboxes } from "@lib";
 import { type Account, isAppError, type Mailbox } from "@models";
 import { useMailStore } from "@stores";
 import {
@@ -30,6 +30,9 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
   const { t } = useTranslation(["mail", "accounts"]);
   const [expanded, setExpanded] = useState(true);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [newFolder, setNewFolder] = useState(false);
+  const createMailbox = useCreateMailbox();
+  const label = useMailboxLabel();
   const reauthorize = useReauthorizeAccount();
   const errorMessage = useErrorMessage();
   const cancelled = isAppError(reauthorize.error) && reauthorize.error.kind === "cancelled";
@@ -63,6 +66,15 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
           </button>
         </ContextMenuTrigger>
         <ContextMenuContent>
+          {account.incomingProtocol === "imap" && (
+            <>
+              <ContextMenuItem onSelect={() => setNewFolder(true)}>
+                <FolderPlus />
+                {t("mail:folderMenu.newFolder")}
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
           {account.authType === "oauth2" && (
             <>
               <ContextMenuItem onSelect={() => reauthorize.mutate(account)}>
@@ -83,24 +95,37 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
 
       {expanded && (
         <div className="space-y-px pl-4">
-          {mailboxes.map((mailbox) => (
-            <MailboxItem
-              key={mailbox.id}
-              role={mailbox.role}
-              label={mailbox.role === "custom" ? mailbox.name : t(`mail:folders.${mailbox.role}`)}
-              count={
-                mailbox.role === "inbox" || mailbox.role === "custom" ? unreadCounts[mailbox.id] : 0
-              }
-              active={folder.kind === "mailbox" && folder.mailboxId === mailbox.id}
-              onSelect={() =>
-                selectFolder({ kind: "mailbox", mailboxId: mailbox.id, accountId: account.id })
-              }
-            />
+          {nestMailboxes(mailboxes).map(({ mailbox, depth }) => (
+            <MailboxMenu key={mailbox.id} mailbox={mailbox} account={account}>
+              <MailboxItem
+                role={mailbox.role}
+                label={label(mailbox)}
+                depth={depth}
+                count={
+                  mailbox.role === "inbox" || mailbox.role === "custom"
+                    ? unreadCounts[mailbox.id]
+                    : 0
+                }
+                active={folder.kind === "mailbox" && folder.mailboxId === mailbox.id}
+                onSelect={() =>
+                  selectFolder({ kind: "mailbox", mailboxId: mailbox.id, accountId: account.id })
+                }
+              />
+            </MailboxMenu>
           ))}
         </div>
       )}
 
       <RemoveAccountDialog account={account} open={confirmRemove} onOpenChange={setConfirmRemove} />
+      <FolderNameDialog
+        open={newFolder}
+        title={t("mail:folderMenu.newTitle")}
+        submitLabel={t("mail:folderMenu.create")}
+        onOpenChange={setNewFolder}
+        onSubmit={(name) =>
+          createMailbox.mutateAsync({ accountId: account.id, parentId: null, name })
+        }
+      />
     </div>
   );
 }

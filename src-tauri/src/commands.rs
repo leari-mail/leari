@@ -122,6 +122,62 @@ pub async fn mail_send(
     Ok(())
 }
 
+/// Creates a folder (at the top level, or inside `parent_id`) on the server and locally.
+#[tauri::command]
+pub async fn mailbox_create(
+    engine: State<'_, Arc<SyncEngine>>,
+    account_id: String,
+    parent_id: Option<String>,
+    name: String,
+) -> Result<()> {
+    let db = engine.db().await?;
+    let account = crate::mail::account::load(db, &account_id).await?;
+    let secret = crate::mail::mailboxes::credentials(db, &account).await?;
+    let auth = secret.as_ref().map(|secret| secret.auth());
+    crate::mail::mailboxes::create(db, &account, auth, parent_id.as_deref(), &name).await?;
+    resync(&engine, account_id);
+    Ok(())
+}
+
+/// Renames a custom folder on the server and locally.
+#[tauri::command]
+pub async fn mailbox_rename(
+    engine: State<'_, Arc<SyncEngine>>,
+    account_id: String,
+    mailbox_id: String,
+    name: String,
+) -> Result<()> {
+    let db = engine.db().await?;
+    let account = crate::mail::account::load(db, &account_id).await?;
+    let secret = crate::mail::mailboxes::credentials(db, &account).await?;
+    let auth = secret.as_ref().map(|secret| secret.auth());
+    crate::mail::mailboxes::rename(db, &account, auth, &mailbox_id, &name).await?;
+    resync(&engine, account_id);
+    Ok(())
+}
+
+/// Deletes a custom folder, its subfolders and their mail, on the server and locally.
+#[tauri::command]
+pub async fn mailbox_delete(
+    engine: State<'_, Arc<SyncEngine>>,
+    account_id: String,
+    mailbox_id: String,
+) -> Result<()> {
+    let db = engine.db().await?;
+    let account = crate::mail::account::load(db, &account_id).await?;
+    let secret = crate::mail::mailboxes::credentials(db, &account).await?;
+    let auth = secret.as_ref().map(|secret| secret.auth());
+    crate::mail::mailboxes::delete(db, &account, auth, &mailbox_id).await?;
+    resync(&engine, account_id);
+    Ok(())
+}
+
+/// Syncs an account in the background after a folder change (new order, the folder's mail).
+fn resync(engine: &Arc<SyncEngine>, account_id: String) {
+    let engine = Arc::clone(engine);
+    tauri::async_runtime::spawn(async move { engine.sync_account(account_id).await });
+}
+
 /// Opens an attachment with its default app (executables are revealed in the file manager).
 #[tauri::command]
 pub async fn attachment_open(

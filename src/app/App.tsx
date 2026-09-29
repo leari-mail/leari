@@ -1,5 +1,5 @@
 import { AddAccountDialog } from "@components/accounts";
-import { SplashScreen } from "@components/common";
+import { ConfirmDialog, SplashScreen } from "@components/common";
 import { ComposerDialog } from "@components/composer";
 import { Workspace } from "@components/layout";
 import { SettingsDialog } from "@components/settings";
@@ -26,6 +26,7 @@ export function App() {
       <AddAccountDialog />
       <SettingsDialog />
       <ComposerDialog />
+      <ConfirmDialog />
     </>
   );
 }

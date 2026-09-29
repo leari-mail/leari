@@ -1,4 +1,5 @@
 import { Paperclip, Star } from "lucide-react";
+import type { MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AccountEdge } from "@components/accounts";
@@ -12,7 +13,8 @@ interface MessageListItemProps {
   /** Set when the list mixes accounts: shown as a colored left edge. */
   account?: Account;
   selected: boolean;
-  onSelect: () => void;
+  /** Plain click, ⌘-click or ⇧-click (the list decides from the event's modifiers). */
+  onSelect: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 export function MessageListItem({
@@ -29,6 +31,7 @@ export function MessageListItem({
     <button
       type="button"
       data-message-id={message.id}
+      aria-selected={selected}
       onClick={onSelect}
       className={cn(
         "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",

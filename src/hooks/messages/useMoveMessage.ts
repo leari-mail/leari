@@ -1,20 +1,29 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { messagesService } from "@services";
+import { messagesService, type MoveRole } from "@services";
 import { useMailStore } from "@stores";
 
 import { applyToMessages } from "./applyToMessages";
 import { useInvalidateMail } from "./useInvalidateMail";
 
-/** Moves messages (e.g. a conversation's messages in the current folder) to trash or archive. */
+export type MoveTarget = MoveRole | { mailboxId: string };
+
+/**
+ * Moves messages to a role's mailbox in their own account (archive, trash, spam, inbox) or to a
+ * given mailbox. Moving to trash from the trash deletes permanently.
+ */
 export function useMoveMessage() {
   const invalidate = useInvalidateMail();
   return useMutation({
-    mutationFn: ({ ids, to }: { ids: string[]; to: "trash" | "archive" }) =>
-      applyToMessages(ids, (id) => messagesService.moveToRole(id, to)),
+    mutationFn: ({ ids, to }: { ids: string[]; to: MoveTarget }) =>
+      applyToMessages(ids, (id) =>
+        typeof to === "string"
+          ? messagesService.moveToRole(id, to)
+          : messagesService.moveTo(id, to.mailboxId),
+      ),
     onSuccess: (_, { ids }) => {
-      const { selectedMessageId, selectMessage } = useMailStore.getState();
-      if (selectedMessageId && ids.includes(selectedMessageId)) selectMessage(null);
+      const { selectedIds, selectMessage } = useMailStore.getState();
+      if (selectedIds.some((id) => ids.includes(id))) selectMessage(null);
       return invalidate();
     },
   });

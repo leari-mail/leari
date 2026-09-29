@@ -3,7 +3,16 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import { accounts } from "./accounts";
 
-export const pendingOperationKinds = ["flags", "move", "delete"] as const;
+export const pendingOperationKinds = [
+  "flags",
+  "move",
+  "delete",
+  // Whole-folder changes, covering UIDs up to `maxUid` (see src-tauri/src/mail/imap/ops.rs).
+  "read_all",
+  "delete_all",
+  "move_all",
+] as const;
+export type PendingOperationKind = (typeof pendingOperationKinds)[number];
 
 /**
  * Local changes waiting to be pushed to the server by the sync engine (src-tauri/src/mail).

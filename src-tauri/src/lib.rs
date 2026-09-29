@@ -62,6 +62,9 @@ pub fn run() {
             commands::tray_set_unread,
             commands::notifications_configure,
             commands::app_set_dock_visible,
+            commands::mailbox_create,
+            commands::mailbox_rename,
+            commands::mailbox_delete,
         ])
         .on_window_event(window::handle_event)
         .build(tauri::generate_context!())

@@ -101,5 +101,49 @@
     "open": "Abrir",
     "save": "Salvar…",
     "remove": "Remover {{name}}"
+  },
+  "actions": {
+    "archive": "Arquivar",
+    "delete": "Apagar",
+    "deletePermanently": "Apagar definitivamente",
+    "moveTo": "Mover para",
+    "noFolders": "Nenhuma outra pasta",
+    "markRead": "Marcar como lida",
+    "markUnread": "Marcar como não lida",
+    "star": "Marcar com estrela",
+    "unstar": "Remover estrela",
+    "spam": "Marcar como spam",
+    "notSpam": "Não é spam",
+    "deleteTitle_one": "Apagar definitivamente?",
+    "deleteTitle_other": "Apagar {{count}} conversas definitivamente?",
+    "deleteDescription_one": "Ela será apagada do servidor. Não é possível desfazer.",
+    "deleteDescription_other": "Elas serão apagadas do servidor. Não é possível desfazer."
+  },
+  "selection": {
+    "count_one": "{{count}} conversa selecionada",
+    "count_other": "{{count}} conversas selecionadas",
+    "clear": "Limpar seleção",
+    "hint": "⌘-clique para adicionar ou remover, ⇧-clique para selecionar um intervalo"
+  },
+  "folderMenu": {
+    "newFolder": "Nova pasta…",
+    "newSubfolder": "Nova subpasta…",
+    "rename": "Renomear…",
+    "delete": "Apagar pasta…",
+    "markAllRead": "Marcar todas como lidas",
+    "empty": "Esvaziar pasta…",
+    "emptyTrash": "Esvaziar Lixeira…",
+    "emptySpam": "Esvaziar Spam…",
+    "newTitle": "Nova pasta",
+    "newIn": "Nova pasta em “{{name}}”",
+    "renameTitle": "Renomear pasta",
+    "nameLabel": "Nome",
+    "create": "Criar",
+    "deleteTitle": "Apagar “{{name}}”?",
+    "deleteDescription": "A pasta, suas subpastas e todos os e-mails nelas serão apagados do servidor. Não é possível desfazer.",
+    "emptyTitle": "Esvaziar “{{name}}”?",
+    "emptyPermanent": "Todos os e-mails nela serão apagados definitivamente. Não é possível desfazer.",
+    "emptyToTrash": "Todos os e-mails nela serão movidos para a Lixeira.",
+    "emptyConfirm": "Esvaziar"
   }
 }
