@@ -185,3 +185,36 @@
     @apply select-text;
   }
 }
+
+/* Composer body (TipTap). Mirrors the inline styles of outgoing mail (lib/rich-text.ts). */
+@layer components {
+  .rich-text {
+    @apply leading-normal select-text;
+  }
+  .rich-text p {
+    @apply m-0;
+  }
+  .rich-text ul,
+  .rich-text ol {
+    @apply my-1 pl-6;
+  }
+  .rich-text ul {
+    @apply list-disc;
+  }
+  .rich-text ol {
+    @apply list-decimal;
+  }
+  .rich-text blockquote {
+    @apply my-1 border-l-2 border-border pl-3 text-muted-foreground;
+  }
+  .rich-text a {
+    @apply text-primary underline underline-offset-2;
+  }
+  .rich-text hr {
+    @apply my-3 border-border;
+  }
+  .rich-text p.is-editor-empty:first-child::before {
+    @apply pointer-events-none float-left h-0 text-muted-foreground;
+    content: attr(data-placeholder);
+  }
+}

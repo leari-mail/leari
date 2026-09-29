@@ -376,6 +376,7 @@ async fn imap_smtp_send_round_trip() {
         bcc: String::new(),
         subject: "Re: original".into(),
         body: "Reply body".into(),
+        html: Some("<p>Reply <b>body</b></p>".into()),
         reply_to_message_id: Some(parent),
         attachments: vec![crate::mail::send::DraftAttachment::File {
             path: attachment_path.to_string_lossy().into_owned(),

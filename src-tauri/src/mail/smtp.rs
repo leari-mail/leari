@@ -19,7 +19,10 @@ pub struct Outgoing {
     pub cc: Mailboxes,
     pub bcc: Mailboxes,
     pub subject: String,
+    /// Plain-text body; always sent, as the whole body or the text/plain alternative.
     pub body: String,
+    /// HTML body; when present the message is multipart/alternative.
+    pub html: Option<String>,
     /// Message-ID of the message being replied to (without angle brackets).
     pub in_reply_to: Option<String>,
     /// Thread ancestry, oldest first (without angle brackets).
@@ -73,19 +76,38 @@ pub fn build(outgoing: Outgoing) -> Result<Message> {
         builder = builder.references(references.join(" "));
     }
 
-    let result = if outgoing.attachments.is_empty() {
-        builder.header(ContentType::TEXT_PLAIN).body(outgoing.body)
-    } else {
-        let mut parts = MultiPart::mixed().singlepart(SinglePart::plain(outgoing.body));
-        for attachment in outgoing.attachments {
+    let result = match (outgoing.html, outgoing.attachments.is_empty()) {
+        (None, true) => builder.header(ContentType::TEXT_PLAIN).body(outgoing.body),
+        (Some(html), true) => {
+            builder.multipart(MultiPart::alternative_plain_html(outgoing.body, html))
+        }
+        (html, false) => build_mixed(builder, outgoing.body, html, outgoing.attachments),
+    };
+    result.map_err(|error| Error::Invalid(error.to_string()))
+}
+
+/// Body (plain, or plain + HTML alternatives) followed by the attachments.
+fn build_mixed(
+    builder: lettre::message::MessageBuilder,
+    body: String,
+    html: Option<String>,
+    attachments: Vec<OutgoingAttachment>,
+) -> std::result::Result<Message, lettre::error::Error> {
+    {
+        let mut parts = match html {
+            Some(html) => {
+                MultiPart::mixed().multipart(MultiPart::alternative_plain_html(body, html))
+            }
+            None => MultiPart::mixed().singlepart(SinglePart::plain(body)),
+        };
+        for attachment in attachments {
             let content_type = ContentType::parse(&attachment.content_type)
                 .unwrap_or_else(|_| ContentType::parse("application/octet-stream").expect("valid"));
             parts = parts
                 .singlepart(Attachment::new(attachment.name).body(attachment.bytes, content_type));
         }
         builder.multipart(parts)
-    };
-    result.map_err(|error| Error::Invalid(error.to_string()))
+    }
 }
 
 fn smtp_error(error: lettre::transport::smtp::Error) -> Error {
@@ -155,6 +177,7 @@ mod tests {
             bcc: parse_recipients("secret@example.com").unwrap(),
             subject: "Re: Hello".into(),
             body: "Hi Bob".into(),
+            html: None,
             in_reply_to: Some("parent@example.com".into()),
             references: vec!["root@example.com".into(), "parent@example.com".into()],
             attachments: Vec::new(),
@@ -178,6 +201,7 @@ mod tests {
             bcc: Mailboxes::new(),
             subject: "Files".into(),
             body: "See attached".into(),
+            html: Some("<p>See <b>attached</b></p>".into()),
             in_reply_to: None,
             references: Vec::new(),
             attachments: vec![OutgoingAttachment {
@@ -191,11 +215,36 @@ mod tests {
 
         let parsed = crate::mail::parse::parse(&raw).unwrap();
         assert_eq!(parsed.body_text.as_deref().map(str::trim), Some("See attached"));
+        assert!(parsed.body_html.as_deref().is_some_and(|html| html.contains("<b>attached</b>")));
         assert_eq!(parsed.attachments.len(), 1);
         assert_eq!(parsed.attachments[0].filename, "notes.txt");
         assert_eq!(
             crate::mail::parse::attachment_content(&raw, Some(0), "notes.txt").unwrap(),
             b"hello world"
         );
+    }
+
+    #[test]
+    fn builds_html_with_plain_alternative() {
+        let message = build(Outgoing {
+            from: "ana@example.com".parse().unwrap(),
+            to: parse_recipients("bob@example.com").unwrap(),
+            cc: Mailboxes::new(),
+            bcc: Mailboxes::new(),
+            subject: "Formatted".into(),
+            body: "Hello *there*".into(),
+            html: Some("<p>Hello <b>there</b></p>".into()),
+            in_reply_to: None,
+            references: Vec::new(),
+            attachments: Vec::new(),
+        })
+        .unwrap();
+        let raw = message.formatted();
+        assert!(String::from_utf8_lossy(&raw).contains("multipart/alternative"));
+
+        let parsed = crate::mail::parse::parse(&raw).unwrap();
+        assert_eq!(parsed.body_text.as_deref().map(str::trim), Some("Hello *there*"));
+        assert!(parsed.body_html.as_deref().is_some_and(|html| html.contains("<b>there</b>")));
+        assert!(parsed.attachments.is_empty());
     }
 }

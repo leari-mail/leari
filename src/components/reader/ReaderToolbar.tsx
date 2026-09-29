@@ -8,7 +8,7 @@ import {
   useSetMessageRead,
   useSetMessageStarred,
 } from "@hooks";
-import { cn } from "@lib";
+import { cn, quoteHtml } from "@lib";
 import type { Message } from "@models";
 import { useComposerStore } from "@stores";
 import { Separator } from "@ui";
@@ -23,11 +23,7 @@ interface ReaderToolbarProps {
 }
 
 function quote(message: Message) {
-  const body = (message.bodyText ?? message.snippet)
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n");
-  return `\n\n${message.fromName ?? message.fromAddress}:\n${body}`;
+  return quoteHtml(message.fromName ?? message.fromAddress, message.bodyText ?? message.snippet);
 }
 
 export function ReaderToolbar({ messages, replyTo, targetIds }: ReaderToolbarProps) {

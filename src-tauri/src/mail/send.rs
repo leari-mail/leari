@@ -24,7 +24,11 @@ pub struct SendRequest {
     pub cc: String,
     pub bcc: String,
     pub subject: String,
+    /// Plain-text body.
     pub body: String,
+    /// HTML body from the rich text editor, sent as the text/html alternative.
+    #[serde(default)]
+    pub html: Option<String>,
     /// Local id of the message being replied to, for threading headers.
     pub reply_to_message_id: Option<String>,
     #[serde(default)]
@@ -180,6 +184,7 @@ pub(crate) async fn send_as(
         bcc,
         subject: request.subject,
         body: request.body,
+        html: request.html,
         in_reply_to,
         references,
         attachments,

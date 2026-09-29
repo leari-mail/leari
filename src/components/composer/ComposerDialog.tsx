@@ -5,13 +5,15 @@ import { useTranslation } from "react-i18next";
 import { ComposerAttachments, DropOverlay } from "@components/attachments";
 import { IconButton } from "@components/common";
 import { useAccounts, useErrorMessage, useFileDrop, useSendMessage } from "@hooks";
+import { toEmailHtml } from "@lib";
 import type { LocalFile } from "@models";
 import { attachmentsService } from "@services";
 import { useComposerStore } from "@stores";
-import { Button, Dialog, DialogContent, DialogTitle, Input, Textarea } from "@ui";
+import { Button, Dialog, DialogContent, DialogTitle, Input } from "@ui";
 
 import { ComposerField } from "./ComposerField";
 import { FromSelect } from "./FromSelect";
+import { RichTextEditor } from "./RichTextEditor";
 
 const bareInput =
   "h-10 rounded-none border-0 px-0 shadow-none focus-visible:ring-0 dark:bg-transparent";
@@ -49,7 +51,8 @@ export function ComposerDialog() {
         cc: draft.cc,
         bcc: draft.bcc,
         subject: draft.subject,
-        body: draft.body,
+        body: draft.bodyText,
+        html: toEmailHtml(draft.body),
         replyToMessageId: draft.replyToMessageId,
         attachments: draft.attachments.map((attachment) =>
           attachment.kind === "file"
@@ -152,12 +155,12 @@ export function ComposerDialog() {
               />
             </ComposerField>
 
-            <Textarea
+            <RichTextEditor
+              content={draft.body}
               autoFocus={!!draft.to}
-              value={draft.body}
+              disabled={sending}
               placeholder={t("composer.bodyPlaceholder")}
-              onChange={(event) => update({ body: event.target.value })}
-              className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 text-[14px] shadow-none focus-visible:ring-0 dark:bg-transparent"
+              onChange={(body, bodyText) => update({ body, bodyText })}
             />
           </fieldset>
 
