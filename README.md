@@ -30,6 +30,33 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
   </picture>
 </p>
 
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/leari-composer.png"
+        alt="Writing a reply with bold, a bulleted list and a link, above the quoted original" />
+      <p align="center"><sub>Rich text replies, with the original quoted</sub></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/leari-selection.png"
+        alt="Three conversations selected, with the right-click menu and the summary pane" />
+      <p align="center"><sub>Select several conversations and act on them together</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/leari-drag.png"
+        alt="Two conversations being dragged onto a folder in the sidebar" />
+      <p align="center"><sub>Drag conversations onto a folder</sub></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/leari-folders.png"
+        alt="The right-click menu of a custom folder, with nested folders in the sidebar" />
+      <p align="center"><sub>Nested folders: create, rename, empty and delete</sub></p>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Multi-account:** Google / Workspace, Outlook / Microsoft 365, and any IMAP or POP3 server
@@ -128,20 +155,20 @@ signature, and every rebuild is a new binary. Dev builds are therefore signed wi
 "leari Development" identity, created automatically on the first `pnpm app` (see
 `scripts/dev-run.sh`), so they keep the same signature. Choose **Always Allow** once and it sticks.
 
-| Script                | What it does                                                      |
-| --------------------- | ----------------------------------------------------------------- |
-| `pnpm app`            | Run the app with hot reload                                       |
-| `pnpm tauri build`    | Build installers locally                                          |
-| `pnpm check`          | Everything CI checks: types, lint, formatting, clippy, Rust tests |
-| `pnpm typecheck`      | TypeScript check                                                  |
-| `pnpm lint`           | ESLint (`pnpm lint:fix` to autofix, `pnpm lint:rust` for clippy)  |
-| `pnpm format`         | Prettier and rustfmt (`pnpm format:check` to verify only)         |
-| `pnpm test`           | Frontend unit tests (Vitest)                                      |
-| `pnpm test:rust`      | Rust unit tests                                                   |
-| `pnpm db:generate`    | Generate a migration after changing `src/db/schema`               |
-| `pnpm ui:add <name>`  | Add a shadcn/ui component, split into one file per component      |
-| `pnpm release <bump>` | Cut a release (see [Releasing](#releasing))                       |
-| `pnpm screenshots`    | macOS: regenerate the README screenshots from demo data           |
+| Script                | What it does                                                                                 |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| `pnpm app`            | Run the app with hot reload                                                                  |
+| `pnpm tauri build`    | Build installers locally                                                                     |
+| `pnpm check`          | Everything CI checks: types, lint, formatting, clippy, Rust tests                            |
+| `pnpm typecheck`      | TypeScript check                                                                             |
+| `pnpm lint`           | ESLint (`pnpm lint:fix` to autofix, `pnpm lint:rust` for clippy)                             |
+| `pnpm format`         | Prettier and rustfmt (`pnpm format:check` to verify only)                                    |
+| `pnpm test`           | Frontend unit tests (Vitest)                                                                 |
+| `pnpm test:rust`      | Rust unit tests                                                                              |
+| `pnpm db:generate`    | Generate a migration after changing `src/db/schema`                                          |
+| `pnpm ui:add <name>`  | Add a shadcn/ui component, split into one file per component                                 |
+| `pnpm release <bump>` | Cut a release (see [Releasing](#releasing))                                                  |
+| `pnpm screenshots`    | macOS: regenerate the README screenshots from demo data (or `pnpm screenshots drag` for one) |
 
 A pre-commit hook (husky + lint-staged) lints and formats staged files.
 
