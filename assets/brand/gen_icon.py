@@ -254,8 +254,9 @@ def tray_icon(badge=False):
   {dot}
 </svg>
 """
-open(os.path.join(HERE, "app-icon.svg"), "w").write(full_icon())
-open(os.path.join(HERE, "..", "..", "src", "assets", "logo-mark.svg"), "w").write(logo_mark())
-open(os.path.join(HERE, "avatar.svg"), "w").write(avatar())
-open(os.path.join(HERE, "tray-icon.svg"), "w").write(tray_icon())
-open(os.path.join(HERE, "tray-icon-sync.svg"), "w").write(tray_icon(badge=True))
+if __name__ == "__main__":  # gen_dmg_background.py imports the drawing
+    open(os.path.join(HERE, "app-icon.svg"), "w").write(full_icon())
+    open(os.path.join(HERE, "..", "..", "src", "assets", "logo-mark.svg"), "w").write(logo_mark())
+    open(os.path.join(HERE, "avatar.svg"), "w").write(avatar())
+    open(os.path.join(HERE, "tray-icon.svg"), "w").write(tray_icon())
+    open(os.path.join(HERE, "tray-icon-sync.svg"), "w").write(tray_icon(badge=True))

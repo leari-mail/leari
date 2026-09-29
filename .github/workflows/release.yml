@@ -29,7 +29,7 @@ jobs:
 
           **Installing:** download the `.dmg` (macOS, Apple Silicon and Intel) or the `-setup.exe` (Windows).
           Builds are not code-signed yet:
-          - macOS: after moving Leari to Applications, run `xattr -dr com.apple.quarantine /Applications/leari.app`
+          - macOS: after moving Leari to Applications, run `xattr -dr com.apple.quarantine /Applications/Leari.app`
             (or allow it in System Settings → Privacy & Security).
           - Windows: in the SmartScreen prompt, choose "More info" → "Run anyway".
           NOTES
