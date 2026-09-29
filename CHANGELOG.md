@@ -9,6 +9,11 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Changed
+
+- The macOS installer window continues the app icon: its sky and branch
+- The app is named "Leari" (capitalized) when installed: `Leari.app`, `Leari.exe` and the installers
+
 ## [0.1.0-alpha.4] - 2026-09-29
 
 ### Added

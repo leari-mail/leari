@@ -51,3 +51,7 @@ Icon sources: `assets/brand/gen_icon.py` generates `app-icon.svg`, `tray-icon.sv
 (a Lear's macaw perched with raised wings, traced from a reference photo). Rasterize to PNG (app icon 1024 px, tray 44 px),
 then run `pnpm tauri icon assets/brand/app-icon.png` (delete the android/ and ios/ folders it creates).
 The tray PNG is `src-tauri/icons/tray-icon.png` (macOS template image, black + alpha).
+The installer window background comes from `assets/brand/gen_dmg_background.py` (660x400): it redraws the icon's scene
+(imported from `gen_icon.py`) exactly where Finder shows the icon and extends its sky and branch. Render it
+at 660 and 1320 px, then `tiffutil -cathidpicheck bg.png bg@2x.png -out src-tauri/icons/dmg-background.tiff`.
+Its icon positions must match `bundle.macOS.dmg` in `tauri.conf.json`.

@@ -74,13 +74,13 @@ NTLM / client-certificate authentication.
 
 Download the latest build from [Releases](https://github.com/leari-mail/leari/releases):
 
-- **macOS** (Apple Silicon and Intel): `leari_<version>_universal.dmg`
-- **Windows**: `leari_<version>_x64-setup.exe`
+- **macOS** (Apple Silicon and Intel): `Leari_<version>_universal.dmg`
+- **Windows**: `Leari_<version>_x64-setup.exe`
 
 Builds are not notarized by Apple / signed by Microsoft yet:
 
 - **macOS:** after moving Leari to Applications, run
-  `xattr -dr com.apple.quarantine /Applications/leari.app`, or allow it in
+  `xattr -dr com.apple.quarantine /Applications/Leari.app`, or allow it in
   System Settings → Privacy & Security.
 - **Windows:** in the SmartScreen prompt, choose **More info** → **Run anyway**.
 
