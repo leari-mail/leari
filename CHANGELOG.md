@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.4] - 2026-09-29
+
 ### Added
 
 - Setting to also show Leari in the Dock (macOS) or taskbar (Windows, Linux), like a regular app;
