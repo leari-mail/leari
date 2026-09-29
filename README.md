@@ -37,7 +37,8 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
 - **Menu bar / tray app:** no Dock icon by default (optional in Settings); closing the window hides it
 - **Three-pane layout:** resizable sidebar, message list and reader
 - **Mail management:** select several conversations (`⌘`-click, `⇧`-click, `⌘A`) to archive, move,
-  delete, mark or star them together; right-click for all actions, `⌫` to delete
+  delete, mark or star them together; drag them onto a folder; right-click for all actions,
+  `⌫` to delete
 - **Folders:** create, rename, nest and delete folders; empty Trash and Spam; mark a folder as read
 - **Keyboard friendly:** `↑`/`↓` or `j`/`k` to navigate (`⇧` to extend the selection), `⌘N` to
   compose, `⌘,` for settings

@@ -3,12 +3,19 @@ import { type KeyboardEvent, type MouseEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@components/common";
-import { useAccounts, useConversations, useMessageActions, useScreenshotMode } from "@hooks";
+import {
+  useAccounts,
+  useConversations,
+  useMessageActions,
+  useMessageDrag,
+  useScreenshotMode,
+} from "@hooks";
 import type { Conversation } from "@models";
-import { rowOf, useMailStore } from "@stores";
+import { rowOf, useDragStore, useMailStore } from "@stores";
 import { ContextMenu, ContextMenuTrigger, ScrollArea } from "@ui";
 
 import { MessageActionsMenu } from "./MessageActionsMenu";
+import { MessageDragPreview } from "./MessageDragPreview";
 import { MessageListHeader } from "./MessageListHeader";
 import { MessageListItem } from "./MessageListItem";
 import { MessageListSkeleton } from "./MessageListSkeleton";
@@ -26,12 +33,15 @@ export function MessageList() {
   const selectedRows = useMailStore((state) => state.selectedRows);
   const { selectMessage, toggleRow, selectRange } = useMailStore.getState();
   const actions = useMessageActions();
+  const startDrag = useMessageDrag();
+  const dragged = useDragStore((state) => state.drag?.rows);
 
   const accountsById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
   );
   const selected = useMemo(() => new Set(selectedRows.map((row) => row.id)), [selectedRows]);
+  const draggedIds = useMemo(() => new Set(dragged?.map((row) => row.id)), [dragged]);
   // Account markers only help when a unified folder mixes several accounts.
   const showAccounts = isUnified && accounts.length > 1;
   const unread = messages.filter((message) => !message.isRead).length;
@@ -122,6 +132,8 @@ export function MessageList() {
                   account={showAccounts ? accountsById.get(conversation.accountId) : undefined}
                   selected={selected.has(conversation.id)}
                   onSelect={(event) => onSelect(conversation, index, event)}
+                  onPointerDown={(event) => startDrag(conversation, event)}
+                  dragging={draggedIds.has(conversation.id)}
                 />
               ))}
             </div>
@@ -136,6 +148,7 @@ export function MessageList() {
     <section className="flex h-full flex-col bg-list">
       <MessageListHeader unread={unread} />
       {renderBody()}
+      <MessageDragPreview />
     </section>
   );
 }

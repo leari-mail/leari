@@ -1,4 +1,5 @@
 export { MessageActionsMenu } from "./MessageActionsMenu";
+export { MessageDragPreview } from "./MessageDragPreview";
 export { MessageList } from "./MessageList";
 export { MessageListHeader } from "./MessageListHeader";
 export { MessageListItem } from "./MessageListItem";

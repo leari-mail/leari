@@ -11,6 +11,9 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- Drag conversations (or a selection) onto a folder in the sidebar to move them there; onto
+  All Archive or All Trash to move each to its own account's folder, onto Starred to star them.
+  Esc cancels
 - Select several conversations (⌘-click, ⇧-click, ⇧↑/↓, ⌘A) and archive, move, delete, mark as
   read or unread, star or mark them as spam together, from a summary pane or by right-clicking
 - "Move to" any folder of the account, from the right-click menu or the reader toolbar

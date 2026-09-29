@@ -1,5 +1,5 @@
 import { Paperclip, Star } from "lucide-react";
-import type { MouseEvent } from "react";
+import type { MouseEvent, PointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AccountEdge } from "@components/accounts";
@@ -15,6 +15,10 @@ interface MessageListItemProps {
   selected: boolean;
   /** Plain click, ⌘-click or ⇧-click (the list decides from the event's modifiers). */
   onSelect: (event: MouseEvent<HTMLButtonElement>) => void;
+  /** Starts dragging the row (or the selection) to a folder. */
+  onPointerDown?: (event: PointerEvent<HTMLButtonElement>) => void;
+  /** Being dragged right now. */
+  dragging?: boolean;
 }
 
 export function MessageListItem({
@@ -22,6 +26,8 @@ export function MessageListItem({
   account,
   selected,
   onSelect,
+  onPointerDown,
+  dragging,
 }: MessageListItemProps) {
   const { t, i18n } = useTranslation(["mail", "common"]);
   const message = conversation;
@@ -33,8 +39,10 @@ export function MessageListItem({
       data-message-id={message.id}
       aria-selected={selected}
       onClick={onSelect}
+      onPointerDown={onPointerDown}
       className={cn(
-        "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-colors outline-none",
+        "relative isolate flex w-full gap-3 rounded-lg py-2.5 pr-3 pl-4 text-left transition-[background-color,opacity] outline-none",
+        dragging && "opacity-50",
         selected
           ? "bg-list-selected text-list-selected-foreground"
           : "hover:bg-accent/70 focus-visible:bg-accent/70",

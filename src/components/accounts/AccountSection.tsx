@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { FolderNameDialog, MailboxItem, MailboxMenu } from "@components/mailboxes";
 import { useCreateMailbox, useErrorMessage, useMailboxLabel, useReauthorizeAccount } from "@hooks";
-import { cn, nestMailboxes } from "@lib";
+import { cn, dropTargetKey, nestMailboxes } from "@lib";
 import { type Account, isAppError, type Mailbox } from "@models";
 import { useMailStore } from "@stores";
 import {
@@ -101,6 +101,7 @@ export function AccountSection({ account, mailboxes, unreadCounts }: AccountSect
                 role={mailbox.role}
                 label={label(mailbox)}
                 depth={depth}
+                dropTarget={dropTargetKey({ kind: "mailbox", mailboxId: mailbox.id })}
                 count={
                   mailbox.role === "inbox" || mailbox.role === "custom"
                     ? unreadCounts[mailbox.id]
