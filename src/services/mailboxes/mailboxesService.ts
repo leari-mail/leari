@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { asc, count, eq } from "drizzle-orm";
 
 import { db, mailboxes, messages } from "@db";
@@ -18,4 +19,18 @@ export const mailboxesService = {
 
     return Object.fromEntries(rows.map((row) => [row.mailboxId, row.unread]));
   },
+
+  /**
+   * Folder changes run on the server right away (Rust, src-tauri/src/mail/mailboxes.rs), then
+   * the account syncs. `parentId` null creates a top-level folder.
+   */
+  create: (accountId: string, parentId: string | null, name: string) =>
+    invoke<void>("mailbox_create", { accountId, parentId, name }),
+
+  rename: (accountId: string, mailboxId: string, name: string) =>
+    invoke<void>("mailbox_rename", { accountId, mailboxId, name }),
+
+  /** Deletes a custom folder, its subfolders and all their mail. */
+  remove: (accountId: string, mailboxId: string) =>
+    invoke<void>("mailbox_delete", { accountId, mailboxId }),
 };

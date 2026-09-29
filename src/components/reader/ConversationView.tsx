@@ -12,8 +12,6 @@ import { ReaderToolbar } from "./ReaderToolbar";
 interface ConversationViewProps {
   /** Oldest first. */
   messages: Message[];
-  /** Messages the selected list row stands for (what archive / delete act on). */
-  targetIds: string[];
   account?: Account;
   showAccount: boolean;
 }
@@ -22,12 +20,7 @@ interface ConversationViewProps {
  * The reader's content for a selected row. Mounted per selection (`key`), so expansion
  * state starts fresh: the newest and unread messages open, the rest collapsed.
  */
-export function ConversationView({
-  messages,
-  targetIds,
-  account,
-  showAccount,
-}: ConversationViewProps) {
+export function ConversationView({ messages, account, showAccount }: ConversationViewProps) {
   const markAsReadOnOpen = useSettingsStore((state) => state.markAsReadOnOpen);
   const { mutate: setRead } = useSetMessageRead();
   const newest = messages[messages.length - 1];
@@ -59,7 +52,7 @@ export function ConversationView({
 
   return (
     <section className="flex h-full flex-col bg-background">
-      <ReaderToolbar messages={messages} replyTo={replyTo} targetIds={targetIds} />
+      <ReaderToolbar messages={messages} replyTo={replyTo} />
       <ScrollArea className="min-h-0 flex-1">
         <article className="mx-auto max-w-3xl space-y-4 px-8 py-6">
           <ConversationHeader

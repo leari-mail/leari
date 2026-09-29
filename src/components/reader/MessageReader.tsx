@@ -3,13 +3,16 @@ import { useMailStore } from "@stores";
 
 import { ConversationView } from "./ConversationView";
 import { ReaderEmpty } from "./ReaderEmpty";
+import { SelectionSummary } from "./SelectionSummary";
 
 /** Right pane: the selected message, or its whole conversation. */
 export function MessageReader() {
   const selectedId = useMailStore((state) => state.selectedMessageId);
-  const selectedIds = useMailStore((state) => state.selectedIds);
-  const { data: messages } = useConversation(selectedId);
+  const multiple = useMailStore((state) => state.selectedRows.length > 1);
+  const { data: messages } = useConversation(multiple ? null : selectedId);
   const { data: accounts = [] } = useAccounts();
+
+  if (multiple) return <SelectionSummary />;
 
   if (!selectedId || !messages?.length) {
     return (
@@ -24,7 +27,6 @@ export function MessageReader() {
     <ConversationView
       key={selectedId}
       messages={messages}
-      targetIds={selectedIds.length ? selectedIds : [selectedId]}
       account={account}
       showAccount={accounts.length > 1}
     />

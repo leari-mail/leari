@@ -1,12 +1,14 @@
 import { Inbox, SearchX } from "lucide-react";
-import { type KeyboardEvent, useMemo } from "react";
+import { type KeyboardEvent, type MouseEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@components/common";
-import { useAccounts, useConversations, useScreenshotMode } from "@hooks";
-import { useMailStore } from "@stores";
-import { ScrollArea } from "@ui";
+import { useAccounts, useConversations, useMessageActions, useScreenshotMode } from "@hooks";
+import type { Conversation } from "@models";
+import { rowOf, useMailStore } from "@stores";
+import { ContextMenu, ContextMenuTrigger, ScrollArea } from "@ui";
 
+import { MessageActionsMenu } from "./MessageActionsMenu";
 import { MessageListHeader } from "./MessageListHeader";
 import { MessageListItem } from "./MessageListItem";
 import { MessageListSkeleton } from "./MessageListSkeleton";
@@ -19,27 +21,69 @@ export function MessageList() {
   const { data: accounts = [] } = useAccounts();
   const isUnified = useMailStore((state) => state.folder.kind === "unified");
   const search = useMailStore((state) => state.searchQuery);
-  const selectedId = useMailStore((state) => state.selectedMessageId);
-  const selectMessage = useMailStore((state) => state.selectMessage);
+  const currentId = useMailStore((state) => state.selectedMessageId);
+  const anchorId = useMailStore((state) => state.anchorId);
+  const selectedRows = useMailStore((state) => state.selectedRows);
+  const { selectMessage, toggleRow, selectRange } = useMailStore.getState();
+  const actions = useMessageActions();
 
   const accountsById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account])),
     [accounts],
   );
+  const selected = useMemo(() => new Set(selectedRows.map((row) => row.id)), [selectedRows]);
   // Account markers only help when a unified folder mixes several accounts.
   const showAccounts = isUnified && accounts.length > 1;
   const unread = messages.filter((message) => !message.isRead).length;
 
-  // ↑/↓ (or k/j) moves the selection through the list.
-  const onKeyDown = (event: KeyboardEvent) => {
-    const step = { ArrowDown: 1, j: 1, ArrowUp: -1, k: -1 }[event.key];
-    if (!step || conversations.length === 0) return;
-    event.preventDefault();
+  /** Selects from the anchor (or the given row) to the row at `index`. */
+  const selectTo = (index: number) => {
+    const anchor = conversations.findIndex((conversation) => conversation.id === anchorId);
+    const from = anchor === -1 ? index : anchor;
+    const [start, end] = from <= index ? [from, index] : [index, from];
+    selectRange(conversations.slice(start, end + 1).map(rowOf), conversations[index].id);
+  };
 
-    const index = conversations.findIndex((conversation) => conversation.id === selectedId);
-    const next = conversations[Math.min(Math.max(index + step, 0), conversations.length - 1)];
-    selectMessage(next.id, next.messageIds);
+  const onSelect = (conversation: Conversation, index: number, event: MouseEvent) => {
+    if (event.metaKey || event.ctrlKey) toggleRow(rowOf(conversation));
+    else if (event.shiftKey) selectTo(index);
+    else selectMessage(rowOf(conversation));
+  };
+
+  // ↑/↓ (or k/j) moves the selection, with ⇧ it extends it; ⌘A selects everything, Esc clears,
+  // Delete / ⌫ moves the selection to Trash.
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (conversations.length === 0) return;
+    if ((event.metaKey || event.ctrlKey) && event.key === "a") {
+      event.preventDefault();
+      selectRange(conversations.map(rowOf), currentId ?? conversations[0].id);
+      return;
+    }
+    if (event.key === "Escape") return selectMessage(null);
+    if (event.key === "Delete" || event.key === "Backspace") {
+      event.preventDefault();
+      return actions.remove();
+    }
+
+    const step = { ArrowDown: 1, j: 1, ArrowUp: -1, k: -1 }[event.key];
+    if (!step || event.metaKey || event.ctrlKey || event.altKey) return;
+    event.preventDefault();
+    const index = conversations.findIndex((conversation) => conversation.id === currentId);
+    const nextIndex = Math.min(Math.max(index + step, 0), conversations.length - 1);
+    const next = conversations[nextIndex];
+    if (event.shiftKey) selectTo(nextIndex);
+    else selectMessage(rowOf(next));
     document.querySelector(`[data-message-id="${next.id}"]`)?.scrollIntoView({ block: "nearest" });
+  };
+
+  // Right-clicking a row outside the selection selects it first; empty space gets no menu.
+  const onContextMenu = (event: MouseEvent) => {
+    const id = (event.target as HTMLElement)
+      .closest<HTMLElement>("[data-message-id]")
+      ?.getAttribute("data-message-id");
+    const conversation = conversations.find((item) => item.id === id);
+    if (!conversation) return event.preventDefault();
+    if (!selected.has(conversation.id)) selectMessage(rowOf(conversation));
   };
 
   const renderBody = () => {
@@ -61,22 +105,29 @@ export function MessageList() {
     }
     return (
       <ScrollArea className="min-h-0 flex-1">
-        <div
-          role="listbox"
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          className="space-y-0.5 p-2 outline-none"
-        >
-          {conversations.map((conversation) => (
-            <MessageListItem
-              key={conversation.id}
-              conversation={conversation}
-              account={showAccounts ? accountsById.get(conversation.accountId) : undefined}
-              selected={conversation.id === selectedId}
-              onSelect={() => selectMessage(conversation.id, conversation.messageIds)}
-            />
-          ))}
-        </div>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div
+              role="listbox"
+              aria-multiselectable
+              tabIndex={0}
+              onKeyDown={onKeyDown}
+              onContextMenu={onContextMenu}
+              className="space-y-0.5 p-2 outline-none"
+            >
+              {conversations.map((conversation, index) => (
+                <MessageListItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  account={showAccounts ? accountsById.get(conversation.accountId) : undefined}
+                  selected={selected.has(conversation.id)}
+                  onSelect={(event) => onSelect(conversation, index, event)}
+                />
+              ))}
+            </div>
+          </ContextMenuTrigger>
+          <MessageActionsMenu />
+        </ContextMenu>
       </ScrollArea>
     );
   };

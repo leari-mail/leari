@@ -1,10 +1,20 @@
-import { Archive, Forward, MailOpen, Reply, ReplyAll, Star, Trash2 } from "lucide-react";
+import {
+  Archive,
+  FolderInput,
+  Forward,
+  MailOpen,
+  Reply,
+  ReplyAll,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { DragRegion, IconButton } from "@components/common";
+import { MoveToDropdown } from "@components/messages";
 import {
+  useMessageActions,
   useMessageAttachments,
-  useMoveMessage,
   useSetMessageRead,
   useSetMessageStarred,
 } from "@hooks";
@@ -18,20 +28,19 @@ interface ReaderToolbarProps {
   messages: Message[];
   /** Message that reply / forward respond to (newest one from someone else). */
   replyTo: Message;
-  /** Messages archive / delete act on: the selected row's messages in the current folder. */
-  targetIds: string[];
 }
 
 function quote(message: Message) {
   return quoteHtml(message.fromName ?? message.fromAddress, message.bodyText ?? message.snippet);
 }
 
-export function ReaderToolbar({ messages, replyTo, targetIds }: ReaderToolbarProps) {
+export function ReaderToolbar({ messages, replyTo }: ReaderToolbarProps) {
   const { t } = useTranslation("mail");
   const openComposer = useComposerStore((state) => state.open);
   const setRead = useSetMessageRead();
   const setStarred = useSetMessageStarred();
-  const move = useMoveMessage();
+  // Archive, move and delete act on the list's selection: this row's messages in the folder.
+  const actions = useMessageActions();
   const { data: attachments = [] } = useMessageAttachments(replyTo.id);
 
   const replySubject = replyTo.subject.match(/^re:/i) ? replyTo.subject : `Re: ${replyTo.subject}`;
@@ -89,15 +98,14 @@ export function ReaderToolbar({ messages, replyTo, targetIds }: ReaderToolbarPro
 
       <Separator orientation="vertical" className="mx-1.5 h-4!" />
 
+      <IconButton label={t("reader.archive")} icon={<Archive />} onClick={actions.archive} />
+      <MoveToDropdown>
+        <IconButton label={t("actions.moveTo")} icon={<FolderInput />} />
+      </MoveToDropdown>
       <IconButton
-        label={t("reader.archive")}
-        icon={<Archive />}
-        onClick={() => move.mutate({ ids: targetIds, to: "archive" })}
-      />
-      <IconButton
-        label={t("reader.delete")}
+        label={actions.role === "trash" ? t("actions.deletePermanently") : t("reader.delete")}
         icon={<Trash2 />}
-        onClick={() => move.mutate({ ids: targetIds, to: "trash" })}
+        onClick={actions.remove}
       />
 
       <div data-tauri-drag-region className="h-full flex-1" />

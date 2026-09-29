@@ -1,6 +1,7 @@
 export * from "./account-colors";
 export * from "./conversations";
 export * from "./errors";
+export * from "./folders";
 export * from "./format";
 export * from "./ids";
 export * from "./platform";

@@ -11,6 +11,14 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ### Added
 
+- Select several conversations (⌘-click, ⇧-click, ⇧↑/↓, ⌘A) and archive, move, delete, mark as
+  read or unread, star or mark them as spam together, from a summary pane or by right-clicking
+- "Move to" any folder of the account, from the right-click menu or the reader toolbar
+- Delete / ⌫ moves the selection to Trash; deleting from Trash asks first
+- Folder management (right-click a folder or account): new folder and subfolder, rename, delete,
+  mark all as read and empty (Trash and Spam permanently, other folders to Trash).
+  Subfolders are shown nested
+
 - Rich text in the composer: bold, italic, underline, strikethrough, lists, quotes and links.
   Messages are sent as HTML with a plain-text version, and replies quote the original
 

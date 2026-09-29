@@ -1,1 +1,1 @@
-export { messagesService } from "./messagesService";
+export { messagesService, type MoveRole } from "./messagesService";

@@ -1,3 +1,4 @@
+export { ConfirmDialog } from "./ConfirmDialog";
 export { DragRegion } from "./DragRegion";
 export { EmptyState } from "./EmptyState";
 export { IconButton } from "./IconButton";
