@@ -9,6 +9,11 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Changed
+
+- New app icon, menu bar icon and logo: a Lear's macaw perched on a branch with its wings raised,
+  on a pale sky background
+
 ## [0.1.0-alpha.3] - 2026-09-28
 
 ### Added

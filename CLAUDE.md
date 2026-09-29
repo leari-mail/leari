@@ -48,5 +48,6 @@ closing the window hides it.
 ## Brand
 
 Icon sources: `assets/brand/gen_icon.py` generates `app-icon.svg`, `tray-icon.svg` and `src/assets/logo-mark.svg`
-(a Lear's macaw with open wings). Rasterize to PNG, then run `pnpm tauri icon assets/brand/app-icon.png`.
+(a Lear's macaw perched with raised wings, traced from a reference photo). Rasterize to PNG (app icon 1024 px, tray 44 px),
+then run `pnpm tauri icon assets/brand/app-icon.png` (delete the android/ and ios/ folders it creates).
 The tray PNG is `src-tauri/icons/tray-icon.png` (macOS template image, black + alpha).
