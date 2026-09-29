@@ -2,6 +2,7 @@ import { MailOpen, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useFolderContents, useMailboxes, useUnifiedUnreadCount } from "@hooks";
+import { dropTargetKey } from "@lib";
 import type { MailboxRole } from "@models";
 import { useConfirmStore, useMailStore } from "@stores";
 import {
@@ -37,6 +38,7 @@ export function UnifiedFolderItem({ role }: UnifiedFolderItemProps) {
       label={t(`unified.${role}`)}
       count={role === "inbox" ? unread : 0}
       active={active}
+      dropTarget={dropTargetKey({ kind: "role", role })}
       onSelect={() => selectFolder({ kind: "unified", role })}
     />
   );

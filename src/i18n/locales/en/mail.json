@@ -145,5 +145,9 @@
     "emptyPermanent": "All mail in it will be deleted permanently. This can't be undone.",
     "emptyToTrash": "All mail in it will be moved to Trash.",
     "emptyConfirm": "Empty"
+  },
+  "drag": {
+    "count_one": "{{count}} conversation",
+    "count_other": "{{count}} conversations"
   }
 }

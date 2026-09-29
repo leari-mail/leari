@@ -3,6 +3,7 @@ export { useConversations } from "./useConversations";
 export { useInvalidateMail } from "./useInvalidateMail";
 export { useMessage } from "./useMessage";
 export { useMessageActions } from "./useMessageActions";
+export { useMessageDrag } from "./useMessageDrag";
 export { useMessages } from "./useMessages";
 export { type MoveTarget, useMoveMessage } from "./useMoveMessage";
 export { type MoveTargets, useMoveTargets } from "./useMoveTargets";

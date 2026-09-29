@@ -218,3 +218,9 @@
     content: attr(data-placeholder);
   }
 }
+
+/* While messages are dragged to a folder (useMessageDrag). */
+:root[data-dragging],
+:root[data-dragging] * {
+  cursor: grabbing !important;
+}

@@ -145,5 +145,9 @@
     "emptyPermanent": "Todos os e-mails nela serão apagados definitivamente. Não é possível desfazer.",
     "emptyToTrash": "Todos os e-mails nela serão movidos para a Lixeira.",
     "emptyConfirm": "Esvaziar"
+  },
+  "drag": {
+    "count_one": "{{count}} conversa",
+    "count_other": "{{count}} conversas"
   }
 }
