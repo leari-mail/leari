@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.6] - 2026-09-29
+
 ### Added
 
 - Drag conversations (or a selection) onto a folder in the sidebar to move them there; onto
@@ -21,9 +23,12 @@ the new version, and the release workflow publishes it as the GitHub release not
 - Folder management (right-click a folder or account): new folder and subfolder, rename, delete,
   mark all as read and empty (Trash and Spam permanently, other folders to Trash).
   Subfolders are shown nested
-
 - Rich text in the composer: bold, italic, underline, strikethrough, lists, quotes and links.
   Messages are sent as HTML with a plain-text version, and replies quote the original
+
+### Fixed
+
+- Archiving on an account without an Archive folder no longer deletes the message
 
 ## [0.1.0-alpha.5] - 2026-09-29
 
