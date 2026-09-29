@@ -34,7 +34,7 @@ The macaw's cobalt plumage and yellow eye-ring are the basis of Leari's colors a
 
 - **Multi-account:** Google / Workspace, Outlook / Microsoft 365, and any IMAP or POP3 server
 - **Unified folders:** All Inboxes, Starred, Sent, Drafts, Archive and Trash across every account
-- **Menu bar / tray app:** no dock icon; closing the window hides it
+- **Menu bar / tray app:** no Dock icon by default (optional in Settings); closing the window hides it
 - **Three-pane layout:** resizable sidebar, message list and reader
 - **Keyboard friendly:** `↑`/`↓` or `j`/`k` to navigate, `⌘N` to compose, `⌘,` for settings
 - **Light and dark themes**, following the system by default
@@ -86,14 +86,15 @@ Builds are not notarized by Apple / signed by Microsoft yet:
 
 ## Platform notes
 
-| Platform | Where Leari lives                 | Notes                                      |
-| -------- | --------------------------------- | ------------------------------------------ |
-| macOS    | Menu bar (no dock icon)           | Translucent sidebar, hidden title bar      |
-| Windows  | System tray (hidden from taskbar) |                                            |
-| Linux    | System tray                       | Clicking the tray icon only opens its menu |
+| Platform | Where Leari lives              | Notes                                      |
+| -------- | ------------------------------ | ------------------------------------------ |
+| macOS    | Menu bar (Dock icon optional)  | Translucent sidebar, hidden title bar      |
+| Windows  | System tray (taskbar optional) |                                            |
+| Linux    | System tray                    | Clicking the tray icon only opens its menu |
 
-Left-click the tray icon to show or hide the window. The tray menu has **Open**, **New Message**
-and **Quit**.
+Click the tray icon to show or hide the window; hold it (or right-click) for the menu, which has
+**Open**, **New Message** and **Quit**. **Settings → Show Leari in the Dock / taskbar** also shows
+it as a regular app.
 
 ## Stack
 

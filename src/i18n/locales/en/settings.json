@@ -14,5 +14,7 @@
   "notifications": "Notifications",
   "notifyNewMail": "Notify me about new mail",
   "showUnreadInMenuBar": "Show unread count in the menu bar",
-  "groupByConversation": "Group messages by conversation"
+  "groupByConversation": "Group messages by conversation",
+  "showInDock": "Show Leari in the Dock",
+  "showInTaskbar": "Show Leari in the taskbar"
 }

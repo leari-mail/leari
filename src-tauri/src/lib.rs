@@ -30,7 +30,8 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
-            // No dock icon: leari lives in the menu bar (macOS) / system tray.
+            // No dock icon by default: leari lives in the menu bar (macOS) / system tray.
+            // The "Show in Dock" setting switches it at runtime (window::set_dock_visible).
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
@@ -60,8 +61,18 @@ pub fn run() {
             commands::attachments_stat,
             commands::tray_set_unread,
             commands::notifications_configure,
+            commands::app_set_dock_visible,
         ])
         .on_window_event(window::handle_event)
-        .run(tauri::generate_context!())
-        .expect("error while running leari");
+        .build(tauri::generate_context!())
+        .expect("error while building leari")
+        .run(|app, event| {
+            // Clicking the Dock icon (when shown in the Dock) brings the hidden window back.
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { .. } = event {
+                window::show(app);
+            }
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app, event);
+        });
 }

@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use tauri::{AppHandle, Manager, WebviewWindow, WindowEvent};
 
 pub const MAIN_WINDOW: &str = "main";
@@ -25,6 +27,31 @@ pub fn toggle(app: &AppHandle) {
         let _ = window.hide();
     } else {
         show(app);
+    }
+}
+
+/// Shows or hides leari in the Dock (macOS) / taskbar (Windows, Linux). Off by default:
+/// leari lives in the menu bar / tray.
+pub fn set_dock_visible(app: &AppHandle, visible: bool) {
+    static DOCK_VISIBLE: AtomicBool = AtomicBool::new(false);
+    if DOCK_VISIBLE.swap(visible, Ordering::SeqCst) == visible {
+        return;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::ActivationPolicy;
+        let policy = if visible { ActivationPolicy::Regular } else { ActivationPolicy::Accessory };
+        let _ = app.set_activation_policy(policy);
+        // Changing the policy deactivates the app; keep an open window in front.
+        if let Some(window) = main_window(app) {
+            if window.is_visible().unwrap_or(false) {
+                show(app);
+            }
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    if let Some(window) = main_window(app) {
+        let _ = window.set_skip_taskbar(!visible);
     }
 }
 

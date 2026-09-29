@@ -212,6 +212,12 @@ pub fn notifications_configure(enabled: bool, language: String) {
     crate::notify::configure(enabled, language);
 }
 
+/// Shows leari in the Dock (macOS) / taskbar as a regular app, or only in the menu bar / tray.
+#[tauri::command]
+pub fn app_set_dock_visible(app: AppHandle, visible: bool) {
+    crate::window::set_dock_visible(&app, visible);
+}
+
 /// Checks that a POP3 server is reachable and accepts the credentials.
 #[tauri::command]
 pub async fn pop3_test_connection(
