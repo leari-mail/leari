@@ -206,6 +206,19 @@ def full_icon():
 </svg>
 '''
 
+AVATAR_CROP = (-10, 25, 610)   # a little looser than the icon, so a circular crop keeps the head
+
+def avatar():
+    """Full-bleed square for the GitHub organization / repository profile picture."""
+    x, y, size = AVATAR_CROP
+    k = 1024 / size
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>{DEFS}{SKY}</defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g transform="scale({k:.4f}) translate({-x} {-y})">{bird()}</g>
+</svg>
+'''
+
 # The logo mark has no tile behind it, so its darkest feathers are lifted to stay visible on the dark theme.
 LOGO_DEFS = (DEFS
              .replace('stop-color="#27316a"/><stop offset="1" stop-color="#171a33"', 'stop-color="#3f52a8"/><stop offset="1" stop-color="#2c3a85"')
@@ -243,5 +256,6 @@ def tray_icon(badge=False):
 """
 open(os.path.join(HERE, "app-icon.svg"), "w").write(full_icon())
 open(os.path.join(HERE, "..", "..", "src", "assets", "logo-mark.svg"), "w").write(logo_mark())
+open(os.path.join(HERE, "avatar.svg"), "w").write(avatar())
 open(os.path.join(HERE, "tray-icon.svg"), "w").write(tray_icon())
 open(os.path.join(HERE, "tray-icon-sync.svg"), "w").write(tray_icon(badge=True))
