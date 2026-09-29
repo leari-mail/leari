@@ -9,6 +9,8 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+## [0.1.0-alpha.5] - 2026-09-29
+
 ### Changed
 
 - The macOS installer window continues the app icon: its sky and branch
