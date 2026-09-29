@@ -191,7 +191,10 @@ two options explain that sign-in isn't available and point to IMAP with an app p
 > [!NOTE]
 > `https://mail.google.com/` is a **restricted** scope. While the consent screen is in
 > _Testing_, only listed test users (up to 100) can sign in and their sign-ins expire after
-> 7 days. Opening it to everyone requires Google's verification and a yearly security assessment.
+> 7 days. Opening it to everyone requires Google's restricted-scope verification, which is free.
+> Google's paid yearly security assessment is for apps that can reach Gmail data through a
+> server; Leari keeps mail and tokens on the user's device, so it shouldn't need one, but Google
+> decides during the review.
 
 **Microsoft** ([Microsoft Entra admin center](https://entra.microsoft.com/) → App registrations):
 
