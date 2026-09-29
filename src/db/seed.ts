@@ -26,6 +26,8 @@ interface DemoMessage {
   ago: number;
   /** Folder role (default inbox). */
   folder?: MailboxRole;
+  /** Path of one of the account's custom folders (instead of `folder`). */
+  customFolder?: string;
   isRead?: boolean;
   isStarred?: boolean;
   /** Messages with the same thread show as one conversation. */
@@ -90,6 +92,20 @@ const personal: DemoMessage[] = [
     body: "Salvador → Paulo Afonso, Friday 8:40 AM. Seat 4A. Have a great trip!",
     ago: 3 * DAY,
   },
+  {
+    from: ["Raso da Catarina Park", "visits@rasodacatarina.example"],
+    subject: "Your photography permit",
+    body: "Your permit for the canyon viewpoint is approved for Saturday, from 5 a.m. Please keep a distance of at least 50 meters from the roosting cliffs.",
+    ago: 6 * DAY,
+    customFolder: "Birding/Lear's macaws",
+  },
+  {
+    from: ["Casa das Aves", "orders@casadasaves.example"],
+    subject: "Order shipped: 10×42 binoculars",
+    body: "Good news: your binoculars are on their way. Estimated delivery on Thursday.",
+    ago: 8 * DAY,
+    customFolder: "Receipts",
+  },
 ];
 
 const work: DemoMessage[] = [
@@ -130,6 +146,13 @@ const work: DemoMessage[] = [
     body: "The holiday calendar for next year is now available on the intranet.",
     ago: 4 * DAY,
   },
+  {
+    from: ["Carlos Mendes", "carlos@northwind.example"],
+    subject: "Q4 planning notes",
+    body: "Notes from today's planning session are attached. Next check-in is on the 14th.",
+    ago: 5 * DAY,
+    customFolder: "Projects/Q4 planning",
+  },
 ];
 
 async function seedAccount(options: {
@@ -138,6 +161,8 @@ async function seedAccount(options: {
   provider: "google" | "microsoft";
   sortOrder: number;
   mail: DemoMessage[];
+  /** Custom folder paths (`/`-delimited), parents first. */
+  folders?: string[];
 }) {
   const accountId = newId();
   const isGoogle = options.provider === "google";
@@ -167,10 +192,24 @@ async function seedAccount(options: {
     id: newId(),
     accountId,
     ...mailbox,
+    delimiter: "/",
     sortOrder: index,
   }));
-  await db.insert(mailboxes).values(boxes);
+  const custom: NewMailbox[] = (options.folders ?? []).map((path, index) => ({
+    id: newId(),
+    accountId,
+    role: "custom",
+    path,
+    name: path.split("/").pop() ?? path,
+    delimiter: "/",
+    sortOrder: boxes.length + index,
+  }));
+  await db.insert(mailboxes).values([...boxes, ...custom]);
   const boxId = (role: MailboxRole) => boxes.find((box) => box.role === role)!.id;
+  const folderId = (demo: DemoMessage) =>
+    demo.customFolder
+      ? custom.find((box) => box.path === demo.customFolder)!.id
+      : boxId(demo.folder ?? "inbox");
 
   const now = Date.now();
   for (const [index, demo] of options.mail.entries()) {
@@ -178,7 +217,7 @@ async function seedAccount(options: {
     const row: NewMessage = {
       id,
       accountId,
-      mailboxId: boxId(demo.folder ?? "inbox"),
+      mailboxId: folderId(demo),
       uid: index + 1,
       messageIdHeader: `${id}@demo.example`,
       threadId: demo.thread ? `${demo.thread}@${options.email}` : null,
@@ -205,7 +244,9 @@ async function seedAccount(options: {
   }
 
   const inboxId = boxId("inbox");
-  const inbox = options.mail.filter((demo) => (demo.folder ?? "inbox") === "inbox");
+  const inbox = options.mail.filter(
+    (demo) => !demo.customFolder && (demo.folder ?? "inbox") === "inbox",
+  );
   await db
     .update(mailboxes)
     .set({
@@ -226,6 +267,7 @@ export async function seedDemoData(): Promise<void> {
     provider: "google",
     sortOrder: 0,
     mail: personal,
+    folders: ["Birding", "Birding/Lear's macaws", "Receipts"],
   });
   await seedAccount({
     email: "maya@northwind.example",
@@ -233,5 +275,6 @@ export async function seedDemoData(): Promise<void> {
     provider: "microsoft",
     sortOrder: 1,
     mail: work,
+    folders: ["Projects", "Projects/Q4 planning"],
   });
 }
