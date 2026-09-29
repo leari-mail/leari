@@ -68,7 +68,22 @@
     "sending": "Enviando…",
     "sendShortcut": "⌘↵ para enviar",
     "attach": "Anexar arquivos",
-    "dropFiles": "Solte os arquivos para anexar"
+    "dropFiles": "Solte os arquivos para anexar",
+    "format": {
+      "toolbar": "Formatação",
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "underline": "Sublinhado",
+      "strike": "Tachado",
+      "bulletList": "Lista com marcadores",
+      "orderedList": "Lista numerada",
+      "blockquote": "Citação",
+      "link": "Link",
+      "linkPlaceholder": "Cole ou digite um link",
+      "apply": "Aplicar",
+      "unlink": "Remover",
+      "clear": "Limpar formatação"
+    }
   },
   "sync": {
     "refresh": "Verificar novos e-mails",

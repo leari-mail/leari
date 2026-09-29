@@ -8,13 +8,24 @@ export interface Draft {
   cc: string;
   bcc: string;
   subject: string;
+  /** Message body as HTML (the rich text editor's content). */
   body: string;
+  /** Plain-text version of `body`, sent as the text/plain alternative. */
+  bodyText: string;
   /** Local id of the message being replied to (threading headers). */
   replyToMessageId?: string;
   attachments: ComposerAttachment[];
 }
 
-const emptyDraft: Draft = { to: "", cc: "", bcc: "", subject: "", body: "", attachments: [] };
+const emptyDraft: Draft = {
+  to: "",
+  cc: "",
+  bcc: "",
+  subject: "",
+  body: "",
+  bodyText: "",
+  attachments: [],
+};
 
 const key = (attachment: ComposerAttachment) =>
   attachment.kind === "file" ? attachment.path : attachment.attachmentId;

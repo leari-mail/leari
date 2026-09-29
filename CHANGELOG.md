@@ -9,6 +9,11 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Added
+
+- Rich text in the composer: bold, italic, underline, strikethrough, lists, quotes and links.
+  Messages are sent as HTML with a plain-text version, and replies quote the original
+
 ## [0.1.0-alpha.5] - 2026-09-29
 
 ### Changed

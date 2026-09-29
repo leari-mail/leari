@@ -68,7 +68,22 @@
     "sending": "Sending…",
     "sendShortcut": "⌘↵ to send",
     "attach": "Attach files",
-    "dropFiles": "Drop files to attach"
+    "dropFiles": "Drop files to attach",
+    "format": {
+      "toolbar": "Formatting",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "strike": "Strikethrough",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "blockquote": "Quote",
+      "link": "Link",
+      "linkPlaceholder": "Paste or type a link",
+      "apply": "Apply",
+      "unlink": "Remove",
+      "clear": "Clear formatting"
+    }
   },
   "sync": {
     "refresh": "Check for new mail",

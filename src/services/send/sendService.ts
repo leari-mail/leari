@@ -7,7 +7,10 @@ export interface SendRequest {
   cc: string;
   bcc: string;
   subject: string;
+  /** Plain-text body (text/plain part). */
   body: string;
+  /** HTML body (text/html alternative), when written in the rich text editor. */
+  html?: string;
   replyToMessageId?: string;
   attachments: Array<{ kind: "file"; path: string } | { kind: "forwarded"; attachmentId: string }>;
 }
