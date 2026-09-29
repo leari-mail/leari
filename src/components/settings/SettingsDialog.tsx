@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { LeariLogo } from "@components/brand";
 import { useAppVersion } from "@hooks";
+import { detectPlatform } from "@lib";
 import { useDialogStore, useSettingsStore } from "@stores";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Separator, Switch } from "@ui";
 
@@ -22,6 +23,8 @@ export function SettingsDialog() {
   const setNotifyNewMail = useSettingsStore((state) => state.setNotifyNewMail);
   const showUnreadInMenuBar = useSettingsStore((state) => state.showUnreadInMenuBar);
   const setShowUnreadInMenuBar = useSettingsStore((state) => state.setShowUnreadInMenuBar);
+  const showInDock = useSettingsStore((state) => state.showInDock);
+  const setShowInDock = useSettingsStore((state) => state.setShowInDock);
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeDialog()}>
@@ -37,6 +40,12 @@ export function SettingsDialog() {
           </SettingsRow>
           <SettingsRow label={t("language")} htmlFor="settings-language">
             <LanguageSelect id="settings-language" />
+          </SettingsRow>
+          <SettingsRow
+            label={t(detectPlatform() === "mac" ? "showInDock" : "showInTaskbar")}
+            htmlFor="settings-dock"
+          >
+            <Switch id="settings-dock" checked={showInDock} onCheckedChange={setShowInDock} />
           </SettingsRow>
         </section>
 

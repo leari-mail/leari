@@ -7,4 +7,7 @@ export const systemService = {
 
   configureNotifications: (enabled: boolean, language: string) =>
     invoke<void>("notifications_configure", { enabled, language }),
+
+  /** Dock (macOS) / taskbar icon, in addition to the menu bar / tray. */
+  setDockVisible: (visible: boolean) => invoke<void>("app_set_dock_visible", { visible }),
 };

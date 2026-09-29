@@ -1,8 +1,8 @@
 # leari
 
 Minimalistic open source multi-account mail client (Google/Workspace, Outlook/365, IMAP, POP3).
-Tauri 2 + React 19 + TypeScript. Tray / menu bar app only: no dock icon (macOS `ActivationPolicy::Accessory`),
-closing the window hides it.
+Tauri 2 + React 19 + TypeScript. Tray / menu bar app: no dock icon by default (macOS `ActivationPolicy::Accessory`;
+the "Show in Dock / taskbar" setting switches it at runtime), closing the window hides it.
 
 ## Conventions (must follow)
 

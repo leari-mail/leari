@@ -9,8 +9,15 @@ the new version, and the release workflow publishes it as the GitHub release not
 
 ## [Unreleased]
 
+### Added
+
+- Setting to also show Leari in the Dock (macOS) or taskbar (Windows, Linux), like a regular app;
+  clicking the Dock icon reopens the window
+
 ### Changed
 
+- Clicking the menu bar / tray icon opens the window right away; hold the icon (or right-click)
+  for its menu
 - New app icon, menu bar icon and logo: a Lear's macaw perched on a branch with its wings raised,
   on a pale sky background
 
