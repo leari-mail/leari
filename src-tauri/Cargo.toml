@@ -36,7 +36,7 @@ log = "0.4"
 utf7-imap = "0.3"
 tauri-plugin-log = "2"
 reqwest = { version = "0.13", default-features = false, features = ["json", "form", "native-tls"] }
-sha2 = "0.10"
+sha2 = "0.11"
 base64 = "0.22"
 lettre = { version = "0.11", default-features = false, features = ["builder", "smtp-transport", "tokio1", "tokio1-native-tls", "hostname"] }
 tauri-plugin-dialog = "2"
